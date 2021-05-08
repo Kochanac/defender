@@ -12,6 +12,7 @@ import {
 import Login from './pages/login';
 import Task from "./pages/task";
 
+export const HOST = "http://localhost:8000/"
 
 ReactDOM.render(
   <React.StrictMode>

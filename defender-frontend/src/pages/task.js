@@ -1,7 +1,7 @@
 import React from "react";
 import Wait from "./elements/wait";
 
-const HOST = "http://localhost:8000/"
+import { HOST } from "../index.js";
 
 class Task extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -235,7 +235,7 @@ class Task extends React.Component {
                     </div>
                     <div className="mb-4">
                         <p className="block text-3xl font-semibold mb-2">
-                            2. Напишите эксплоит
+                            2. Напишите эксплойт
                         </p>
                         <p className="block text-xl font-semibold mb-2">
                             Первым аргументом (в sys.argv) он принимает ссылку на сервис, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>

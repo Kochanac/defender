@@ -2,8 +2,45 @@ from flask import Flask
 from flask import render_template, request, redirect, send_file, jsonify
 from random import randint
 
+import users
+
 app = Flask(__name__)
 
+
+@app.route("/register", methods=["POST"])
+def register():
+	data = request.get_json(force=True)
+
+	res = users.register(data)
+
+	if res:
+		return jsonify({
+				"status": "ok"
+			})
+	else:
+		return jsonify({
+				"status": "failed"
+			})
+
+@app.route("/login", methods=["POST"])
+def login():
+	data = request.get_json(force=True)
+
+	res = users.login(data)
+
+	if res:
+		return jsonify({
+				"status": "ok"
+			})
+	else:
+		return jsonify({
+				"status": "failed"
+			})
+
+
+##  |           |
+##  |           |
+## \/ old shit \/
 
 @app.route('/task', methods=['POST'])
 def gettask():

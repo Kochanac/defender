@@ -1,4 +1,42 @@
 
+import { HOST } from "../index.js"
+
+async function RegUser() {
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+
+    let data = await fetch(HOST + "register", {
+        method: "POST",
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    data = await data.json()
+    console.log(data);
+    if (data["status"] === "ok")
+        document.getElementById("title").innerText = "Registered.";
+    else
+        document.getElementById("title").innerText = "Registration failed";
+}
+
+async function LogUser() {
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+
+    let data = await fetch(HOST + "login", {
+        method: "POST",
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    data = await data.json();
+    if (data["status"] === "ok")
+        window.location.href = "/game";
+    else
+        document.getElementById("title").innerText = "Login failed";
+}
 
 function Login() {
     return (
@@ -6,7 +44,7 @@ function Login() {
             <div class="w-1/2">
                 <form class="rounded px-8 pt-6 pb-8">
                     <div class="mb-9">
-                        <h1 class="text-5xl">
+                        <h1 id="title" class="text-5xl">
                             Defence 0.1
                         </h1>
                     </div>
@@ -16,7 +54,7 @@ function Login() {
                         </label>
                         <input
                             class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="title"
+                            id="username"
                             type="text"
                             placeholder=""
                         />
@@ -30,18 +68,18 @@ function Login() {
                         </label>
                         <input
                             class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="title"
+                            id="password"
                             type="password"
                             placeholder=""
                         />
                     </div>
                     <div class="flex items-start justify-start">
-                        <button
+                        <button onClick={RegUser}
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             type="button">
                             Зарегистрироваться
                         </button>
-                        <button
+                        <button onClick={LogUser}
                             className="ml-2 bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             type="button">
                             Залогиниться
