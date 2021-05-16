@@ -218,104 +218,106 @@ class Task extends React.Component {
 
     render() {
         return (
-            <div className="App flex justify-center p-20">
-                <div className="w-1/2 rounded px-8 pt-6 pb-8">
-                    <div className="mb-9">
-                        <h1 className="font-mono" style={{"font-size": "2.5rem"}}>
-                            <span className="text-gray-600">@{this.state.username}</span> > <span className="text-red-800">{this.state.title}</span>
-                        </h1>
+            <div>
+                <div className="mb-9 flex">
+                    <h1 className="text-5xl p-4 bg-gray-200 rounded">{this.state.title}</h1>
+                    <div className="flex-grow"/>
+                    <div className="flex flex-col">
+                        <div className="flex-grow"/>
+                        <h1 className="text-2xl text-gray-600 align-bottom">@{this.state.username}</h1>
                     </div>
-                    <div className="mb-4">
-                        <p className="block text-3xl font-semibold mb-2">
-                            1. Скачайте сервис
-                            <button style={{background: "#d4578e"}} className="ml-3 font-bold text-white text-xl appearance-none rounded-md py-2 px-3 leading-tight focus:outline-none focus:shadow-outline">
-                                Скачать
-                            </button>
-                        </p>
-                    </div>
-                    <div className="mb-4">
-                        <p className="block text-3xl font-semibold mb-2">
-                            2. Напишите эксплойт
-                        </p>
-                        <p className="block text-xl font-semibold mb-2">
-                            Первым аргументом (в sys.argv) он принимает ссылку на сервис, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
-                        </p>
-                        <p className="block text-xl font-semibold mb-2">
-                            Демка сервиса (с флагами) доступна <a href={this.state.service_demo} className="text-blue-900 font-bold">здесь</a>
-                        </p>
-                        <p className="block text-xl font-semibold mb-2">
-                            Python, Requests предустановлены:
-                        </p>
-                        <textarea id="exploit_code" className="w-full font-mono text-lg bg-gray-100 mb-2" rows="10">
+                </div>
 
-                        </textarea>
-                        <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-blue-500")}>
-                            Отправить
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-2">
+                        1. Скачайте сервис
+                        <button style={{background: "#d4578e"}} className="ml-3 font-bold text-white text-xl appearance-none rounded-md py-2 px-3 leading-tight focus:outline-none focus:shadow-outline">
+                            Скачать
                         </button>
+                    </p>
+                </div>
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-2">
+                        2. Напишите эксплойт
+                    </p>
+                    <p className="block text-xl font-semibold mb-2">
+                        Первым аргументом (в sys.argv) он принимает ссылку на сервис, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
+                    </p>
+                    <p className="block text-xl font-semibold mb-2">
+                        Демка сервиса (с флагами) доступна <a href={this.state.service_demo} className="text-blue-900 font-bold">здесь</a>
+                    </p>
+                    <p className="block text-xl font-semibold mb-2">
+                        Python, Requests предустановлены:
+                    </p>
+                    <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10">
 
-                        {this.state.exploit.status === "in progress" &&
-                            <div className="text-2xl font-semibold pt-1">
-                                <Wait text="Тестирую"/>
+                    </textarea>
+                    <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-blue-500")}>
+                        Отправить
+                    </button>
+
+                    {this.state.exploit.status === "in progress" &&
+                        <div className="text-2xl font-semibold pt-1">
+                            <Wait text="Тестирую"/>
+                        </div>
+                    }
+
+                    {this.state.exploit.status === "checked" &&
+                        <div className={"text-5xl font-bold pt-1 " + (this.state.exploit.result ? "text-green-500" : "text-red-500")}>
+                            {this.state.exploit.result ? "✓" : "⨯"}
+                        </div>
+                    }
+                </div>
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-2">
+                        3. Защитите сервис
+                    </p>
+
+                    <p className="block text-xl font-semibold mb-2">
+                        После успешного эксплойта вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
+                    </p>
+                    {this.state.exploit.result &&
+                        <div>
+                            <button onClick={this.start_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_disabled ? "bg-gray-300" : "bg-red-500")}>
+                                Запустить виртуалку
+                            </button>
+                            <button onClick={this.stop_box.bind(this)}
+                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.stop_visible ? "bg-red-400" : "bg-gray-300")}>
+                                Удалить виртуалку
+                            </button>
+                            {this.state.defence_starting &&
+                            <div className="text-2xl mb-2 font-semibold">
+                                <Wait text="Запускаю"/>
                             </div>
-                        }
-
-                        {this.state.exploit.status === "checked" &&
-                            <div className={"text-5xl font-bold pt-1 " + (this.state.exploit.result ? "text-green-500" : "text-red-500")}>
-                                {this.state.exploit.result ? "✓" : "⨯"}
-                            </div>
-                        }
-                    </div>
-                    <div className="mb-4">
-                        <p className="block text-3xl font-semibold mb-2">
-                            3. Защитите сервис
-                        </p>
-
-                        <p className="block text-xl font-semibold mb-2">
-                            После успешного эксплойта вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
-                        </p>
-                        {this.state.exploit.result &&
-                            <div>
-                                <button onClick={this.start_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_disabled ? "bg-gray-300" : "bg-red-500")}>
-                                    Запустить виртуалку
-                                </button>
-                                <button onClick={this.stop_box.bind(this)}
-                                    className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.stop_visible ? "bg-red-400" : "bg-gray-300")}>
-                                    Удалить виртуалку
-                                </button>
-                                {this.state.defence_starting &&
-                                <div className="text-2xl mb-2 font-semibold">
-                                    <Wait text="Запускаю"/>
-                                </div>
-                                }
-                                {this.state.defence.display.messagebox &&
-                                    <p className="block text-xl font-mono mb-2">
-                                        { this.state.defence.messagebox_text.split("\n").map(line => (
-                                            <span>{line}<br/></span>
-                                        )) }
-                                    </p>
-                                }
-                                <p className="block text-xl font-semibold mb-2">
-                                    Пофиксите и нажмите на эту кнопку
+                            }
+                            {this.state.defence.display.messagebox &&
+                                <p className="block text-xl font-mono mb-2">
+                                    { this.state.defence.messagebox_text.split("\n").map(line => (
+                                        <span>{line}<br/></span>
+                                    )) }
                                 </p>
-                                <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.start_disabled && !this.state.defence_testing ? "bg-blue-500" : "bg-gray-300")}>
-                                    Протестировать
-                                </button>
+                            }
+                            <p className="block text-xl font-semibold mb-2">
+                                Пофиксите и нажмите на эту кнопку
+                            </p>
+                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.start_disabled && !this.state.defence_testing ? "bg-blue-500" : "bg-gray-300")}>
+                                Протестировать
+                            </button>
 
-                                {this.state.defence.display.check_results &&
-                                    <div id="checks" className="flex justify-start flex-wrap">
-                                        {this.state.checks.map(check => (
-                                            <h3 className={"p-3 rounded-md mr-2 mb-2 " + (this.check_colors[check.color])}>{check.text}</h3>
-                                        ))}
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
-                    <div className="mb-4">
-                        <p className="block text-3xl font-semibold mb-2">
-                            4. {this.state.flag}
-                        </p>
-                    </div>
+                            {this.state.defence.display.check_results &&
+                                <div id="checks" className="flex justify-start flex-wrap">
+                                    {this.state.checks.map(check => (
+                                        <h3 className={"p-3 rounded-md mr-2 mb-2 " + (this.check_colors[check.color])}>{check.text}</h3>
+                                    ))}
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-2">
+                        4. {this.state.flag}
+                    </p>
                 </div>
             </div>
         );

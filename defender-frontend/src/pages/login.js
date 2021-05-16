@@ -15,14 +15,14 @@ async function RegUser() {
     data = await data.json()
     console.log(data);
     if (data["status"] === "ok")
-        document.getElementById("title").innerText = "Registered.";
+        document.getElementById("title").innerText = "Registered."
     else
-        document.getElementById("title").innerText = "Registration failed";
+        document.getElementById("title").innerText = "Registration failed"
 }
 
 async function LogUser() {
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
+    let username = document.getElementById("username").value
+    let password = document.getElementById("password").value
 
     let data = await fetch(HOST + "login", {
         method: "POST",
@@ -32,17 +32,17 @@ async function LogUser() {
         })
     })
     data = await data.json();
-    if (data["status"] === "ok")
-        window.location.href = "/game";
-    else
-        document.getElementById("title").innerText = "Login failed";
+    if (data["status"] === "ok") {
+        localStorage.setItem("username", username)
+        localStorage.setItem("token", data["token"])
+        window.location.href = "/tasks"
+    } else
+        document.getElementById("title").innerText = "Login failed"
 }
 
 function Login() {
     return (
-        <div className="App" class="flex justify-center p-20">
-            <div class="w-1/2">
-                <form class="rounded px-8 pt-6 pb-8">
+                <form class="">
                     <div class="mb-9">
                         <h1 id="title" class="text-5xl">
                             Defence 0.1
@@ -86,11 +86,6 @@ function Login() {
                         </button>
                     </div>
                 </form>
-            </div>
-
-
-
-        </div>
     );
 }
 

@@ -11,24 +11,32 @@ import {
 
 import Login from './pages/login';
 import Task from "./pages/task";
+import TaskList from "./pages/tasklist";
 
-export const HOST = "http://localhost:8000/"
+export const HOST = "/api/"
 
 ReactDOM.render(
   <React.StrictMode>
-      <Router>
-          <Switch>
-              <Route path="/game">
-                  <Task />
-              </Route>
-              <Route path="/">
-                  <Login />
-              </Route>
-              <Route path="/users">
-                  {/*<Users />*/}
-              </Route>
-          </Switch>
-      </Router>
+      <div className="App flex justify-center p-20">
+          <div className="w-1/2 rounded px-8 pt-6 pb-8">
+              <Router>
+                  <Switch>
+                      <Route path="/task/:id">
+                          <Task />
+                      </Route>
+                      <Route path="/tasks">
+                          <TaskList />
+                      </Route>
+                      <Route path="/">
+                          <Login />
+                      </Route>
+                      <Route path="/users">
+                          {/*<Users />*/}
+                      </Route>
+                  </Switch>
+              </Router>
+          </div>
+      </div>
 
   </React.StrictMode>,
   document.getElementById('root')

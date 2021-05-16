@@ -1,19 +1,46 @@
+from random import randint
+import os
+from secrets import token_hex
+
 from flask import Flask
 from flask import render_template, request, redirect, send_file, jsonify
-from random import randint
+from flask import session
 
-import users
+import db
+from misc import with_redis
 
 app = Flask(__name__)
+
+app.secret_key = os.urandom(32)
+
+@with_redis
+def with_auth(r, func):
+	def with_auth_(*args, **kwargs):
+		data = request.get_json(force=True)
+
+		if "token" not in data:
+			return jsonify({ "status": "bad auth"})
+
+		uid = r.get(data["token"]).decode()
+
+		if uid is None or uid.split(":")[0] != "uid":
+			return jsonify({ "status": "bad auth"})
+
+		uid = int(uid.split(":")[1])
+
+		return func(uid, *args, **kwargs)
+
+	return with_auth_
+
 
 
 @app.route("/register", methods=["POST"])
 def register():
 	data = request.get_json(force=True)
 
-	res = users.register(data)
+	res = db.register(data)
 
-	if res:
+	if res == True:
 		return jsonify({
 				"status": "ok"
 			})
@@ -21,26 +48,48 @@ def register():
 		return jsonify({
 				"status": "failed"
 			})
+
 
 @app.route("/login", methods=["POST"])
-def login():
+@with_redis
+def login(r):
 	data = request.get_json(force=True)
 
-	res = users.login(data)
+	res = db.login(data)
 
-	if res:
+	if res is not None:
+		token = token_hex()
+		r.set(token, f"uid:{res}")
+		print(token)
 		return jsonify({
-				"status": "ok"
+				"status": "ok",
+				"token": token
 			})
 	else:
 		return jsonify({
 				"status": "failed"
 			})
+
+
+@app.route("/tasks", methods=["POST"])
+@with_auth
+@with_redis
+def tasks(r, uid):
+	data = request.get_json(force=True)
+
+	tasks = db.get_tasks(uid)
+
+	return jsonify({
+			"tasks": tasks
+		})
+
+
 
 
 ##  |           |
 ##  |           |
 ## \/ old shit \/
+
 
 @app.route('/task', methods=['POST'])
 def gettask():
@@ -54,7 +103,7 @@ def gettask():
 				"exploit_example": "http://2.com/",
 				"service_demo": "http://2.com/",
 				"title": "PHP Web Token",
-				"username": "Kochan",
+				"username": f"Kochan",
 
 				"exploit_code": state["exploit_code"],
 			})
