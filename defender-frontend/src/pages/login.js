@@ -42,50 +42,50 @@ async function LogUser() {
 
 function Login() {
     return (
-                <form class="">
-                    <div class="mb-9">
-                        <h1 id="title" class="text-5xl">
-                            Defence 0.1
-                        </h1>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block font-semibold mb-2" for="title">
-                            Юзернейм
-                        </label>
-                        <input
-                            class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="username"
-                            type="text"
-                            placeholder=""
-                        />
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            class="block font-semibold mb-2"
-                            for="username"
-                        >
-                            Пароль
-                        </label>
-                        <input
-                            class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="password"
-                            type="password"
-                            placeholder=""
-                        />
-                    </div>
-                    <div class="flex items-start justify-start">
-                        <button onClick={RegUser}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="button">
-                            Зарегистрироваться
-                        </button>
-                        <button onClick={LogUser}
-                            className="ml-2 bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="button">
-                            Залогиниться
-                        </button>
-                    </div>
-                </form>
+        <form class="">
+            <div class="mb-9">
+                <h1 id="title" class="text-5xl">
+                    Defence 0.1
+                </h1>
+            </div>
+            <div class="mb-4">
+                <label class="block font-semibold mb-2" for="title">
+                    Юзернейм
+                </label>
+                <input
+                    class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="username"
+                    type="text"
+                    placeholder=""
+                />
+            </div>
+            <div class="mb-4">
+                <label
+                    class="block font-semibold mb-2"
+                    for="username"
+                >
+                    Пароль
+                </label>
+                <input
+                    class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="password"
+                    type="password"
+                    placeholder=""
+                />
+            </div>
+            <div class="flex items-start justify-start">
+                <button onClick={RegUser}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button">
+                    Зарегистрироваться
+                </button>
+                <button onClick={LogUser}
+                    className="ml-2 bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button">
+                    Залогиниться
+                </button>
+            </div>
+        </form>
     );
 }
 

@@ -1,6 +1,7 @@
 from random import randint
 import os
 from secrets import token_hex
+from functools import wraps
 
 from flask import Flask
 from flask import render_template, request, redirect, send_file, jsonify
@@ -13,9 +14,13 @@ app = Flask(__name__)
 
 app.secret_key = os.urandom(32)
 
+
 @with_redis
 def with_auth(r, func):
+	@wraps(func)
 	def with_auth_(*args, **kwargs):
+		# r = redis.Redis(host="localhost")
+
 		data = request.get_json(force=True)
 
 		if "token" not in data:
@@ -84,32 +89,32 @@ def tasks(r, uid):
 		})
 
 
+@app.route('/task', methods=['POST'])
+@with_auth
+def gettask(uid):
+	global state
+
+	post = request.get_json(force=True)
+
+	task = db.get_task(post['task_id'])
+	if task is not None:
+		return jsonify({
+				"error": 0,
+				"exploit_example": "http://2.com/",
+				"service_demo": task["demo_url"],
+				"title": task["title"],
+				"download_url": task["download_url"],
+
+				"exploit_code": state["exploit_code"],
+			})
+	else:
+		return jsonify({"error": 404})
 
 
 ##  |           |
 ##  |           |
 ## \/ old shit \/
 
-
-@app.route('/task', methods=['POST'])
-def gettask():
-	global state
-
-	post = request.get_json(force=True)
-
-	if post['task_id'] == 5:
-		return jsonify({
-				"error": 0,
-				"exploit_example": "http://2.com/",
-				"service_demo": "http://2.com/",
-				"title": "PHP Web Token",
-				"username": f"Kochan",
-
-				"exploit_code": state["exploit_code"],
-			})
-
-
-	return jsonify({"error": 404})
 
 
 @app.route('/task/update', methods=['POST'])
@@ -121,6 +126,7 @@ def updtask():
 				"error": 0,
 				"done": {}
 			})
+
 
 
 @app.route('/task/exploit/upload', methods=['POST'])
@@ -146,6 +152,7 @@ def upload_exploit():
 			"error": 0
 		})
 
+
 timer = 0
 res = 1
 @app.route('/task/status', methods=['POST'])
@@ -154,7 +161,7 @@ def exploit_status():
 
 	post = request.get_json(force=True)
 
-	assert post["task_id"] == 5
+	# assert post["task_id"] == 5
 	
 	timer += 1
 

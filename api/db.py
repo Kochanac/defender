@@ -40,7 +40,6 @@ def get_tasks(conn, uid):
 
     cur = conn.cursor()
 
-    print(uid)
     cur.execute("""
         SELECT tasks.id, title, exploit, defence FROM tasks
         LEFT JOIN solves ON solves.user_id = %s and solves.task_id = tasks.id
@@ -59,4 +58,20 @@ def get_tasks(conn, uid):
     return list(map(task_convert, tasks))
 
 
+@with_connection
+def get_task(conn, id):
+    cur = conn.cursor()
 
+    cur.execute("SELECT title, download_url, demo_url from tasks WHERE id = %s", [id])
+
+    task = cur.fetchall()
+
+    if len(task) != 1:
+        return None
+    else:
+        task = task[0]
+        return {
+            "title": task[0],
+            "download_url": task[1],
+            "demo_url": task[2]
+        }

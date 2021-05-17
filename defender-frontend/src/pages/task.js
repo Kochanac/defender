@@ -1,6 +1,8 @@
 import React from "react";
 import Wait from "./elements/wait";
 
+import { withRouter } from "react-router-dom"; // Я не умею программировать
+
 import { HOST } from "../index.js";
 
 class Task extends React.Component {
@@ -10,11 +12,12 @@ class Task extends React.Component {
         super(props);
 
         this.state = {
-            username: "{user}",
+            username: localStorage.getItem("username"),
             exploit_example: "/404",
             service_demo: "/404",
+            download_url: "/404",
             title: "{title}",
-            task_id: 5,
+            task_id: parseInt(props.match.params.id),
 
             exploit: {
                 status: "none",
@@ -56,6 +59,7 @@ class Task extends React.Component {
 
     async request(url, data={}) {
         data.task_id = this.state.task_id
+        data.token = localStorage.getItem("token")
 
         let resp = await fetch(HOST + url, {
             method: "POST",
@@ -64,15 +68,15 @@ class Task extends React.Component {
 
         let resp_data = await resp.json();
         if (resp_data["error"] !== 0) {
+            console.log("lox")
             this.setState({
-                username: "Failed to login",
-                title: "Error",
+                username: "#$&%*!",
+                title: "Error " + resp_data["error"],
 
                 exploit_testing: false,
                 defence_starting: false,
                 defence_testing: false
             })
-            return;
         }
 
         return resp_data
@@ -81,10 +85,13 @@ class Task extends React.Component {
     async prepare_task() {
         let data = await this.request("task")
 
+        if (data["error"] !== 0)
+            return
+
         this.setState({
-            username: data["username"],
             exploit_example: data["exploit_example"],
             service_demo: data["service_demo"],
+            download_url: data["download_url"],
             title: data["title"],
         })
 
@@ -231,9 +238,12 @@ class Task extends React.Component {
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         1. Скачайте сервис
-                        <button style={{background: "#d4578e"}} className="ml-3 font-bold text-white text-xl appearance-none rounded-md py-2 px-3 leading-tight focus:outline-none focus:shadow-outline">
+                        <a href = {this.state.download_url}
+                            style={{background: "#d4578e"}}
+                            className="transform scale-105 duration-100 ml-3 font-bold
+                                text-white text-xl rounded-md py-2 px-3 leading-tight">
                             Скачать
-                        </button>
+                        </a>
                     </p>
                 </div>
                 <div className="mb-4">
@@ -324,4 +334,4 @@ class Task extends React.Component {
     }
 }
 
-export default Task;
+export default withRouter(Task);

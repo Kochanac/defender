@@ -24,13 +24,13 @@ ReactDOM.render(
                       <Route path="/task/:id">
                           <Task />
                       </Route>
-                      <Route path="/tasks">
+                      <Route exact path="/tasks">
                           <TaskList />
                       </Route>
-                      <Route path="/">
+                      <Route exact path="/">
                           <Login />
                       </Route>
-                      <Route path="/users">
+                      <Route exact path="/users">
                           {/*<Users />*/}
                       </Route>
                   </Switch>
