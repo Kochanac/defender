@@ -1,4 +1,4 @@
-from misc import with_connection
+from api.misc import with_connection
 
 
 
@@ -75,3 +75,28 @@ def get_task(conn, id):
             "download_url": task[1],
             "demo_url": task[2]
         }
+
+@with_connection
+def upload_exploit(conn, uid, task_id, exploit_path):
+    cur = conn.cursor()
+
+    cur.execute("INSERT INTO exploits (user_id, task_id, path) VALUES (%s, %s, %s)", [uid, task_id, exploit_path])
+
+    return True
+
+
+@with_connection
+def get_recent_exploit(conn, uid, task_id):
+    cur = conn.cursor()
+
+    cur.execute("SELECT path FROM exploits \
+                 WHERE user_id=%(uid)s and task_id=%(task_id)s and id = \
+                    (SELECT MAX(id) FROM exploits WHERE user_id=%(uid)s and task_id=%(task_id)s)", 
+                    {"uid": uid, "task_id": task_id})
+
+    exploit_path = cur.fetchone()
+
+    if exploit_path is None:
+        return None
+    else:
+        return exploit_path[0]

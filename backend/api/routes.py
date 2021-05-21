@@ -2,13 +2,16 @@ from random import randint
 import os
 from secrets import token_hex
 from functools import wraps
+from pathlib import Path
 
 from flask import Flask
 from flask import render_template, request, redirect, send_file, jsonify
 from flask import session
 
-import db
-from misc import with_redis
+import api.db as db
+from api.misc import with_redis
+
+import tasks.tasks as tasks
 
 app = Flask(__name__)
 
@@ -19,17 +22,15 @@ app.secret_key = os.urandom(32)
 def with_auth(r, func):
 	@wraps(func)
 	def with_auth_(*args, **kwargs):
-		# r = redis.Redis(host="localhost")
-
 		data = request.get_json(force=True)
 
 		if "token" not in data:
-			return jsonify({ "status": "bad auth"})
+			return jsonify({ "error": "bad auth"})
 
 		uid = r.get(data["token"]).decode()
 
 		if uid is None or uid.split(":")[0] != "uid":
-			return jsonify({ "status": "bad auth"})
+			return jsonify({ "error": "bad auth"})
 
 		uid = int(uid.split(":")[1])
 
@@ -38,9 +39,21 @@ def with_auth(r, func):
 	return with_auth_
 
 
+def fancy_on_error(func):
+	@wraps(func)
+	def fancy_on_error_(*args, **kwargs):
+		try:
+			return func(*args, **kwargs)
+		except Exception as e:
+			raise e
+			return {"error": "хуй"}
+
+	return fancy_on_error_
+
+
 
 @app.route("/register", methods=["POST"])
-def register():
+def _register():
 	data = request.get_json(force=True)
 
 	res = db.register(data)
@@ -57,7 +70,7 @@ def register():
 
 @app.route("/login", methods=["POST"])
 @with_redis
-def login(r):
+def _login(r):
 	data = request.get_json(force=True)
 
 	res = db.login(data)
@@ -79,7 +92,7 @@ def login(r):
 @app.route("/tasks", methods=["POST"])
 @with_auth
 @with_redis
-def tasks(r, uid):
+def _tasks(r, uid):
 	data = request.get_json(force=True)
 
 	tasks = db.get_tasks(uid)
@@ -91,7 +104,7 @@ def tasks(r, uid):
 
 @app.route('/task', methods=['POST'])
 @with_auth
-def gettask(uid):
+def _gettask(uid):
 	global state
 
 	post = request.get_json(force=True)
@@ -111,79 +124,76 @@ def gettask(uid):
 		return jsonify({"error": 404})
 
 
-##  |           |
-##  |           |
-## \/ old shit \/
-
-
-
-@app.route('/task/update', methods=['POST'])
-def updtask():
-	post = request.get_json(force=True)
-
-	if post['task_id'] == 5:
-		return jsonify({
-				"error": 0,
-				"done": {}
-			})
-
-
-
 @app.route('/task/exploit/upload', methods=['POST'])
-def upload_exploit():
+@fancy_on_error
+@with_auth
+@with_redis
+def _upload_exploit(r, uid):
 	global state
 	"""
 		Expecting {
 			auth,
+			"task_id": id,
 			"code": "fewafm\nfeafmeaw\n"
 		}
+
+		Does:
+		start a job in Celery
 	"""
-	post = request.get_json(force=True)
+	data = request.get_json(force=True)
 
-	assert "code" in post
+	assert "code" in data
+	assert db.get_task(data["task_id"]) is not None
+	code = data["code"]
 
-	state["exploit"] = 1
+	exploit_path = Path(f"../data/exploits/{data['task_id']}/{token_hex()}.py")
 
-	state["exploit_code"] = post["code"]
+	exploit_path.parent.mkdir(exists_ok=True)
 
-	print(post["code"])
+	open(exploit_path, 'w').write(code)
+
+	db.upload_exploit(uid, task_id, exploit_path)
+
+	print("delaying task")
+	task = tasks.check_exploit.delay(data["task_id"], exploit_path)
+
+	r.set(f"exploit/uid:{uid}/task_id:{data['task_id']}", task.id)
 
 	return jsonify({
 			"error": 0
 		})
 
 
-timer = 0
-res = 1
 @app.route('/task/status', methods=['POST'])
-def exploit_status():
-	global state, res, timer
+@with_auth
+@with_redis
+@fancy_on_error
+def _exploit_status(r, uid):
+	data = request.get_json(force=True)
 
-	post = request.get_json(force=True)
+	task_id = data['task_id']
 
-	# assert post["task_id"] == 5
-	
-	timer += 1
+	tid = r.get(f"exploit/uid:{uid}/task_id:{task_id}")
+	if tid is not None:
+		task = tasks.check_exploit.AsyncResult(tid)
+	else:
+		task = None
 
-	if state["exploit"] == 2:
-		res = randint(0, 2) if res == None else res
+	if task and task.state == "SUCCESS":
+		res = task.result
 		return jsonify({
 				"error": 0,
-				"exploit_id": 123,
+				# "exploit_id": 123,
 				"status": "checked",
-				"result": ("OK" if res == 1 else "FAIL"),
+				"result": ("OK" if res else "FAIL"),
 
 				"flag": state["flag"]
 			})
 
-	elif state["exploit"] == 1:
-		if (randint(0, 100) < 10):
-			state["exploit"] = 2
-			res = None
-
+	elif state["exploit"] == "STARTED":
 		return jsonify({
 				"error": 0,
-				"exploit_id": 123,
+				# "exploit_id": 123,
 				"status": "in progress"
 			})
 	else:
@@ -192,6 +202,23 @@ def exploit_status():
 				"exploit_id": -1,
 				"status": "none"
 			})
+##  |           |
+##  |           |
+## \/ old shit \/
+
+
+# @app.route('/task/update', methods=['POST'])
+# def updtask():
+# 	post = request.get_json(force=True)
+
+# 	if post['task_id'] == 5:
+# 		return jsonify({
+# 				"error": 0,
+# 				"done": {}
+# 			})
+
+
+
 
 message = """
 Данные для входа:
