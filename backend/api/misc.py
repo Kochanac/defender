@@ -5,10 +5,10 @@ import psycopg2
 from functools import wraps
 
 db = {
-	"host": "localhost",
+	"host": environ.get("PSQL_HOST", "localhost"),
 	"db": "defender",
 	"user": "root",
-	"password": "XThwauCbMPcaTkByRGsu"
+	"password": environ.get("PSQL_PASSWORD", "XThwauCbMPcaTkByRGsu")
 }
 
 environ["REDIS_HOST"] = environ.get("REDIS_HOST", "localhost")

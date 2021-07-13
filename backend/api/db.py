@@ -41,9 +41,15 @@ def get_tasks(conn, uid):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT tasks.id, title, exploit, defence FROM tasks
-        LEFT JOIN solves ON solves.user_id = %s and solves.task_id = tasks.id
-        """, [uid])
+        SELECT tasks.id, 
+            title, 
+            (EXISTS 
+                (SELECT id FROM exploits WHERE user_id=%(user_id)s AND task_id=tasks.id AND works = 1)
+            ), 
+            false FROM tasks
+        """, {"user_id": uid}) 
+
+    # Это, возможно, плохо при нагрузке -- оно проходится по всей базе эксплоитов
 
     tasks = cur.fetchall()
 
@@ -100,3 +106,28 @@ def get_recent_exploit(conn, uid, task_id):
         return None
     else:
         return exploit_path[0]
+
+
+@with_connection
+def evaluate_exploit(conn, exploit_path, result: bool):
+    cur = conn.cursor()
+
+    assert type(result) is bool
+
+    result = 1 if result else 0
+
+    cur.execute("UPDATE exploits SET works=%(result)s WHERE path=%(path)s", 
+        {"result": result, "path": exploit_path})
+
+
+@with_connection
+def is_exploited(conn, uid, task_id):
+    cur = conn.cursor()
+
+    cur.execute("SELECT id FROM exploits WHERE user_id = %s AND task_id = %s AND works = 1",
+        [uid, task_id])
+
+    if cur.fetchone():
+        return True
+    else:
+        return False

@@ -97,6 +97,7 @@ class Task extends React.Component {
 
         document.getElementById("exploit_code").value = data["exploit_code"]
 
+        this.update_task()
         setInterval(this.update_task.bind(this), 4000)
     }
 

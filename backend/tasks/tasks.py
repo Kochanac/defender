@@ -1,6 +1,9 @@
-from celery import Celery
 from os import environ
-from api.misc import with_redis, with_connection
+from celery import Celery
+
+from api.misc import with_redis
+import api.db as db
+
 
 environ["CELERY_BROKER"] = environ.get("CELERY_BROKER", "redis://localhost")
 environ["CELERY_BACKEND"] = environ.get("CELERY_BACKEND", "redis://localhost")
@@ -21,10 +24,10 @@ def check_exploit(self, task_id, exploit_path):
 
 	time.sleep(5)
 
-	if randint(0, 1) == 0:
-		return True
-	else:
-		return False
+	result = True if randint(0, 1) == 1 else False
+	db.evaluate_exploit(exploit_path, result)
+	
+	return result
 
 
 @celery.task(bind=True, track_started=True)

@@ -189,7 +189,7 @@ def _exploit_status(r, uid):
 				"status": "checked",
 				"result": ("OK" if res else "FAIL"),
 
-				"flag": state["flag"]
+				# "flag": state["flag"]
 			})
 
 	elif task and task.state == "STARTED":
@@ -259,6 +259,9 @@ def start_box(r, uid):
 	data = request.get_json(force=True)
 
 	task_id = data["task_id"]
+
+	if not db.is_exploited(uid, task_id):
+		return jsonify({"error": 403, "message": "exploit first"})
 
 	box_status = r.get(f"box/uid:{uid}")
 	print(box_status)

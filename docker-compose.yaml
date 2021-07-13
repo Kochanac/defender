@@ -37,3 +37,5 @@ services:
       - CELERY_BROKER=redis://redis
       - CELERY_BACKEND=redis://redis
       - REDIS_HOST=redis
+      - PSQL_HOST=db
+
