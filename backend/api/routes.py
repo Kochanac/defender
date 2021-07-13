@@ -270,8 +270,8 @@ def start_box(r, uid):
 		tasks.box_start.delay(uid, task_id)
 	
 	else:
-		box_id = r.get(f"box/uid:{uid}")
-		(tasks.box_stop.s(box_id) | tasks.box_start.s(uid, task_id)).delay()
+		box_id = r.get(f"box/uid:{uid}").decode()
+		(tasks.box_stop.si(box_id) | tasks.box_start.si(uid, task_id)).delay()
 
 	return jsonify({"error": 0})
 

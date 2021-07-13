@@ -1,6 +1,6 @@
 FROM python:3.9
 
-
+# TODO: migrate to gevent
 WORKDIR /app
 
 COPY api api/
