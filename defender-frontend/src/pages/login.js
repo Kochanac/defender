@@ -1,4 +1,4 @@
-
+import React from "react";
 import { HOST } from "../index.js"
 
 async function RegUser() {

@@ -1,7 +1,8 @@
+from os import environ
+
 import redis
 import psycopg2
 from functools import wraps
-
 
 db = {
 	"host": "localhost",
@@ -9,6 +10,9 @@ db = {
 	"user": "root",
 	"password": "XThwauCbMPcaTkByRGsu"
 }
+
+environ["REDIS_HOST"] = environ.get("REDIS_HOST", "localhost")
+
 conn = None
 r = None
 
@@ -35,7 +39,7 @@ def with_redis(func):
 	def with_redis_(*args, **kwargs):
 		global r
 		if r is None:
-			r = redis.Redis(host="localhost")
+			r = redis.Redis(host=environ["REDIS_HOST"])
 		# print(str(func))
 		return func(r, *args, **kwargs)
 

@@ -28,3 +28,12 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
+  celery:
+    build: 
+      context: ./backend/
+      dockerfile: celery-dockerfile
+
+    environment:
+      - CELERY_BROKER=redis://redis
+      - CELERY_BACKEND=redis://redis
+      - REDIS_HOST=redis

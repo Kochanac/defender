@@ -1,0 +1,11 @@
+FROM python:3.9
+
+
+WORKDIR /app
+
+COPY api api/
+COPY tasks tasks/
+
+RUN pip install -r tasks/requirements.txt
+
+ENTRYPOINT celery -A tasks.tasks worker --loglevel=INFO
