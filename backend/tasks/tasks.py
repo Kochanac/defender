@@ -72,12 +72,35 @@ def box_stop(r, self, box_id):
 		f"box:{box_id}/status", 
 		f"box:{box_id}/uid", 
 		f"box:{box_id}/task_id", 
-		f"box:{box_id}/message")
+		f"box:{box_id}/message",
+		f"box:{box_id}/checks",
+		f"box:{box_id}/checks/progress")
 	r.delete(f"box/uid:{uid}")
 
 
-# if __name__ == "__main__":
-# 	celery.start()
+@celery.task(bind=True, track_started=True)
+@with_redis
+def box_checks(r, self, box_id):
+	print("w")
 
+	import time
+	from random import randint, choice
+	
+	def gen_s(n = 10):
+		return ''.join([choice("qwertyuiopasdfghjklzxcvbnm") for _ in range(10)])
 
+	r.set(f"box:{box_id}/checks/progress", "in progress")
+	r.delete(f"box:{box_id}/checks")
+
+	for i in range(5):
+		time.sleep(2)
+		result = True if randint(0, 1) == 1 else False
+		comment = f"Check {gen_s()}: {'PASS' if result else 'FAILED'}"
+
+		colored = f"{'G' if result else 'R'}:{comment}"
+
+		r.rpush(f"box:{box_id}/checks", colored)
+
+	r.set(f"box:{box_id}/checks/progress", "finished")
+	# db.evaluate_box
 

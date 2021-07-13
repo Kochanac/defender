@@ -11,3 +11,7 @@ TODO:
 
 - user exploits to hack another users
 - game mode
+
+- refactor frontend
+- unify names of api endpoints and internal names
+- document

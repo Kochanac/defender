@@ -179,6 +179,10 @@ class Task extends React.Component {
                     defence_testing: false
                 })
 
+            if (data.finished_checks)
+                this.setState({
+                    defence_testing: false
+                })                
         }
     }
 

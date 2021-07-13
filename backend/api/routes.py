@@ -129,7 +129,6 @@ def _gettask(uid):
 @with_auth
 @with_redis
 def _upload_exploit(r, uid):
-	global state
 	"""
 		Expecting {
 			auth,
@@ -185,7 +184,6 @@ def _exploit_status(r, uid):
 		res = task.result
 		return jsonify({
 				"error": 0,
-				# "exploit_id": 123,
 				"status": "checked",
 				"result": ("OK" if res else "FAIL"),
 
@@ -209,7 +207,7 @@ def _exploit_status(r, uid):
 @with_auth
 @with_redis
 @fancy_on_error
-def box_status(r, uid):
+def _box_status(r, uid):
 	data = request.get_json(force=True)
 
 	box_id = r.get(f"box/uid:{uid}")
@@ -255,7 +253,7 @@ def box_status(r, uid):
 @with_auth
 @with_redis
 @fancy_on_error
-def start_box(r, uid):
+def _start_box(r, uid):
 	data = request.get_json(force=True)
 
 	task_id = data["task_id"]
@@ -284,7 +282,7 @@ def start_box(r, uid):
 @with_auth
 @with_redis
 @fancy_on_error
-def stop_box(r, uid):
+def _stop_box(r, uid):
 	data = request.get_json(force=True)
 
 	box_id = r.get(f"box/uid:{uid}")
@@ -297,9 +295,61 @@ def stop_box(r, uid):
 	if int(r.get(f"box:{box_id}/task_id")) != data["task_id"]:
 		return jsonify({"error": 2, "message": "box of another task is on"})
 
-	tasks.box_stop(box_id)
+	tasks.box_stop.delay(box_id)
 
 	return jsonify({"error": 0})
+
+
+@app.route("/task/defence/test/start", methods=["POST"])
+@with_auth
+@with_redis
+@fancy_on_error
+def _test_start(r, uid):
+	data = request.get_json(force=True)
+
+	box_id = r.get(f"box/uid:{uid}")
+
+	if box_id in [b"off", b"starting", None] \
+		or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
+		return jsonify({"error": 1, "message": "box in not on"})
+
+	box_id = box_id.decode()
+
+	if r.get(f"box:{box_id}/checks/progress") == "in progress":
+		return jsonify({"error": 1, "message": "box in checking"})
+
+	tasks.box_checks.delay(box_id)
+
+	return jsonify({"error": 0})
+
+
+@app.route("/task/defence/test/checks", methods=["POST"])
+@with_auth
+@with_redis
+@fancy_on_error
+def _box_checks(r, uid):
+	data = request.get_json(force=True)
+
+	box_id = r.get(f"box/uid:{uid}")
+
+	if box_id in [b"off", b"starting", None] \
+		or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
+		return jsonify({"error": 1, "message": "box in not on"})
+
+	box_id = box_id.decode()
+
+	def check_convert(x):
+		color = "green" if x.split(":")[0] == "G" else "red"
+		return {
+			"color": color,
+			"text": x[2:]
+		}
+
+	return jsonify({
+			"error": 0,
+			"checks": [check_convert(x.decode()) for x in r.lrange(f"box:{box_id}/checks", 0, -1)],
+			"finished_checks": True if r.get(f"box:{box_id}/checks/progress") in [b"finished", None] else False
+		})
 
 
 ##  |           |
@@ -361,29 +411,6 @@ state = {
 
 
 
-@app.route("/task/defence/test/start", methods=["POST"])
-def test_start():
-	global state
-
-	state["tests"] = 0
-
-	return jsonify({"error": 0})
 
 
-@app.route("/task/defence/test/checks", methods=["POST"])
-def test_checks():
-	global state
-
-	if state["tests"] != -1:
-		state["tests"] += 1
-
-	if state["tests"] == len(state["checks"]) + 1:
-		state["tests"] = -1
-		state["flag"] = "Flag{faewfew}"
-		return jsonify({"error":0})
-
-	return jsonify({
-			"error": 0,
-			"checks": state["checks"][:max(0, state["tests"])]
-		})
 
