@@ -36,13 +36,20 @@ def with_connection(f):
 
 def with_redis(func):
 	@wraps(func)
-	def with_redis_(*args, **kwargs):
+	def _with_redis(*args, **kwargs):
 		global r
 		if r is None:
 			r = redis.Redis(host=environ["REDIS_HOST"])
 		# print(str(func))
 		return func(r, *args, **kwargs)
 
-	return with_redis_
+	import inspect
+
+	_with_redis.__signature__ = inspect.Signature(
+		parameters = list(inspect.signature(func).parameters.values())[1:],
+		return_annotation = inspect.signature(func).return_annotation
+		)
+
+	return _with_redis
 
 

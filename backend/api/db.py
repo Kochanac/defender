@@ -1,9 +1,8 @@
 from api.misc import with_connection
 
 
-
 @with_connection
-def register(conn, data):
+def register(conn, data) -> bool:
     username = data["username"]
     password = data["password"]
 
