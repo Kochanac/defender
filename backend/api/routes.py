@@ -8,10 +8,11 @@ from pathlib import Path
 # from flask import render_template, request, redirect, send_file, 
 # from flask import session
 
-from fastapi import FastAPI, Request, Body
+from fastapi import FastAPI, Request, Body, Depends
+from redis import Redis
 
 import api.db as db
-from api.misc import with_redis
+from api.misc import with_redis, redis_dep
 from api.auth_middleware import TokenAuthMiddleware
 
 import tasks.tasks as tasks
@@ -19,11 +20,6 @@ import tasks.tasks as tasks
 app = FastAPI()
 
 app.add_middleware(TokenAuthMiddleware[0], backend=TokenAuthMiddleware[1])
-
-
-# app = Flask(__name__)
-
-# app.secret_key = os.urandom(32)
 
 
 @app.get("/")
@@ -44,18 +40,13 @@ def _register(username: str = Body(...), password: str = Body(...)):
 	res = db.register(data)
 
 	if res == True:
-		return {
-				"status": "ok"
-			}
+		return {"status": "ok"}
 	else:
-		return {
-				"status": "failed"
-			}
+		return {"status": "failed"}
 
 
 @app.post("/login")
-@with_redis
-def _login(r, username: str = Body(...), password: str = Body(...)):
+def _login(r: Redis = Depends(redis_dep), username: str = Body(...), password: str = Body(...)):
 	data = {
 		"username": username,
 		"password": password
@@ -75,9 +66,6 @@ def _login(r, username: str = Body(...), password: str = Body(...)):
 		return {
 				"status": "failed"
 			}
-
-# import inspect
-# print(inspect.signature(_login))
 
 
 # @app.route("/tasks", methods=["POST"])

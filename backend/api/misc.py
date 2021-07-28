@@ -43,13 +43,13 @@ def with_redis(func):
 		# print(str(func))
 		return func(r, *args, **kwargs)
 
-	import inspect
-
-	_with_redis.__signature__ = inspect.Signature(
-		parameters = list(inspect.signature(func).parameters.values())[1:],
-		return_annotation = inspect.signature(func).return_annotation
-		)
-
 	return _with_redis
 
+@with_redis
+def redis_dep(r):
+	return r
 
+import inspect
+redis_dep.__signature__ = inspect.Signature(
+		return_annotation = inspect.signature(redis_dep).return_annotation
+		)
