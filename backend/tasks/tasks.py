@@ -24,7 +24,8 @@ def check_exploit(self, task_id, exploit_path):
 
 	time.sleep(5)
 
-	result = True if randint(0, 1) == 1 else False
+	#result = True if randint(0, 1) == 1 else False
+        result = True
 	db.evaluate_exploit(exploit_path, result)
 	
 	return result
