@@ -20,108 +20,108 @@ app.secret_key = os.urandom(32)
 
 @with_redis
 def with_auth(r, func):
-	@wraps(func)
-	def with_auth_(*args, **kwargs):
-		data = request.get_json(force=True)
+    @wraps(func)
+    def with_auth_(*args, **kwargs):
+        data = request.get_json(force=True)
 
-		if "token" not in data:
-			return jsonify({ "error": "bad auth"})
+        if "token" not in data:
+            return jsonify({ "error": "bad auth"})
 
-		uid = r.get(data["token"]).decode()
+        uid = r.get(data["token"]).decode()
 
-		if uid is None or uid.split(":")[0] != "uid":
-			return jsonify({ "error": "bad auth"})
+        if uid is None or uid.split(":")[0] != "uid":
+            return jsonify({ "error": "bad auth"})
 
-		uid = int(uid.split(":")[1])
+        uid = int(uid.split(":")[1])
 
-		return func(uid, *args, **kwargs)
+        return func(uid, *args, **kwargs)
 
-	return with_auth_
+    return with_auth_
 
 
 def fancy_on_error(func):
-	@wraps(func)
-	def fancy_on_error_(*args, **kwargs):
-		try:
-			return func(*args, **kwargs)
-		except Exception as e:
-			raise e
-			return {"error": "хуй"}
+    @wraps(func)
+    def fancy_on_error_(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            raise e
+            return {"error": "хуй"}
 
-	return fancy_on_error_
+    return fancy_on_error_
 
 
 
 @app.route("/register", methods=["POST"])
 def _register():
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	res = db.register(data)
+    res = db.register(data)
 
-	if res == True:
-		return jsonify({
-				"status": "ok"
-			})
-	else:
-		return jsonify({
-				"status": "failed"
-			})
+    if res == True:
+        return jsonify({
+                "status": "ok"
+            })
+    else:
+        return jsonify({
+                "status": "failed"
+            })
 
 
 @app.route("/login", methods=["POST"])
 @with_redis
 def _login(r):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	res = db.login(data)
+    res = db.login(data)
 
-	if res is not None:
-		token = token_hex()
-		r.set(token, f"uid:{res}")
-		print(token)
-		return jsonify({
-				"status": "ok",
-				"token": token
-			})
-	else:
-		return jsonify({
-				"status": "failed"
-			})
+    if res is not None:
+        token = token_hex()
+        r.set(token, f"uid:{res}")
+        print(token)
+        return jsonify({
+                "status": "ok",
+                "token": token
+            })
+    else:
+        return jsonify({
+                "status": "failed"
+            })
 
 
 @app.route("/tasks", methods=["POST"])
 @with_auth
 @with_redis
 def _tasks(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	tasks = db.get_tasks(uid)
+    tasks = db.get_tasks(uid)
 
-	return jsonify({
-			"tasks": tasks
-		})
+    return jsonify({
+            "tasks": tasks
+        })
 
 
 @app.route('/task', methods=['POST'])
 @with_auth
 def _gettask(uid):
-	global state
+    global state
 
-	post = request.get_json(force=True)
+    post = request.get_json(force=True)
 
-	task = db.get_task(post['task_id'])
-	if task is not None:
-		return jsonify({
-				"error": 0,
-				"exploit_example": "http://2.com/",
-				"service_demo": task["demo_url"],
-				"title": task["title"],
-				"download_url": task["download_url"],
+    task = db.get_task(post['task_id'])
+    if task is not None:
+        return jsonify({
+                "error": 0,
+                "exploit_example": "http://2.com/",
+                "service_demo": task["demo_url"],
+                "title": task["title"],
+                "download_url": task["download_url"],
 
-				"exploit_code": state["exploit_code"],
-			})
-	else:
-		return jsonify({"error": 404})
+                "exploit_code": state["exploit_code"],
+            })
+    else:
+        return jsonify({"error": 404})
 
 
 @app.route('/task/exploit/upload', methods=['POST'])
@@ -129,40 +129,40 @@ def _gettask(uid):
 @with_auth
 @with_redis
 def _upload_exploit(r, uid):
-	"""
-		Expecting {
-			auth,
-			"task_id": id,
-			"code": "fewafm\nfeafmeaw\n"
-		}
+    """
+        Expecting {
+            auth,
+            "task_id": id,
+            "code": "fewafm\nfeafmeaw\n"
+        }
 
-		Does:
-		start a job in Celery
-	"""
-	data = request.get_json(force=True)
+        Does:
+        start a job in Celery
+    """
+    data = request.get_json(force=True)
 
-	assert "code" in data
-	assert db.get_task(data["task_id"]) is not None
-	code = data["code"]
-	# task_id = data["task_id"]
+    assert "code" in data
+    assert db.get_task(data["task_id"]) is not None
+    code = data["code"]
+    # task_id = data["task_id"]
 
-	exploit_path = Path(f"../data/exploits/{data['task_id']}/{token_hex()}.py")
+    exploit_path = Path(f"../data/exploits/{data['task_id']}/{token_hex()}.py")
 
-	exploit_path.parent.mkdir(exist_ok=True)
+    exploit_path.parent.mkdir(exist_ok=True)
 
-	open(exploit_path, 'w').write(code)
+    open(exploit_path, 'w').write(code)
 
-	print(exploit_path)
-	db.upload_exploit(uid, data["task_id"], str(exploit_path))
+    print(exploit_path)
+    db.upload_exploit(uid, data["task_id"], str(exploit_path))
 
-	print("delaying task")
-	task = tasks.check_exploit.delay(data["task_id"], str(exploit_path))
+    print("delaying task")
+    task = tasks.check_exploit.delay(data["task_id"], str(exploit_path))
 
-	r.set(f"exploit/uid:{uid}/task_id:{data['task_id']}", task.id)
+    r.set(f"exploit/uid:{uid}/task_id:{data['task_id']}", task.id)
 
-	return jsonify({
-			"error": 0
-		})
+    return jsonify({
+            "error": 0
+        })
 
 
 @app.route('/task/status', methods=['POST'])
@@ -170,82 +170,82 @@ def _upload_exploit(r, uid):
 @with_redis
 @fancy_on_error
 def _exploit_status(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	task_id = data['task_id']
+    task_id = data['task_id']
 
-	tid = r.get(f"exploit/uid:{uid}/task_id:{task_id}")
-	if tid is not None:
-		task = tasks.check_exploit.AsyncResult(tid)
-	else:
-		task = None
+    tid = r.get(f"exploit/uid:{uid}/task_id:{task_id}")
+    if tid is not None:
+        task = tasks.check_exploit.AsyncResult(tid)
+    else:
+        task = None
 
-	if task and task.state == "SUCCESS":
-		res = task.result
-		return jsonify({
-				"error": 0,
-				"status": "checked",
-				"result": ("OK" if res else "FAIL"),
+    if task and task.state == "SUCCESS":
+        res = task.result
+        return jsonify({
+                "error": 0,
+                "status": "checked",
+                "result": ("OK" if res else "FAIL"),
 
-				# "flag": state["flag"]
-			})
+                # "flag": state["flag"]
+            })
 
-	elif task and task.state == "STARTED":
-		return jsonify({
-				"error": 0,
-				# "exploit_id": 123,
-				"status": "in progress"
-			})
-	else:
-		return jsonify({
-				"error": 0,
-				"exploit_id": -1,
-				"status": "none"
-			})
+    elif task and task.state == "STARTED":
+        return jsonify({
+                "error": 0,
+                # "exploit_id": 123,
+                "status": "in progress"
+            })
+    else:
+        return jsonify({
+                "error": 0,
+                "exploit_id": -1,
+                "status": "none"
+            })
 
 @app.route("/task/defence/box/status", methods=['POST'])
 @with_auth
 @with_redis
 @fancy_on_error
 def _box_status(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	box_id = r.get(f"box/uid:{uid}")
+    box_id = r.get(f"box/uid:{uid}")
 
-	if box_id is None:
-		box = {"status": "off"}
+    if box_id is None:
+        box = {"status": "off"}
 
-	elif box_id.decode() == "starting": # ?
-		box = {"status": "starting"}
+    elif box_id.decode() == "starting": # ?
+        box = {"status": "starting"}
 
-	else:
-		box_id = box_id.decode()
-		box = {
-			"task": r.get(f"box:{box_id}/task_id").decode(),
-			"status": r.get(f"box:{box_id}/status").decode(),
-			"message": r.get(f"box:{box_id}/message").decode()
-		}
-		
-		if data["task_id"] != int(box["task"]):
-			box = {"status": "off"}
+    else:
+        box_id = box_id.decode()
+        box = {
+            "task": r.get(f"box:{box_id}/task_id").decode(),
+            "status": r.get(f"box:{box_id}/status").decode(),
+            "message": r.get(f"box:{box_id}/message").decode()
+        }
+        
+        if data["task_id"] != int(box["task"]):
+            box = {"status": "off"}
 
 
-	if box["status"] == "on":
-		return jsonify({
-				"status": "on",
-				"message": box["message"],
-				"error": 0
-			})
-	elif box["status"] == "starting":
-		return jsonify({
-				"status": "starting",
-				"error": 0
-			})
-	else:
-		return jsonify({
-				"status": "off",
-				"error": 0
-			})
+    if box["status"] == "on":
+        return jsonify({
+                "status": "on",
+                "message": box["message"],
+                "error": 0
+            })
+    elif box["status"] == "starting":
+        return jsonify({
+                "status": "starting",
+                "error": 0
+            })
+    else:
+        return jsonify({
+                "status": "off",
+                "error": 0
+            })
 
 
 
@@ -254,27 +254,27 @@ def _box_status(r, uid):
 @with_redis
 @fancy_on_error
 def _start_box(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	task_id = data["task_id"]
+    task_id = data["task_id"]
 
-	if not db.is_exploited(uid, task_id):
-		return jsonify({"error": 403, "message": "exploit first"})
+    if not db.is_exploited(uid, task_id):
+        return jsonify({"error": 403, "message": "exploit first"})
 
-	box_status = r.get(f"box/uid:{uid}")
-	print(box_status)
+    box_status = r.get(f"box/uid:{uid}")
+    print(box_status)
 
-	if box_status == "starting":
-		return jsonify({"error": 1, "message": "box is starting"})
-	
-	elif box_status == None:
-		tasks.box_start.delay(uid, task_id)
-	
-	else:
-		box_id = r.get(f"box/uid:{uid}").decode()
-		(tasks.box_stop.si(box_id) | tasks.box_start.si(uid, task_id)).delay()
+    if box_status == "starting":
+        return jsonify({"error": 1, "message": "box is starting"})
+    
+    elif box_status == None:
+        tasks.box_start.delay(uid, task_id)
+    
+    else:
+        box_id = r.get(f"box/uid:{uid}").decode()
+        (tasks.box_stop.si(box_id) | tasks.box_start.si(uid, task_id)).delay()
 
-	return jsonify({"error": 0})
+    return jsonify({"error": 0})
 
 
 
@@ -283,21 +283,21 @@ def _start_box(r, uid):
 @with_redis
 @fancy_on_error
 def _stop_box(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	box_id = r.get(f"box/uid:{uid}")
+    box_id = r.get(f"box/uid:{uid}")
 
-	if box_id in [b"off", b"starting", None]:
-		return jsonify({"error": 1, "message": "box in not on"})
+    if box_id in [b"off", b"starting", None]:
+        return jsonify({"error": 1, "message": "box in not on"})
 
-	box_id = box_id.decode()
+    box_id = box_id.decode()
 
-	if int(r.get(f"box:{box_id}/task_id")) != data["task_id"]:
-		return jsonify({"error": 2, "message": "box of another task is on"})
+    if int(r.get(f"box:{box_id}/task_id")) != data["task_id"]:
+        return jsonify({"error": 2, "message": "box of another task is on"})
 
-	tasks.box_stop.delay(box_id)
+    tasks.box_stop.delay(box_id)
 
-	return jsonify({"error": 0})
+    return jsonify({"error": 0})
 
 
 @app.route("/task/defence/test/start", methods=["POST"])
@@ -305,22 +305,22 @@ def _stop_box(r, uid):
 @with_redis
 @fancy_on_error
 def _test_start(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	box_id = r.get(f"box/uid:{uid}")
+    box_id = r.get(f"box/uid:{uid}")
 
-	if box_id in [b"off", b"starting", None] \
-		or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
-		return jsonify({"error": 1, "message": "box in not on"})
+    if box_id in [b"off", b"starting", None] \
+        or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
+        return jsonify({"error": 1, "message": "box in not on"})
 
-	box_id = box_id.decode()
+    box_id = box_id.decode()
 
-	if r.get(f"box:{box_id}/checks/progress") == "in progress":
-		return jsonify({"error": 1, "message": "box in checking"})
+    if r.get(f"box:{box_id}/checks/progress") == "in progress":
+        return jsonify({"error": 1, "message": "box in checking"})
 
-	tasks.box_checks.delay(box_id)
+    tasks.box_checks.delay(box_id)
 
-	return jsonify({"error": 0})
+    return jsonify({"error": 0})
 
 
 @app.route("/task/defence/test/checks", methods=["POST"])
@@ -328,28 +328,28 @@ def _test_start(r, uid):
 @with_redis
 @fancy_on_error
 def _box_checks(r, uid):
-	data = request.get_json(force=True)
+    data = request.get_json(force=True)
 
-	box_id = r.get(f"box/uid:{uid}")
+    box_id = r.get(f"box/uid:{uid}")
 
-	if box_id in [b"off", b"starting", None] \
-		or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
-		return jsonify({"error": 1, "message": "box in not on"})
+    if box_id in [b"off", b"starting", None] \
+        or int(r.get(f"box:{box_id.decode()}/task_id")) != data["task_id"]:
+        return jsonify({"error": 1, "message": "box in not on"})
 
-	box_id = box_id.decode()
+    box_id = box_id.decode()
 
-	def check_convert(x):
-		color = "green" if x.split(":")[0] == "G" else "red"
-		return {
-			"color": color,
-			"text": x[2:]
-		}
+    def check_convert(x):
+        color = "green" if x.split(":")[0] == "G" else "red"
+        return {
+            "color": color,
+            "text": x[2:]
+        }
 
-	return jsonify({
-			"error": 0,
-			"checks": [check_convert(x.decode()) for x in r.lrange(f"box:{box_id}/checks", 0, -1)],
-			"finished_checks": True if r.get(f"box:{box_id}/checks/progress") in [b"finished", None] else False
-		})
+    return jsonify({
+            "error": 0,
+            "checks": [check_convert(x.decode()) for x in r.lrange(f"box:{box_id}/checks", 0, -1)],
+            "finished_checks": True if r.get(f"box:{box_id}/checks/progress") in [b"finished", None] else False
+        })
 
 
 ##  |           |
@@ -359,13 +359,13 @@ def _box_checks(r, uid):
 
 # @app.route('/task/update', methods=['POST'])
 # def updtask():
-# 	post = request.get_json(force=True)
+#   post = request.get_json(force=True)
 
-# 	if post['task_id'] == 5:
-# 		return jsonify({
-# 				"error": 0,
-# 				"done": {}
-# 			})
+#   if post['task_id'] == 5:
+#       return jsonify({
+#               "error": 0,
+#               "done": {}
+#           })
 
 
 
@@ -378,32 +378,32 @@ curl http://defence.imbadat.tech:68010/
 """
 
 state = {
-	"flag": None,
+    "flag": None,
 
-	"exploit": None,
+    "exploit": None,
 
-	"box": "Not started",
-	"tests": -1,
-	"checks": [
-		{
-			"color": "green",
-			"text": "Check: OK"
-		},
-		{
-			"color": "green",
-			"text": "Vuln check 1: PASS"
-		},
-		{
-			"color": "green",
-			"text": "Vuln check 2: PASS"
-		},
-		{
-			"color": "red",
-			"text": "Vuln check 3: FAIL"
-		},
-	],
+    "box": "Not started",
+    "tests": -1,
+    "checks": [
+        {
+            "color": "green",
+            "text": "Check: OK"
+        },
+        {
+            "color": "green",
+            "text": "Vuln check 1: PASS"
+        },
+        {
+            "color": "green",
+            "text": "Vuln check 2: PASS"
+        },
+        {
+            "color": "red",
+            "text": "Vuln check 3: FAIL"
+        },
+    ],
 
-	"exploit_code": "Code goes here"
+    "exploit_code": "Code goes here"
 }
 
 
