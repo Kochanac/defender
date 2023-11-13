@@ -12,6 +12,8 @@ CREATE TABLE tasks (
 	flag TEXT,
 
 	checker_path VARCHAR(1024),
+	qemu_qcow2_path VARCHAR(1024),
+	tcp_ports_needed int[],
 	post_time TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -36,4 +38,9 @@ CREATE TABLE exploits (
 	path VARCHAR(1024),
 	works int DEFAULT -1,
 	post_time TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+CREATE TABLE checks (
+    task_id integer references tasks,
+    checker_path varchar(1024)
 );

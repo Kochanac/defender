@@ -68,7 +68,7 @@ def get_tasks(conn, uid):
 def get_task(conn, id):
     cur = conn.cursor()
 
-    cur.execute("SELECT title, download_url, demo_url from tasks WHERE id = %s", [id])
+    cur.execute("SELECT title, download_url, demo_url, checker_path, qemu_qcow2_path, tcp_ports_needed from tasks WHERE id = %s", [id])
 
     task = cur.fetchall()
 
@@ -79,7 +79,10 @@ def get_task(conn, id):
         return {
             "title": task[0],
             "download_url": task[1],
-            "demo_url": task[2]
+            "demo_url": task[2],
+            "checker_path": task[3],
+            "qemu_qcow2_path": task[4],
+            "ports": task[5]
         }
 
 @with_connection
