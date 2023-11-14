@@ -43,14 +43,15 @@ vms = {}
 #     -net nic,model=virtio \
 #     -net user,{ports} \
 #     -daemonize"""
+# -nographic \
 
 qemu_run_cli = """
 qemu-system-x86_64 \
-    -nographic \
+    -enable-kvm \
     -m 512M \
     -boot d "{image}" \
     -net nic,model=virtio \
-    -net user,{ports}
+    -net user,{ports} \
     -daemonize""".strip()
 
 greet = """
@@ -139,7 +140,10 @@ def box_stop(r, self, box_id):
     print(f"killig {pid}")
     if pid is not None:
         pid = pid.decode()
-        print(subprocess.check_output(f"kill -9 {int(pid)}", shell=True))
+        try:
+            print(subprocess.check_output(f"kill -9 {int(pid)}", shell=True))
+        except subprocess.CalledProcessError as e:
+            print(e)
 
     uid = r.get(f"box:{box_id}/uid")
     if uid is not None:
@@ -163,24 +167,56 @@ def box_stop(r, self, box_id):
 def box_checks(r, self, box_id):
     print("Checks")
 
-    from random import randint, choice
-
-    def gen_s(n=10):
-        return ''.join([choice("qwertyuiopasdfghjklzxcvbnm") for _ in range(10)])
-
-
-
     r.set(f"box:{box_id}/checks/progress", "in progress")
     r.delete(f"box:{box_id}/checks")
 
-    for i in range(5):
-        time.sleep(2)
-        result = True if randint(0, 1) == 1 else False
-        comment = f"Check {gen_s()}: {'PASS' if result else 'FAILED'}"
+    task_id = r.get(f"box:{box_id}/task_id")
+    if task_id is None:
+        r.rpush(f"box:{box_id}/checks", "R: box is not run, try restarting")
+        r.set(f"box:{box_id}/checks/progress", "finished")
+        return
 
-        colored = f"{'G' if result else 'R'}:{comment}"
+    task_id = int(task_id.decode())
 
-        r.rpush(f"box:{box_id}/checks", colored)
+    task = db.get_task(task_id)
+    print(task)
+
+    ppref = r.get(f"box:{box_id}/port_prefix")
+    if ppref is None:
+        r.rpush(f"box:{box_id}/checks", "R: box is not run, try restarting")
+        r.set(f"box:{box_id}/checks/progress", "finished")
+        return
+
+    ppref = ppref.decode()
+
+    proc = subprocess.Popen([task["checker_path"], "localhost", ppref], stdout=subprocess.PIPE)
+    proc.wait()
+    for line in proc.stdout.readlines():
+        #line = proc.stdout.readline()
+        print(f"{line = }")
+        if len(line) < 2:
+            continue
+        r.rpush(f"box:{box_id}/checks", line)
+
+    # for i in range(5):
+    #     time.sleep(2)
+    #     result = True if randint(0, 1) == 1 else False
+    #     comment = f"Check {gen_s()}: {'PASS' if result else 'FAILED'}"
+
+    #     colored = f"{'G' if result else 'R'}:{comment}"
+
+    #     r.rpush(f"box:{box_id}/checks", colored)
 
     r.set(f"box:{box_id}/checks/progress", "finished")
     # db.evaluate_box
+
+
+
+
+
+
+
+
+
+
+

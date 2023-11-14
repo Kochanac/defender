@@ -39,8 +39,3 @@ CREATE TABLE exploits (
 	works int DEFAULT -1,
 	post_time TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
-
-CREATE TABLE checks (
-    task_id integer references tasks,
-    checker_path varchar(1024)
-);

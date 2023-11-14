@@ -145,7 +145,7 @@ def _upload_exploit(r, uid):
     code = data["code"]
     # task_id = data["task_id"]
 
-    exploit_path = Path(f"../data/exploits/{data['task_id']}/{token_hex()}.py")
+    exploit_path = Path(f"/exploits/{data['task_id']}/{token_hex()}.py")
 
     exploit_path.parent.mkdir(exist_ok=True)
 

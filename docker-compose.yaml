@@ -46,6 +46,9 @@ services:
             context: ./backend/
             dockerfile: api-dockerfile
 
+        volumes:
+            - ./data/exploits:/exploits
+
         environment:
             - CELERY_BROKER=redis://redis
             - CELERY_BACKEND=redis://redis
