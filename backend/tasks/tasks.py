@@ -107,6 +107,8 @@ def box_start(r, self, user_id, task_id):
     img = f"/tmp/{user_id}.qcow2"
     shutil.copyfile(task["qemu_qcow2_path"], img)
 
+    subprocess.check_output("qemu-img resize {img} +3G", shell=True)
+
     port_prefix = 1000 + user_id * 100
     ports = [(port_prefix + port, port) for port in task["ports"]]
 
@@ -116,6 +118,7 @@ def box_start(r, self, user_id, task_id):
         stderr=FNULL,
         stdout=FNULL,
         stdin=FNULL)
+
 
     time.sleep(50)
 

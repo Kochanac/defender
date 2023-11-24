@@ -1,0 +1,13 @@
+[Unit]
+Description=Celery for defender
+After=network.target
+
+[Service]
+ExecStart=celery -A tasks.tasks worker --loglevel=INFO >logs.txt 2>err.txt
+Type=simple
+Restart=always
+
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target
