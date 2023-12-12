@@ -25,6 +25,7 @@ class Task extends React.Component {
             },
             exploit_testing: false,
 
+	    defence_unlocked: false,
             defence: {
                 display: {
                     buttons: {
@@ -129,8 +130,18 @@ class Task extends React.Component {
                 flag: data.flag
             })
         }
+	
+	if (data.defence_unlocked) {
+	    this.setState({
+		defence_unlocked: true
+	    })
+	} else {
+            this.setState({
+		defence_unlocked: false
+	    })	
+	}
 
-        if (this.state.exploit.result) {
+        if (this.state.defence_unlocked) {
             data = await this.request("task/defence/box/status")
 
             if (data.status === "on") {
@@ -232,7 +243,7 @@ class Task extends React.Component {
         return (
             <div>
                 <div className="mb-9 flex">
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded">{this.state.title}</h1>
+                    <h1 className="text-5xl p-4 bg-gray-200 rounded" onClick={() => {window.location.href = "/tasks"}} >{this.state.title}</h1>
                     <div className="flex-grow"/>
                     <div className="flex flex-col">
                         <div className="flex-grow"/>
@@ -240,6 +251,14 @@ class Task extends React.Component {
                     </div>
                 </div>
 
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-2">
+                        0. Дисклеймер
+                    </p>
+                    <p className="block text-xl font-semibold mb-2">
+			Пункты 1 и 2 пока что не работают. И сама система работает не очень стабильно. Просто прокликайте кнопку в пункте 2 и запускайте себе виртуалку, ваша цель: защититься от атак системы.
+                    </p>
+                </div>
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         1. Скачайте сервис
@@ -291,7 +310,7 @@ class Task extends React.Component {
                     <p className="block text-xl font-semibold mb-2">
                         После успешного эксплойта вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
                     </p>
-                    {this.state.exploit.result &&
+                    {this.state.defence_unlocked &&
                         <div>
                             <button onClick={this.start_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_disabled ? "bg-gray-300" : "bg-red-500")}>
                                 Запустить виртуалку

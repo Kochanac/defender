@@ -45,7 +45,7 @@ function Login() {
         <form class="">
             <div class="mb-9">
                 <h1 id="title" class="text-5xl">
-                    Defence 0.1
+                    Defence 0.1.1
                 </h1>
             </div>
             <div class="mb-4">
