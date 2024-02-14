@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path"
 
-	"machine-worker/internal/repository/util"
+	"machine-worker/internal/util"
 )
 
 type QCOW2Manager struct {
@@ -19,8 +19,7 @@ func NewQCOW2Manager(basePath string) *QCOW2Manager {
 }
 
 func (Q *QCOW2Manager) EnsureImage(ctx context.Context, image string) (path string, err error) {
-	//TODO implement me
-	panic("implement me")
+	return image, nil
 }
 
 func generateChildrenPathName(baseImagePath string) string {

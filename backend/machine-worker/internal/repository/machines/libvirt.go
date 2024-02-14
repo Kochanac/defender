@@ -56,7 +56,7 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 
 	dom := &libvirtxml.Domain{
 		Type: "kvm",
-		Name: mod.VMID,
+		Name: mod.VMName,
 
 		Memory: &libvirtxml.DomainMemory{
 			Value: uint(mod.MemoryMB),
@@ -119,6 +119,7 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 				},
 			},
 		},
+		Metadata: &libvirtxml.DomainMetadata{XML: mod.TaskName},
 	}
 
 	xml, err := dom.Marshal()
@@ -126,7 +127,7 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 		return "", fmt.Errorf("dom marshal error: %w", err)
 	}
 
-	fmt.Println(xml)
+	//fmt.Println(xml)
 
 	rDom, err := l.conn.DomainDefineXML(xml) // todo CONTEXT
 	if err != nil {
@@ -148,6 +149,8 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, error) {
 	ip, subnet := l.c.Subnet(ctx)
 
+	log.Printf("ip %v subnet %v", ip, subnet)
+
 	n4 := iplib.NewNet4(net.ParseIP(ip), int(subnet))
 
 	var err error
@@ -156,7 +159,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, e
 		machineNet := iplib.NewNet4(addr, maskSize)
 
 		networkDOM := libvirtxml.Network{
-			Name: mod.VMID,
+			Name: mod.VMName,
 			Forward: &libvirtxml.NetworkForward{
 				Mode: "route",
 				Dev:  "eth0",
@@ -286,7 +289,22 @@ func (l *Libvirt) GetInfo(ctx context.Context, name string) (Info, error) {
 	}
 	addr := addrs[0]
 
+	desc, err := dom.GetXMLDesc(libvirt.DOMAIN_XML_MIGRATABLE)
+	if err != nil {
+		return Info{}, fmt.Errorf("get xml desc: %w", err)
+	}
+	domCfg := &libvirtxml.Domain{}
+	err = domCfg.Unmarshal(desc)
+	if err != nil {
+		return Info{}, fmt.Errorf("unmarshal: %w", err)
+	}
+
+	if domCfg.Metadata == nil {
+		return Info{}, fmt.Errorf("no metadata in XML desc")
+	}
+
 	return Info{
+		TaskName:  domCfg.Metadata.XML,
 		IP:        addr.Addr,
 		IsRunning: info.State == libvirt.DOMAIN_RUNNING,
 	}, nil

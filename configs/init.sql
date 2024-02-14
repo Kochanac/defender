@@ -52,21 +52,6 @@ CREATE TABLE machines (
 	UNIQUE (id, worker_url)
 );
 
-CREATE TABLE work (
-	id int PRIMARY KEY,
-
-	type text NOT NULL,
-	worker_url text,
-	
-	machine_id int, -- ref ...
-
-	status text NOT NULL,
-	taken_at timestamptz,
-
-	created_at timestamptz default now() NOT NULL,
-	
-	UNIQUE (worker_url, machine_id)
-);
 
 
 

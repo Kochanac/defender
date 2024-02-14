@@ -29,7 +29,7 @@ func main() {
 		VCPU:          1,
 		BaseImagePath: "ssh.qcow2",
 		TaskName:      "",
-		VMID:          "test2",
+		VMName:        "test2",
 	})
 	if err != nil {
 		log.Fatalf("failed to Create: %s", err)

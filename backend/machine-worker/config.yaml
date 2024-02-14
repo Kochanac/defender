@@ -1,0 +1,4 @@
+worker:
+  id: kek-1
+  delay_between_runs: 1s
+

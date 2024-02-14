@@ -11,10 +11,11 @@ type CreateModel struct {
 	BaseImagePath string
 
 	TaskName string
-	VMID     string
+	VMName   string
 }
 
 type Info struct {
+	TaskName  string
 	IP        string
 	IsRunning bool
 }
