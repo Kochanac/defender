@@ -1,4 +1,6 @@
-flask
+python-multipart
+FastAPI
+
 psycopg2
 redis
 celery

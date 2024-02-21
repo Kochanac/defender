@@ -11,7 +11,8 @@ import (
 )
 
 type Config struct {
-	WorkerID string
+	WorkerID       string
+	WorkerHostname string
 }
 
 type Postgres struct {
@@ -51,7 +52,7 @@ func (p *Postgres) AssignMachine(ctx context.Context, machineName string) error 
 		return nil
 	}
 
-	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id) VALUES ($1, $2)", p.cfg.WorkerID, machineName)
+	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id, worker_hostname) VALUES ($1, $2, $3)", p.cfg.WorkerID, machineName, p.cfg.WorkerHostname)
 	if err != nil {
 		return fmt.Errorf("insert machine_assignment: %w", err)
 	}
@@ -59,6 +60,15 @@ func (p *Postgres) AssignMachine(ctx context.Context, machineName string) error 
 	err = tx.Commit(ctx)
 	if err != nil {
 		return fmt.Errorf("tx commit: %w", err)
+	}
+
+	return nil
+}
+
+func (p *Postgres) RemoveMachine(ctx context.Context, machineName string) error {
+	_, err := p.pg.Exec(ctx, "DELETE FROM machine_assignment WHERE machine_id=$1", machineName)
+	if err != nil {
+		return fmt.Errorf("delete from machine_assignment: %w", err)
 	}
 
 	return nil

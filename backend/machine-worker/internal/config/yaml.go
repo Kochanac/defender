@@ -20,6 +20,9 @@ import (
 const CONFIG_PATH = "/etc/defender-worker/config.yaml"
 
 const (
+	ApiPrefix  = "api."
+	ApiAddress = ApiPrefix + "address"
+
 	WorkerPrefix           = "worker."
 	WorkerID               = WorkerPrefix + "id"
 	WorkerBatchLimit       = WorkerPrefix + "batch_limit"
@@ -108,7 +111,8 @@ func (c *Controller) GetImageManagerConfig() (basePath string) {
 
 func (c *Controller) GetMachineAssignmentConfig() *machine_assignment.Config {
 	return &machine_assignment.Config{
-		WorkerID: c.k.String(WorkerID),
+		WorkerID:       c.k.String(WorkerID),
+		WorkerHostname: c.k.String(ApiAddress),
 	}
 }
 
@@ -149,4 +153,8 @@ func (c *Controller) GetPostgres() *postgres.Config {
 
 func (c *Controller) GetPeriodic() (timeout time.Duration, delay time.Duration) {
 	return c.k.Duration(WorkerTimeout), c.k.Duration(WorkerDelayBetweenRuns)
+}
+
+func (c *Controller) GetHostname() string {
+	return c.k.String(ApiAddress)
 }

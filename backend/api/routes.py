@@ -7,11 +7,13 @@ from pathlib import Path
 from flask import Flask
 from flask import render_template, request, redirect, send_file, jsonify
 from flask import session
+from pydantic import BaseModel, dataclass
 
-import api.db as db
-from api.misc import with_redis
+import api.db.db as db
+from api.misc import Callable, with_redis
 
-import tasks.tasks as tasks
+import api.db.tasks as tasks
+
 
 app = Flask(__name__)
 
@@ -19,7 +21,7 @@ app.secret_key = os.urandom(32)
 
 
 @with_redis
-def with_auth(r, func):
+def with_auth(r, func) -> Callable:
 	@wraps(func)
 	def with_auth_(*args, **kwargs):
 		data = request.get_json(force=True)
@@ -53,6 +55,9 @@ def fancy_on_error(func):
 
 @app.route("/register", methods=["POST"])
 def _register():
+	@dataclass
+	class request:
+
 	data = request.get_json(force=True)
 
 	res = db.register(data)
@@ -347,22 +352,6 @@ def _box_checks(r, uid):
 		"checks": [check_convert(x.decode()) for x in r.lrange(f"box:{box_id}/checks", 0, -1)],
 		"finished_checks": True if r.get(f"box:{box_id}/checks/progress") in [b"finished", None] else False
 	})
-
-
-##	|			|
-##	|			|
-## \/ old shit \/
-
-
-# @app.route('/task/update', methods=['POST'])
-# def updtask():
-#	post = request.get_json(force=True)
-
-#	if post['task_id'] == 5:
-#		return jsonify({
-#				"error": 0,
-#				"done": {}
-#			})
 
 
 state = {

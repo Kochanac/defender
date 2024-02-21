@@ -6,4 +6,5 @@ import (
 
 type Repository interface {
 	AssignMachine(ctx context.Context, machineName string) error
+	RemoveMachine(ctx context.Context, machineName string) error
 }

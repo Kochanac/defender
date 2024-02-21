@@ -8,7 +8,8 @@ from psycopg2.extensions import connection
 from celery import Celery
 
 from api.misc import with_redis, with_connection
-import api.db as db
+import api.db.db as db
+import api.models.exploit as exploit
 
 HOSTNAME = "defender.lyceumctf.ru"
 environ["CELERY_BROKER"] = environ.get("CELERY_BROKER", "redis://localhost")
@@ -82,16 +83,15 @@ def fmt_ports(from_to_ports):
 
 
 @celery.task(bind=True, track_started=True)
-def check_exploit(self, task_id, exploit_path):
-	# self.update_state(state="PROGRESS")
-
-	from random import randint
+def check_exploit(self, exploit_run_id: int):
+	run = db.get_exploit_run(exploit_run_id)
+	assert run is not None
 
 	time.sleep(5)
 
 	# result = True if randint(0, 1) == 1 else False
-	result = True
-	db.evaluate_exploit(exploit_path, result)
+	result = exploit.ExploitResult.ok
+	db.set_exploit_run_result(exploit_run_id, result)
 
 	return result
 

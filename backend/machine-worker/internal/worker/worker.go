@@ -100,6 +100,10 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			if removeErr != nil {
 				slog.Error("failed to remove a machine while failing to assign it to the worker: %w", err)
 			}
+			removeAssignmentErr := w.machineAssignment.RemoveMachine(ctx, name)
+			if removeAssignmentErr != nil {
+				slog.Error("failed to remove a machine while failing to assign it to the worker: %w", err)
+			}
 			return "", err
 		}
 
@@ -120,6 +124,11 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 		return "OK", nil
 	case work.TypeRemoveMachine:
 		err = w.mach.Remove(ctx, wrk.MachineName)
+		if err != nil {
+			return "", err
+		}
+
+		err = w.machineAssignment.RemoveMachine(ctx, wrk.MachineName)
 		if err != nil {
 			return "", err
 		}

@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from os import environ
 
 import redis
@@ -7,7 +8,7 @@ from functools import wraps
 db = {
     "host": environ.get("PSQL_HOST", "localhost"),
     "db": "defender",
-    "user": "root",
+    "user": "kochan",
     "password": environ.get("PSQL_PASSWORD", "XThwauCbMPcaTkByRGsu")
 }
 
@@ -16,7 +17,7 @@ environ["REDIS_HOST"] = environ.get("REDIS_HOST", "localhost")
 conn = None
 r = None
 
-def with_connection(f):
+def with_connection(f) -> Callable:
     @wraps(f)
     def with_connection_(*args, **kwargs):
         global conn
@@ -34,7 +35,7 @@ def with_connection(f):
     return with_connection_
 
 
-def with_redis(func):
+def with_redis(func) -> Callable:
     @wraps(func)
     def with_redis_(*args, **kwargs):
         global r
