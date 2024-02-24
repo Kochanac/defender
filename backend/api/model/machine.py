@@ -14,6 +14,6 @@ class MachineState(str, Enum):
 class Machine(BaseModel):
 	name: str
 	state: MachineState
-	hostname: str # ip
+	hostname: str | None # ip
 
 

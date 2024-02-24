@@ -1,6 +1,6 @@
 from api.misc import with_connection
-import api.models.task as task
-import api.models.exploit as exploit
+import api.model.task as m_task
+import api.model.exploit as exploit
 
 
 @with_connection
@@ -31,7 +31,7 @@ def login(conn, username, password) -> int | None:
 
 
 @with_connection
-def get_tasks(conn, uid) -> list[task.UserTask]:
+def get_tasks(conn, uid) -> list[m_task.UserTask]:
 
 	cur = conn.cursor()
 
@@ -47,8 +47,8 @@ def get_tasks(conn, uid) -> list[task.UserTask]:
 	tasks = cur.fetchall()
 	print(tasks)
 
-	def task_convert(t) -> task.UserTask:
-		return task.UserTask(
+	def task_convert(t) -> m_task.UserTask:
+		return m_task.UserTask(
 				id=t[0],
 				title=t[1],
 				is_exploited=t[2] == True,
@@ -59,7 +59,7 @@ def get_tasks(conn, uid) -> list[task.UserTask]:
 
 
 @with_connection
-def get_task_info(conn, id) -> task.TaskInfo | None:
+def get_task_info(conn, id) -> m_task.TaskInfo | None:
 	cur = conn.cursor()
 
 	cur.execute("SELECT title, download_url, demo_url, checker_path, qemu_qcow2_path, flag from tasks WHERE id = %s", [id])
@@ -70,7 +70,7 @@ def get_task_info(conn, id) -> task.TaskInfo | None:
 		return None
 	else:
 		t = t[0]
-		ti = task.TaskInfo(
+		ti = m_task.TaskInfo(
 			id=id,
 			title=t[0],
 			download_url=t[1],
@@ -161,10 +161,13 @@ def set_exploit_run_result(conn, exploit_run_id: int, result: exploit.ExploitRes
 	cur.execute("UPDATE exploit_runs set result=%s WHERE run_id=%s", [result.value, exploit_run_id])
 
 @with_connection
-def get_first_exploit_run(conn, user_id: int, task_id: int) -> int:
+def get_first_exploit_run(conn, user_id: int, task_id: int) -> int | None:
 	cur = conn.cursor()
 	cur.execute("SELECT run_id FROM first_exploits WHERE user_id=%s AND task_id=%s ORDER BY created_at DESC LIMIT 1", [user_id, task_id])
-	run_id = cur.fetchone()[0]
+	res = cur.fetchone()
+	if res is None:
+		return None
+	run_id = res[0]
 	return int(run_id)
 
 # дальше старое =======================================================================================================8
@@ -203,7 +206,7 @@ def mark_solved(conn, uid, task_id):
 
 
 @with_connection
-def get_task_progress(conn, uid, task_id) -> task.UserTask:
+def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 	cur = conn.cursor()
 
 	cur.execute("""
@@ -217,8 +220,10 @@ def get_task_progress(conn, uid, task_id) -> task.UserTask:
 		 """, {"user_id": uid, "task_id": task_id})
 
 	task = cur.fetchone()
+	if task is None:
+		return None
 
-	return task.UserTask(id=task_id, title=str(task[0]), is_exploited=task[1], is_defended=task[2])
+	return m_task.UserTask(id=task_id, title=str(task[0]), is_exploited=task[1], is_defended=task[2])
 
 	#return {"exploited": bool(task[0]), "defended": bool(task[1])}
 

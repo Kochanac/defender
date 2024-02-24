@@ -9,7 +9,7 @@ from celery import Celery
 
 from api.misc import with_redis, with_connection
 import api.db.db as db
-import api.models.exploit as exploit
+import api.model.exploit as exploit
 
 HOSTNAME = "defender.lyceumctf.ru"
 environ["CELERY_BROKER"] = environ.get("CELERY_BROKER", "redis://localhost")
