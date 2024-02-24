@@ -14,7 +14,7 @@ class WorkEventStatus(str, Enum):
 
 class Work(BaseModel):
 	work_id: int
-	data: str
+	data: str | None
 	work_type: WorkType
 	machine_name: str
 

@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -52,8 +53,11 @@ func (w Worker) Work(ctx context.Context) error {
 
 	for _, wrk := range claimed {
 		res, err := w.handleWork(ctx, wrk)
-		if err != nil {
+		if err != nil && !errors.Is(err, machines.ErrorDomainNotFound) {
 			return fmt.Errorf("handle work: %w", err)
+		}
+		if err != nil {
+			res = ResultErr
 		}
 
 		err = w.work.SetResultOfDoneWork(ctx, wrk.WorkID, res)
@@ -69,6 +73,11 @@ type CreateMachine struct {
 	TaskName string `json:"task_name"`
 	Image    string `json:"image"`
 }
+
+var (
+	ResultOK  = "OK"
+	ResultErr = "ERROR"
+)
 
 func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, err error) {
 	switch wrk.Type {
@@ -107,21 +116,21 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			return "", err
 		}
 
-		return "OK", nil
+		return ResultOK, nil
 	case work.TypeStopMachine:
 		err = w.mach.Stop(ctx, wrk.MachineName)
 		if err != nil {
 			return "", err
 		}
 
-		return "OK", nil
+		return ResultOK, nil
 	case work.TypeStartMachine:
 		err = w.mach.Start(ctx, wrk.MachineName)
 		if err != nil {
 			return "", err
 		}
 
-		return "OK", nil
+		return ResultOK, nil
 	case work.TypeRemoveMachine:
 		err = w.mach.Remove(ctx, wrk.MachineName)
 		if err != nil {
@@ -133,7 +142,7 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			return "", err
 		}
 
-		return "OK", nil
+		return ResultOK, nil
 	case work.TypeUnknown:
 		return "", fmt.Errorf("unknown work type")
 	default:

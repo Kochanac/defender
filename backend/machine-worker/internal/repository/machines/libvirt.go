@@ -51,6 +51,10 @@ func ConnectLibvirt(c *Config, repository image_manager.Repository) (*Libvirt, e
 	return &Libvirt{conn: conn, c: c, imageManager: repository}, nil
 }
 
+func isNotFound(err error) bool {
+	return strings.Contains(err.Error(), "Domain not found: no domain with matching name")
+}
+
 func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, imageName string) (string, error) {
 	zp := uint(0)
 
@@ -240,6 +244,9 @@ func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err e
 func (l *Libvirt) Start(ctx context.Context, name string) error {
 	dom, err := l.conn.LookupDomainByName(name)
 	if err != nil {
+		if isNotFound(err) {
+			return fmt.Errorf("%w, lookup by name: %s", ErrorDomainNotFound, err)
+		}
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 
@@ -257,6 +264,9 @@ func (l *Libvirt) Start(ctx context.Context, name string) error {
 func (l *Libvirt) GetInfo(ctx context.Context, name string) (Info, error) {
 	dom, err := l.conn.LookupDomainByName(name)
 	if err != nil {
+		if isNotFound(err) {
+			return Info{}, fmt.Errorf("%w, lookup by name: %s", ErrorDomainNotFound, err)
+		}
 		return Info{}, fmt.Errorf("lookup by name: %w", err)
 	}
 
@@ -313,6 +323,9 @@ func (l *Libvirt) GetInfo(ctx context.Context, name string) (Info, error) {
 func (l *Libvirt) Stop(ctx context.Context, name string) error {
 	dom, err := l.conn.LookupDomainByName(name)
 	if err != nil {
+		if isNotFound(err) {
+			return fmt.Errorf("%w, lookup by name: %s", ErrorDomainNotFound, err)
+		}
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 
@@ -327,7 +340,6 @@ func (l *Libvirt) Stop(ctx context.Context, name string) error {
 	return nil
 }
 
-// Remove todo идемпотентность?
 func (l *Libvirt) Remove(ctx context.Context, name string) error {
 	dom, err := l.conn.LookupDomainByName(name)
 	if err != nil {

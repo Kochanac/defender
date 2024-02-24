@@ -2,6 +2,7 @@ package machines
 
 import (
 	"context"
+	"errors"
 )
 
 type CreateModel struct {
@@ -19,6 +20,10 @@ type Info struct {
 	IP        string
 	IsRunning bool
 }
+
+var (
+	ErrorDomainNotFound = errors.New("domain not found")
+)
 
 type Repository interface {
 	Create(ctx context.Context, mod CreateModel) (id string, err error)
