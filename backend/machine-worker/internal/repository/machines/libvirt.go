@@ -331,6 +331,9 @@ func (l *Libvirt) Stop(ctx context.Context, name string) error {
 func (l *Libvirt) Remove(ctx context.Context, name string) error {
 	dom, err := l.conn.LookupDomainByName(name)
 	if err != nil {
+		if strings.Contains(err.Error(), "Domain not found: no domain with matching name") {
+			return nil
+		}
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 

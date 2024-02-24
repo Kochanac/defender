@@ -70,7 +70,11 @@ def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine |
 	if state is None:
 		return None
 
-	return m_machine.Machine(name=machine_name, state=state, hostname=assignment.ip)
+	ip = None
+	if worker_info is not None:
+		ip = worker_info.ip
+
+	return m_machine.Machine(name=machine_name, state=state, hostname=ip)
 
 
 def create_first_defence_machine(user_id: int, task_id: int):
