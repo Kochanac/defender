@@ -16,7 +16,9 @@ import (
 )
 
 type Config struct {
-	Subnet func(ctx context.Context) (string, uint8) // (10.2.N.0, 24) – N is important
+	Subnet            func(ctx context.Context) (string, uint8) // (10.2.N.0, 24) – N is important
+	RoutedNetworkName func(ctx context.Context) string
+	AddNetwork        func(ctx context.Context) string
 }
 
 type Libvirt struct {
@@ -100,7 +102,11 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 			},
 			Interfaces: []libvirtxml.DomainInterface{
 				{
-					MAC: &libvirtxml.DomainInterfaceMAC{Address: "00:11:22:33:44:55"},
+					Source: &libvirtxml.DomainInterfaceSource{
+						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
+					},
+				},
+				{
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
 					},
@@ -166,7 +172,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, e
 			Name: mod.VMName,
 			Forward: &libvirtxml.NetworkForward{
 				Mode: "route",
-				Dev:  "eth0",
+				Dev:  l.c.RoutedNetworkName(ctx),
 			},
 			IPs: []libvirtxml.NetworkIP{
 				{

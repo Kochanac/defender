@@ -33,10 +33,12 @@ const (
 	PostgresConnString  = PostgresPrefix + "conn_string"
 	PostgresConnections = PostgresPrefix + "connections"
 
-	MachinesPrefix        = "machines."
-	MachinesDefaultCPU    = MachinesPrefix + "default_cpu"
-	MachinesDefaultMemory = MachinesPrefix + "default_memory_mb"
-	MachinesSubnet        = MachinesPrefix + "subnet"
+	MachinesPrefix            = "machines."
+	MachinesDefaultCPU        = MachinesPrefix + "default_cpu"
+	MachinesDefaultMemory     = MachinesPrefix + "default_memory_mb"
+	MachinesSubnet            = MachinesPrefix + "subnet"
+	MachinesRoutedNetworkName = MachinesPrefix + "routed_network_name"
+	MachinesAddNetwork        = MachinesPrefix + "additional_network"
 
 	ImagesPrefix   = "images."
 	ImagesBasePath = ImagesPrefix + "base_path"
@@ -72,13 +74,15 @@ func InitConfig() (*Controller, error) {
 
 func (c *Controller) setDefaults() error {
 	defaults := map[string]interface{}{
-		WorkerBatchLimit:       1,
-		WorkerTimeout:          1 * time.Minute,
-		WorkerDelayBetweenRuns: 10 * time.Second,
-		MachinesDefaultCPU:     1,
-		MachinesDefaultMemory:  1024,
-		ImagesBasePath:         "/var/lib/libvirt/images",
-		PostgresConnections:    1,
+		WorkerBatchLimit:          1,
+		WorkerTimeout:             1 * time.Minute,
+		WorkerDelayBetweenRuns:    10 * time.Second,
+		MachinesDefaultCPU:        1,
+		MachinesDefaultMemory:     1024,
+		ImagesBasePath:            "/var/lib/libvirt/images",
+		PostgresConnections:       1,
+		MachinesRoutedNetworkName: "eth0",
+		MachinesAddNetwork:        "default",
 	}
 
 	for key, val := range defaults {
@@ -126,6 +130,12 @@ func (c *Controller) GetMachinesConfig() *machines.Config {
 			}
 			ones, _ := n.Mask().Size()
 			return cidr.String(), uint8(ones)
+		},
+		RoutedNetworkName: func(_ context.Context) string {
+			return c.k.String(MachinesRoutedNetworkName)
+		},
+		AddNetwork: func(_ context.Context) string {
+			return c.k.String(MachinesAddNetwork)
 		},
 	}
 }
