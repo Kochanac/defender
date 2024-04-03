@@ -105,10 +105,16 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
 					},
+					Target: &libvirtxml.DomainInterfaceTarget{
+						Dev: "eth0",
+					},
 				},
 				{
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
+					},
+					Target: &libvirtxml.DomainInterfaceTarget{
+						Dev: "wtf0",
 					},
 				},
 			},
