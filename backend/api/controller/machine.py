@@ -20,6 +20,8 @@ def get_worker_info(worker_hostname: str, machine_name: str) -> WorkerInfo | Non
 		return None
 
 def convert_state(work: m_work.Work, work_result: bool | None, worker_info: WorkerInfo | None) -> m_machine.MachineState | None:
+	print(work, work_result, worker_info)
+
 	if work.work_type == m_work.WorkType.create or work.work_type == m_work.WorkType.start:
 		if work_result and worker_info is not None and worker_info.is_running:
 			return m_machine.MachineState.on

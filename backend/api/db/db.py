@@ -1,6 +1,10 @@
+import hashlib
 from api.misc import with_connection
 import api.model.task as m_task
 
+
+def cryptohash(x: str) -> str:
+	return hashlib.sha256(x.encode()).hexdigest()
 
 @with_connection
 def register(conn, username: str, password: str) -> bool:
@@ -11,7 +15,7 @@ def register(conn, username: str, password: str) -> bool:
 	if len(cur.fetchall()) != 0:
 		return False
 
-	cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", [username,  password])
+	cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", [username,  cryptohash(password)])
 
 	return True
 
@@ -20,7 +24,7 @@ def register(conn, username: str, password: str) -> bool:
 def login(conn, username, password) -> int | None:
 	cur = conn.cursor()
 
-	cur.execute("SELECT id FROM users WHERE username = %s and password = %s", [username, password])
+	cur.execute("SELECT id FROM users WHERE username = %s and password = %s", [username, cryptohash(password)])
 
 	res = cur.fetchall()
 	if len(res) == 1:
@@ -61,7 +65,7 @@ def get_tasks(conn, uid) -> list[m_task.UserTask]:
 def get_task_info(conn, id) -> m_task.TaskInfo | None:
 	cur = conn.cursor()
 
-	cur.execute("SELECT title, download_url, demo_url, checker_path, qemu_qcow2_path, flag from tasks WHERE id = %s", [id])
+	cur.execute("SELECT title, download_url, demo_url, qemu_qcow2_path, flag from tasks WHERE id = %s", [id])
 
 	t = cur.fetchall()
 
@@ -74,47 +78,12 @@ def get_task_info(conn, id) -> m_task.TaskInfo | None:
 			title=t[0],
 			download_url=t[1],
 			service_demo=t[2],
-			checker_path=t[3],
-			image_path=t[4],
+			image_path=t[3],
 			exploit_example="kek",
-			flag=t[5]
+			flag=t[4]
 		)
 		return ti
 
-
-# дальше старое =======================================================================================================8
-
-@with_connection
-def _upload_exploit(conn, uid, task_id, exploit_path):
-	cur = conn.cursor()
-
-	cur.execute("INSERT INTO exploits (user_id, task_id, path) VALUES (%s, %s, %s)", [uid, task_id, exploit_path])
-
-	return True
-
-
-@with_connection
-def get_recent_exploit(conn, uid, task_id):
-	cur = conn.cursor()
-
-	cur.execute("SELECT path FROM exploits \
-				 WHERE user_id=%(uid)s and task_id=%(task_id)s and id = \
-					(SELECT MAX(id) FROM exploits WHERE user_id=%(uid)s and task_id=%(task_id)s)", 
-					{"uid": uid, "task_id": task_id})
-
-	exploit_path = cur.fetchone()
-
-	if exploit_path is None:
-		return None
-	else:
-		return exploit_path[0]
-
-
-@with_connection
-def mark_solved(conn, uid, task_id):
-	cur = conn.cursor()
-
-	cur.execute("INSERT INTO defences (user_id, task_id) VALUES (%s, %s)", [int(uid), int(task_id)])
 
 
 @with_connection
@@ -122,11 +91,15 @@ def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 	cur = conn.cursor()
 
 	cur.execute("""
-		SELECT tasks.title, count(exploit_id) > 0, count(defences.id) > 0
+		SELECT tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0
 			FROM tasks
-			LEFT JOIN first_exploits ON first_exploits.task_id = tasks.id AND first_exploits.user_id=%(user_id)s
-			LEFT JOIN exploit_runs ON exploit_runs.exploit_id=first_exploits.id AND exploit_runs.result = 'OK'
-			LEFT JOIN defences ON defences.task_id = tasks.id AND defences.user_id=%(user_id)s
+
+			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
+			LEFT JOIN exploit_runs as er ON er.exploit_id=fe.id AND er.result = 'OK'
+
+			LEFT JOIN first_checker_run fcr ON fcr.task_id = tasks.id AND fcr.user_id=%(user_id)s
+			LEFT JOIN checker_run as cr ON fcr.run_id = cr.id AND cr.ok
+
 			WHERE tasks.id = %(task_id)s
 			GROUP BY tasks.id, tasks.title
 		 """, {"user_id": uid, "task_id": task_id})
@@ -137,5 +110,4 @@ def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 
 	return m_task.UserTask(id=task_id, title=str(task[0]), is_exploited=task[1], is_defended=task[2])
 
-	#return {"exploited": bool(task[0]), "defended": bool(task[1])}
 

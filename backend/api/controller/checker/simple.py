@@ -41,7 +41,7 @@ def check_result(checker_run: m_checker.CheckerRun) -> tuple[m_checker.CheckStat
     elif celery_status.status == "SUCCESS":
         status = m_checker.CheckStatus.checked
 
-    checker_result = db_checks.get_checker_run(checker_run)
+    checker_result = db_checks.get_checker_run(checker_run.run_id)
 
     return (
         status, 

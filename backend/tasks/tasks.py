@@ -59,7 +59,7 @@ def simple_checker(r, self, simple_checker_run_id: int):
 	if checker_run is None:
 		raise ValueError("not found checker run")
 
-	mach = machine.get_machine(checker_run.machine_name)
+	mach = machine.get_machine(checker_run.target_machine_name)
 	if mach is None:
 		raise ValueError("not found machine")
 	if mach.hostname is None:
@@ -71,6 +71,8 @@ def simple_checker(r, self, simple_checker_run_id: int):
 	assert isinstance(checker, m_checker.Checker)
 
 	# todo S3 and so on...
+
+	print(f"{checker=}")
 
 	proc = subprocess.Popen([checker.checker_url, hostname], stdout=subprocess.PIPE)
 	proc.wait()
@@ -85,7 +87,11 @@ def simple_checker(r, self, simple_checker_run_id: int):
 			allgreen = False
 		
 		db_checks.add_checker_result(
-			m_checker.CheckerResult(comment=line[2:].decode(), passed=line[0:1] == "G")
+			simple_checker_run_id,
+			m_checker.CheckerResult(
+				comment=line[2:].decode().strip(), 
+				passed=line[0:1] == b"G"
+			)
 		)
 
 	if allgreen:

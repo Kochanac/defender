@@ -15,6 +15,5 @@ class TaskInfo(BaseModel):
     download_url: str
     exploit_example: str  # url
     service_demo: str  # url
-    checker_path: str
     image_path: str
     flag: str

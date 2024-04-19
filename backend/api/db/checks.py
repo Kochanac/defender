@@ -3,10 +3,10 @@ from subprocess import run
 
 from pydantic import with_config
 
-from backend.api.misc import with_connection
+from api.misc import with_connection
 from enum import Enum
 
-import backend.api.model.checker as m_checker
+import api.model.checker as m_checker
 
 
 # CHECK RUN
@@ -19,7 +19,7 @@ class CheckerType(str, Enum):
 def get_checker_by_task(conn, task_id: int) -> m_checker.Checker | None:
     cur = conn.cursor()
 
-    cur.execute("SELECT id, checker_url FROM checker_run WHERE task_id=%s", [task_id, ])
+    cur.execute("SELECT id, checker_url FROM checker WHERE task_id=%s", [task_id, ])
     res = cur.fetchone()
 
     if res is None:
@@ -36,7 +36,7 @@ def get_checker_by_task(conn, task_id: int) -> m_checker.Checker | None:
 def get_checker_by_id(conn, checker_id: int) -> m_checker.Checker | None:
     cur = conn.cursor()
 
-    cur.execute("SELECT task_id, checker_url FROM checker_run WHERE checker_id=%s", [checker_id, ])
+    cur.execute("SELECT task_id, checker_url FROM checker WHERE id=%s", [checker_id, ])
     res = cur.fetchone()
 
     if res is None:
@@ -62,23 +62,7 @@ def create_simple_checker_run(conn, checker_id: int, target_machine_name: str) -
         [checker_run_id, target_machine_name, checker_id]
     )
 
-    return checker_run_id
-
-
-def parse_checker_results(x: str, is_ok) -> m_checker.CheckerResults:
-    res_json = json.loads(x)
-    results = []
-    for r in res_json:
-        results.append(m_checker.CheckerResult.model_validate_json(json.dumps(r)))
-
-    is_ok_res = None
-    if is_ok is not None:
-        is_ok_res = bool(is_ok)
-
-    return m_checker.CheckerResults(
-        results=results,
-        ok=is_ok_res
-    )
+    return checker_run_id[0]
 
 
 @with_connection
@@ -91,7 +75,7 @@ def get_checker_run(conn, checker_run: int) -> m_checker.CheckerResults | None:
     if res is None:
         return None
     else:
-        return parse_checker_results(res[0], res[1])
+        return m_checker.parse_checker_results(res[0], res[1])
 
 
 @with_connection
@@ -122,7 +106,7 @@ def add_checker_result(conn, checker_run: int, new_result: m_checker.CheckerResu
     cur = conn.cursor()
     cur.execute(
         "UPDATE checker_run SET result=%s WHERE id=%s",
-        [json.dumps(now.results), checker_run]
+        [m_checker.serialise_checker_results(now.results), checker_run]
     )
 
 @with_connection
@@ -141,7 +125,7 @@ def set_first_defence_checker_run(conn, user_id: int, task_id: int, run_id: int)
     cur = conn.cursor()
 
     cur.execute(
-        "INSERT INTO first_checker_run user_id, task_id, run_id VALUES (%s, %s, %s)",
+        "INSERT INTO first_checker_run (user_id, task_id, run_id) VALUES (%s, %s, %s)",
         [user_id, task_id, run_id]
     )
 
@@ -151,7 +135,7 @@ def get_first_defence_checker_run(conn, user_id: int, task_id: int) -> int | Non
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT run_id FROM first_checker_run WHERE user_id=%s AND task_id=%s", 
+        "SELECT run_id FROM first_checker_run WHERE user_id=%s AND task_id=%s ORDER BY id DESC LIMIT 1", 
         [user_id, task_id]
     )
 
@@ -159,6 +143,6 @@ def get_first_defence_checker_run(conn, user_id: int, task_id: int) -> int | Non
     if run_id is None:
         return None   
         
-    return int(run_id)
+    return int(run_id[0])
 
 

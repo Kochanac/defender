@@ -8,7 +8,7 @@ from functools import wraps
 db = {
 	"host": environ.get("PSQL_HOST", "localhost"),
 	"db": "defender",
-	"user": "kochan",
+	"user": environ.get("PSQL_USER", "kochan"),
 	"password": environ.get("PSQL_PASSWORD", "XThwauCbMPcaTkByRGsu")
 }
 
