@@ -370,11 +370,11 @@ func (l *Libvirt) Remove(ctx context.Context, name string) error {
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 
-	net, err := l.conn.LookupInterfaceByName(name)
+	net, err := l.conn.LookupNetworkByName(name)
 	if err != nil {
 		return fmt.Errorf("network lookup by name: %w", err)
 	}
-	err = net.Destroy(0)
+	err = net.Destroy()
 	if err != nil {
 		return fmt.Errorf("network destroy: %w", err)
 	}
