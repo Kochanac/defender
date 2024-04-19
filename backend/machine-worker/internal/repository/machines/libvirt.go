@@ -370,6 +370,15 @@ func (l *Libvirt) Remove(ctx context.Context, name string) error {
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 
+	net, err := l.conn.LookupInterfaceByName(name)
+	if err != nil {
+		return fmt.Errorf("network lookup by name: %w", err)
+	}
+	err = net.Destroy(0)
+	if err != nil {
+		return fmt.Errorf("network destroy: %w", err)
+	}
+
 	desc, err := dom.GetXMLDesc(libvirt.DOMAIN_XML_MIGRATABLE)
 	if err != nil {
 		return fmt.Errorf("get xml desc: %w", err)
