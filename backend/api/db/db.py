@@ -1,6 +1,5 @@
 from api.misc import with_connection
 import api.model.task as m_task
-import api.model.exploit as exploit
 
 
 @with_connection
@@ -82,93 +81,6 @@ def get_task_info(conn, id) -> m_task.TaskInfo | None:
 		)
 		return ti
 
-@with_connection
-def upload_exploit(conn, user_id: int, task_id: int, exploit_path: str) -> int:
-	cur = conn.cursor()
-
-	cur.execute("INSERT INTO exploits (user_id, task_id, path) VALUES (%s, %s, %s) RETURNING (id)", [user_id, task_id, exploit_path])
-
-	exploit_id = cur.fetchone()[0]
-	return exploit_id
-
-@with_connection
-def get_exploit(conn, exploit_id: int) -> exploit.Exploit:
-	cur = conn.cursor()
-
-	cur.execute("SELECT user_id, task_id, path FROM exploits WHERE id=%s", [exploit_id,])
-	user_id, task_id, path = cur.fetchone()
-
-	return exploit.Exploit(
-		exploit_id=exploit_id,
-		user_id=user_id,
-		task_id=task_id,
-		exploit_path=path
-	)
-
-
-@with_connection
-def run_first_exploit(conn, exploit_id: int, target_image: str) -> int:
-	expl = get_exploit(exploit_id)
-
-	cur = conn.cursor()
-
-	run_id = _run_exploit(cur, exploit_id, target_image)
-
-	cur.execute("INSERT INTO first_exploits (user_id, task_id, run_id) VALUES (%s, %s, %s)", [expl.user_id, expl.task_id, run_id])
-
-	return int(run_id)
-
-
-def _run_exploit(cur, exploit_id: int, target_image: str) -> int:
-	cur.execute("INSERT INTO exploit_runs (exploit_id, target_image) VALUES (%s, %s) RETURNING (run_id)", [exploit_id, target_image])
-
-	run_id = cur.fetchone()[0]
-	return int(run_id)
-
-@with_connection
-def get_exploit_run(conn, exploit_run_id: int) -> exploit.ExploitRun | None:
-	cur = conn.cursor()
-	assert isinstance(exploit_run_id, int)
-
-	print(exploit_run_id)
-
-	cur.execute("SELECT exploit_id, target_image, result FROM exploit_runs WHERE run_id=%s", [exploit_run_id,])
-	e = cur.fetchone()
-	if e is None:
-		return None
-	exploit_id, target_image, result = tuple(e)
-	
-	print(exploit_id)
-
-	res = None
-	if result == "OK":
-		res = exploit.ExploitResult.ok
-	elif result is not None:
-		res = exploit.ExploitResult.failed
-
-	return exploit.ExploitRun(
-		run_id=exploit_run_id,
-		exploit_id=int(exploit_id),
-		target_image=target_image,
-		result=res
-	)
-
-
-@with_connection
-def set_exploit_run_result(conn, exploit_run_id: int, result: exploit.ExploitResult):
-	cur = conn.cursor()
-
-	cur.execute("UPDATE exploit_runs set result=%s WHERE run_id=%s", [result.value, exploit_run_id])
-
-@with_connection
-def get_first_exploit_run(conn, user_id: int, task_id: int) -> int | None:
-	cur = conn.cursor()
-	cur.execute("SELECT run_id FROM first_exploits WHERE user_id=%s AND task_id=%s ORDER BY created_at DESC LIMIT 1", [user_id, task_id])
-	res = cur.fetchone()
-	if res is None:
-		return None
-	run_id = res[0]
-	return int(run_id)
 
 # дальше старое =======================================================================================================8
 

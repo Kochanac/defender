@@ -1,0 +1,12 @@
+[Unit]
+Description=API for defender machine-worker
+After=network.target
+
+[Service]
+ExecStart=/sbin/defender-api
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target

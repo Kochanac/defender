@@ -1,6 +1,6 @@
 from api.misc import with_connection
 import api.model.task as task
-import api.model.exploit as exploit
+import api.model.exploit_model as exploit_model
 
 import api.model.work as mWork
 from pydantic import BaseModel

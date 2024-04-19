@@ -4,15 +4,21 @@ from typing import Annotated
 
 import api.db.db as db
 import api.redis as redis
-import api.controller.exploits as exploits
-import api.controller.machines as machines
-import api.model.exploit as exploit
+
+import api.controller.exploit as exploit
+import api.controller.machine as machine
+import api.controller.checker.adapters.first_defence as first_defence_checker
+
+import api.model.exploit_model as exploit_model
 import api.model.machine as m_machine
+import api.model.checker as m_checker
+
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from pydantic import BaseModel
+
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -95,8 +101,8 @@ async def _get_task(t: GetTaskModel):
 
 
 class TaskState(BaseModel):
-	exploit_status: exploit.ExploitStatus | None
-	exploit_result: exploit.ExploitResult | None
+	exploit_status: exploit_model.ExploitStatus | None
+	exploit_result: exploit_model.ExploitResult | None
 
 	defence_unlocked: bool
 	flag: str | None
@@ -104,7 +110,7 @@ class TaskState(BaseModel):
 
 @app.post("/task/state")
 async def _task_state(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]) -> TaskState:
-	first_exploit_status, first_exploit_result = exploits.get_first_exploit_status(user_id, t.task_id)
+	first_exploit_status, first_exploit_result = exploit.get_first_exploit_status(user_id, t.task_id)
 
 	task_status = db.get_task_progress(user_id, t.task_id)
 	if task_status is None:
@@ -129,8 +135,8 @@ class UploadExploit(BaseModel):
 
 @app.post("/task/exploit/upload")
 async def _upload_exploit(ue: UploadExploit, user_id: Annotated[int, Depends(get_user_id)]):
-	exp = exploits.upload_exploit(ue.task_id, user_id, ue.exploit_text)
-	exploits.start_first_exploit(exp.exploit_id)
+	exp = exploit.upload_exploit(ue.task_id, user_id, ue.exploit_text)
+	exploit.start_first_exploit(exp.exploit_id)
 
 
 class BoxStatus(BaseModel):
@@ -140,34 +146,50 @@ class BoxStatus(BaseModel):
 
 @app.post("/task/defence/box/status")
 async def _box_status(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	machine = machines.get_first_defence_machine(user_id, t.task_id)
-	if machine is None:
+	m = machine.get_first_defence_machine(user_id, t.task_id)
+	if m is None:
 		raise HTTPException(status_code=404, detail="No machine found")
 
 	return BoxStatus(
-		status=machine.state,
-		message=(f"Машина доступна по `ssh root@{machine.hostname}` с паролем 8QIQzf0okRCPs5zD" if machine.state == m_machine.MachineState.on else None)
+		status=m.state,
+		message=(f"Машина доступна по `ssh root@{m.hostname}` с паролем 8QIQzf0okRCPs5zD" if m.state == m_machine.MachineState.on else None)
 	)
 
 @app.post("/task/defence/box/create")
 async def _box_create(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	machines.create_first_defence_machine(user_id, t.task_id)
+	machine.create_first_defence_machine(user_id, t.task_id)
 
 
 @app.post("/task/defence/box/stop")
 async def _box_stop(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	machines.stop_first_defence_machine(user_id, t.task_id)
+	machine.stop_first_defence_machine(user_id, t.task_id)
 
 
 @app.post("/task/defence/box/start")
 async def _box_start(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	machines.start_first_defence_machine(user_id, t.task_id)
+	machine.start_first_defence_machine(user_id, t.task_id)
 
 
 @app.post("/task/defence/box/remove")
 async def _box_remove(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	machines.remove_first_defence_machine(user_id, t.task_id)
+	machine.remove_first_defence_machine(user_id, t.task_id)
 
+
+@app.post("/task/defence/test/start")
+async def _first_defence_check(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
+	first_defence_checker.check_start(t.task_id, user_id)
+
+class FirstDefenceStatus(BaseModel):
+	results: m_checker.CheckerResults | None
+	status: m_checker.CheckStatus | None
+	
+@app.post("/task/defence/test/checks")
+async def _first_defence_check_result(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]) -> FirstDefenceStatus:
+	status, result = first_defence_checker.check_result(t.task_id, user_id)
+	return FirstDefenceStatus(
+		status=status,
+		results=result
+	)
 
 
 

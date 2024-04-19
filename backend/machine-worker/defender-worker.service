@@ -1,0 +1,13 @@
+[Unit]
+Description=Celery for defender
+After=network.target
+
+[Service]
+ExecStart=/sbin/defender-worker
+Type=simple
+Restart=always
+
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target

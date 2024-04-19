@@ -9,10 +9,11 @@ import (
 	"net"
 	"strings"
 
+	image_manager "machine-worker/internal/repository/image-manager"
+
 	"github.com/c-robinson/iplib"
 	"libvirt.org/go/libvirt"
 	"libvirt.org/go/libvirtxml"
-	image_manager "machine-worker/internal/repository/image-manager"
 )
 
 type Config struct {
@@ -47,7 +48,7 @@ func ConnectLibvirt(c *Config, repository image_manager.Repository) (*Libvirt, e
 	}
 
 	for _, domain := range domains {
-		log.Printf("domain: %s", domain)
+		log.Printf("domain: %+v", domain)
 	}
 
 	return &Libvirt{conn: conn, c: c, imageManager: repository}, nil
@@ -114,7 +115,7 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
 					},
 					Target: &libvirtxml.DomainInterfaceTarget{
-						Dev: "wtf0",
+						Dev: "eth10",
 					},
 				},
 			},
@@ -301,15 +302,23 @@ func (l *Libvirt) GetInfo(ctx context.Context, name string) (Info, error) {
 	if len(ifs) == 0 {
 		return Info{}, fmt.Errorf("no network interfaces")
 	}
-	if len(ifs) != 1 {
-		slog.WarnContext(ctx, "getInfo about a domain: != one network interface. ifs: %+v", ifs)
-	}
 
-	addrs := ifs[0].Addrs
-	if len(addrs) != 1 {
-		return Info{}, fmt.Errorf("amount of network addresses %d != 1. addrs: %+v", len(addrs), addrs)
+	ip, subnet := l.c.Subnet(ctx)
+	n4 := iplib.NewNet4(net.ParseIP(ip), int(subnet))
+
+	var resIP string
+	for _, iface := range ifs {
+		addrs := iface.Addrs
+		for _, addr := range addrs {
+			ip := net.ParseIP(addr.Addr)
+			if n4.Contains(ip) {
+				resIP = addr.Addr
+			}
+		}
 	}
-	addr := addrs[0]
+	if resIP == "" {
+		return Info{}, fmt.Errorf("no matching IPs")
+	}
 
 	desc, err := dom.GetXMLDesc(libvirt.DOMAIN_XML_MIGRATABLE)
 	if err != nil {
@@ -327,7 +336,7 @@ func (l *Libvirt) GetInfo(ctx context.Context, name string) (Info, error) {
 
 	return Info{
 		TaskName:  domCfg.Metadata.XML,
-		IP:        addr.Addr,
+		IP:        resIP,
 		IsRunning: info.State == libvirt.DOMAIN_RUNNING,
 	}, nil
 }

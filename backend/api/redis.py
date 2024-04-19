@@ -29,3 +29,13 @@ def get_exploit_run_celery_task(r, run_id: int) -> str:
 	task_id = r.get(f"run:{run_id}/celery_task")
 	return str(task_id.decode())
 
+
+@with_redis
+def set_checker_run_celery_task(r, run_id: int, celery_task_id: str):
+	r.set(f"checker:{run_id}/celery_task", celery_task_id)
+
+@with_redis
+def get_checker_run_celery_task(r, run_id: int) -> str:
+	task_id = r.get(f"checker:{run_id}/celery_task")
+	return str(task_id.decode())
+

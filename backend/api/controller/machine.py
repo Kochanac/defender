@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 import api.model.machine as m_machine
 import api.model.work as m_work
@@ -7,11 +6,6 @@ import api.db.db as db
 import api.db.machine_assignment as db_machine_assignment
 
 import requests 
-
-
-def gen_first_machine_name(user_id: int, task_id: int) -> str:
-	return f"first_user_{user_id}_task_{task_id}"
-
 
 class WorkerInfo(BaseModel):
 	ip: str
@@ -44,12 +38,9 @@ def convert_state(work: m_work.Work, work_result: bool | None, worker_info: Work
 	return None
 
 
-def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine | None:
-	# 1) get first defence machine name
-	# 2) get info about work queue
-	# 3) get info from worker
-
-	machine_name = gen_first_machine_name(user_id, task_id)
+def get_machine(machine_name: str) -> m_machine.Machine | None:
+	# 1) get info about work queue
+	# 2) get info from worker
 
 	work_info = db_work.get_last_by_machine_name(machine_name)
 
@@ -75,6 +66,18 @@ def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine |
 		ip = worker_info.ip
 
 	return m_machine.Machine(name=machine_name, state=state, hostname=ip)
+
+
+# TODO то что ниже кажется может называться "Адаптером" и можно это вынести в другой файл
+
+def gen_first_machine_name(user_id: int, task_id: int) -> str:
+	return f"first_user_{user_id}_task_{task_id}"
+
+def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine | None:
+	# 1) get first defence machine name
+
+	machine_name = gen_first_machine_name(user_id, task_id)
+	return get_machine(machine_name)
 
 
 def create_first_defence_machine(user_id: int, task_id: int):
