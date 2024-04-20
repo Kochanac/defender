@@ -1,23 +1,21 @@
 import React from "react";
 import Wait from "./elements/wait";
 
-import { withRouter } from "react-router-dom"; // Я не умею программировать
-
-import { HOST } from "../index.js";
+import { call } from "../api/api.js";
+import { useParams } from "react-router-dom";
 
 class Task extends React.Component {
     // TODO: Make defence (and attack?) another component
 
     constructor(props) {
         super(props);
-
         this.state = {
             username: localStorage.getItem("username"),
             exploit_example: "/404",
             service_demo: "/404",
             download_url: "/404",
             title: "{title}",
-            task_id: parseInt(props.match.params.id),
+            task_id: this.props.params.id,
 
             exploit: {
                 status: "none",
@@ -29,8 +27,10 @@ class Task extends React.Component {
             defence: {
                 display: {
                     buttons: {
-                        start_disabled: false,
-                        stop_visible: false
+                        create_enabled: false,
+                        start_enabled: false,
+                        stop_enabled: false,
+                        remove_enabled: false,
                     },
                     messagebox: false,
                     check_button: false,
@@ -39,7 +39,10 @@ class Task extends React.Component {
 
                 messagebox_text: "test\ntest2\ntest3"
             },
-            defence_starting: false,
+            machine_progress: {
+                in_progress: false,
+                process_label: ""
+            },
             defence_testing: false,
 
             checks: [
@@ -60,34 +63,28 @@ class Task extends React.Component {
 
     async request(url, data={}) {
         data.task_id = this.state.task_id
-        data.token = localStorage.getItem("token")
+        // data.token = localStorage.getItem("token")
 
-        let resp = await fetch(HOST + url, {
-            method: "POST",
-            body: JSON.stringify(data)
-        })
+        let resp = await call(url, data, localStorage.getItem("token"));
 
-        let resp_data = await resp.json();
-        if (resp_data["error"] !== 0) {
-            console.log("lox")
-            this.setState({
-                username: "#$&%*!",
-                title: "Error " + resp_data["error"],
 
-                exploit_testing: false,
-                defence_starting: false,
-                defence_testing: false
-            })
-        }
+        // if (resp["error"] !== 0) {
+        //     console.log("lox", resp)
+        //     this.setState({
+        //         username: "#$&%*!",
+        //         title: "Error " + resp["error"],
 
-        return resp_data
+        //         exploit_testing: false,
+        //         defence_starting: false,
+        //         defence_testing: false
+        //     })
+        // }
+
+        return resp
     }
 
     async prepare_task() {
         let data = await this.request("task")
-
-        if (data["error"] !== 0)
-            return
 
         this.setState({
             exploit_example: data["exploit_example"],
@@ -103,23 +100,23 @@ class Task extends React.Component {
     }
 
     async update_task() {
-        let data = await this.request("task/status")
+        let data = await this.request("task/state")
 
         this.setState({
             exploit: {
-                status: data["status"],
-                result: (data["result"] && data["result"] === "OK")
+                status: data["exploit_status"],
+                result: (data["exploit_result"] && data["exploit_result"] === "OK")
             },
         })
 
-        if (data["status"] === "checked") {
+        if (data["exploit_status"] === "checked") {
             this.setState({
                     exploit_testing: false
                 }
             )
         }
 
-        if (data["status"] === "in progress") {
+        if (data["exploit_status"] === "in progress") {
             this.setState({
                 exploit_testing: true
             })
@@ -131,69 +128,148 @@ class Task extends React.Component {
             })
         }
 	
-	if (data.defence_unlocked) {
-	    this.setState({
-		defence_unlocked: true
-	    })
-	} else {
-            this.setState({
-		defence_unlocked: false
-	    })	
-	}
+    
+        this.setState({
+            defence_unlocked: data.defence_unlocked
+        })	
+    
 
         if (this.state.defence_unlocked) {
-            data = await this.request("task/defence/box/status")
+            this.update_defence_state()
+        }
+    }
 
-            if (data.status === "on") {
-                this.setState({
-                    defence: {
-                        display: {
-                            buttons: {
-                                start_disabled: true,
-                                stop_visible: true
-                            },
-                            messagebox: true,
-                            check_button: true,
-                            check_results: true
+    async update_defence_state() {
+        var data = await this.request("task/defence/box/status")
+        console.log("kek", data)
+
+        if (data.error === 404) {
+            this.setState({
+                machine_progress: {
+                    in_progress: false,
+                },
+                defence: {
+                    display: {
+                        buttons: {
+                            create_enabled: true,
+                            start_enabled: false,
+                            stop_enabled: false,
+                            remove_enabled: false,
                         },
-                        messagebox_text: data.message
+                        messagebox: false,
+                        check_button: false,
+                        check_results: false
                     },
-                    defence_starting: false
-                })
-            } else {
-                this.setState({
-                    defence: {
-                        display: {
-                            buttons: {
-                                start_disabled: false,
-                                stop_visible: false
-                            },
-                            messagebox: false,
-                            check_button: false,
-                            check_results: false
-                        },
-                        messagebox_text: "No message"
-                    }
-                })
-            }
+                    messagebox_text: "",
+                }
+            })
+            return
         }
 
-        if (this.state.defence_testing) {
-            data = await this.request("task/defence/test/checks")
 
-            if (data.checks)
-                this.setState({
-                    checks: data.checks
-                })
-            else
-                this.setState({
-                    defence_testing: false
-                })
+        if (data.status === "starting") {
+            this.setState({
+                machine_progress: {
+                    in_progress: true,
+                    process_label: "Запускаю"
+                }
+            })
+            return
+        }
 
-            if (data.finished_checks)
-                this.setState({
-                    defence_testing: false
-                })                
+        if (data.status === "removing") {
+            this.setState({
+                machine_progress: {
+                    in_progress: true,
+                    process_label: "Удаляю"
+                }
+            })
+            return
+        }
+
+        if (data.status === "turning_off") {
+            this.setState({
+                machine_progress: {
+                    in_progress: true,
+                    process_label: "Выключаю"
+                }
+            })
+            return
+        }
+
+        if (data.status === "off") {
+            this.setState({
+                machine_progress: {
+                    in_progress: false,
+                    process_label: ""
+                }
+            })
+
+
+            this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                            create_enabled: false,
+                            start_enabled: true,
+                            stop_enabled: false,
+                            remove_enabled: true,
+                        },
+                        messagebox: true,
+                        check_button: false,
+                        check_results: false
+                    },
+                    messagebox_text: ""
+                },
+                
+            })
+        }
+
+        if (data.status === "on") {
+            this.setState({
+                machine_progress: {
+                    in_progress: false,
+                    process_label: ""
+                }
+            })
+
+            this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                            create_enabled: false,
+                            start_enabled: false,
+                            stop_enabled: true,
+                            remove_enabled: true,
+                        },
+                        messagebox: true,
+                        check_button: true,
+                        check_results: true
+                    },
+                    messagebox_text: data.message
+                },
+                
+            })
+    
+            if (this.state.defence_testing) {
+                data = await this.request("task/defence/test/checks")
+    
+                if (data.checks) {
+                    this.setState({
+                        checks: data.checks
+                    })
+                } else {
+                    this.setState({
+                        defence_testing: false
+                    })
+                }
+    
+                if (data.finished_checks) {
+                    this.setState({
+                        defence_testing: false
+                    })
+                }
+            }
         }
     }
 
@@ -205,15 +281,37 @@ class Task extends React.Component {
 
             let exp_code = document.getElementById("exploit_code").value
 
-            let data = await this.request("task/exploit/upload", {code: exp_code})
+            let data = await this.request("task/exploit/upload", {exploit_text: exp_code})
+        }
+    }
+
+    async create_box() {
+        if (this.state.defence.display.buttons.create_enabled) {
+            this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                            create_enabled: false
+                        }
+                    }
+                }
+            })
+            let data = await this.request("task/defence/box/create")
+
+            await this.update_task(); // ?
         }
     }
 
     async start_box() {
-        if (!this.state.defence.display.buttons.start_disabled) {
+        if (this.state.defence.display.buttons.start_enabled) {
             this.setState({
-                defence_starting: true,
-                checks: []
+                defence: {
+                    display: {
+                        buttons: {
+                            start_enabled: false
+                        }
+                    }
+                }
             })
             let data = await this.request("task/defence/box/start")
 
@@ -222,15 +320,41 @@ class Task extends React.Component {
     }
 
     async stop_box() {
-        if (this.state.defence.display.buttons.stop_visible) {
+        if (this.state.defence.display.buttons.stop_enabled) {
+            this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                            stop_enabled: false
+                        }
+                    }
+                }
+            })
             let data = await this.request("task/defence/box/stop")
+
+            await this.update_task(); // ?
+        }
+    }
+    
+    async remove_box() {
+        if (this.state.defence.display.buttons.remove_enabled) {
+            this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                            remove_enabled: false
+                        }
+                    }
+                }
+            })
+            let data = await this.request("task/defence/box/remove")
 
             await this.update_task(); // ?
         }
     }
 
     async defence_test() {
-        if (this.state.defence.display.buttons.start_disabled && !this.state.defence_testing) {
+        if (this.state.defence.display.buttons.start_enabled && !this.state.defence_testing) {
             this.setState({
                 defence_testing: true
             })
@@ -312,16 +436,26 @@ class Task extends React.Component {
                     </p>
                     {this.state.defence_unlocked &&
                         <div>
-                            <button onClick={this.start_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_disabled ? "bg-gray-300" : "bg-red-500")}>
-                                Запустить виртуалку
+                            <button onClick={this.create_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500": "bg-gray-300")}>
+                                Создать виртуалку
+                            </button>
+                            <button onClick={this.start_box.bind(this)}
+                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_enabled ? "bg-green-400" : "bg-gray-300")}>
+                                Включить
                             </button>
                             <button onClick={this.stop_box.bind(this)}
-                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.stop_visible ? "bg-red-400" : "bg-gray-300")}>
+                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400" : "bg-gray-300")}>
+                                Выключить
+                            </button>
+                            <button onClick={this.remove_box.bind(this)}
+                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.remove_enabled ? "bg-black" : "bg-gray-300")}>
                                 Удалить виртуалку
                             </button>
-                            {this.state.defence_starting &&
+
+
+                            {this.state.machine_progress.in_progress &&
                             <div className="text-2xl mb-2 font-semibold">
-                                <Wait text="Запускаю"/>
+                                <Wait text={this.state.machine_progress.process_label}/>
                             </div>
                             }
                             {this.state.defence.display.messagebox &&
@@ -334,7 +468,7 @@ class Task extends React.Component {
                             <p className="block text-xl font-semibold mb-2">
                                 Пофиксите и нажмите на эту кнопку
                             </p>
-                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.start_disabled && !this.state.defence_testing ? "bg-blue-500" : "bg-gray-300")}>
+                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.start_enabled && !this.state.defence_testing ? "bg-blue-500" : "bg-gray-300")}>
                                 Протестировать
                             </button>
 
@@ -358,4 +492,9 @@ class Task extends React.Component {
     }
 }
 
-export default withRouter(Task);
+export default (props) => (
+    <Task
+        {...props}
+        params={useParams()}
+/>)
+// export default withRouter Task;

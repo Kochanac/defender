@@ -1,6 +1,6 @@
 import React from "react";
 
-import { HOST } from "../index.js";
+import { call, get } from "../api/api.js";
 
 class TaskList extends React.Component {
     componentDidMount() {
@@ -8,20 +8,9 @@ class TaskList extends React.Component {
     }
 
     async load_tasks() {
-        let request = {
-            token: localStorage.getItem("token")
-        }
+        let data = await call("tasks", {}, localStorage.getItem("token"))
 
-        let data = await fetch(HOST+"tasks", {
-            method: "POST",
-            body: JSON.stringify(request)
-        })
-
-        data = await data.json()
-
-        console.log(data)
-
-        this.setState({tasks: data["tasks"]})
+        this.setState({tasks: data})
     }
 
     constructor(props) {
@@ -45,7 +34,7 @@ class TaskList extends React.Component {
                 </div>
                 <div id="tasks" className="flex flex-col gap-4">
                     {this.state.tasks.map(task => (
-                        <Task title={task.title} attack={task.exploit} defence={task.defence} id={task.id}/>
+                        <Task title={task.title} attack={task.exploit} defence={task.defence} id={task.id} key={task.id}/>
                     ))}
                 </div>
             </div>
@@ -60,16 +49,18 @@ function Task(props) {
                 <h3 className="flex-none font-semibold">
                     {props.title}
                 </h3>
-                {/*<div className="flex flex-col pl-3">*/}
-                {/*    <div className="flex-grow"> </div>*/}
-                {/*    <div className="flex-grow-0 rounded-full h-3 w-3 bg-red-500"> </div>*/}
-                {/*    <div className="flex-grow"> </div>*/}
-                {/*</div>*/}
+                
+                {/* <div className="flex flex-col pl-3"> */}
+                   {/* <div className="flex-grow"> </div> */}
+                   {/* <div className="flex-grow-0 rounded-full h-3 w-3 bg-red-500"> </div> */}
+                   {/* <div className="flex-grow"> </div> */}
+                {/* </div> */}
+
                 <div className="flex-grow"/>
                 <div className="flex flex-col">
                     <div className="flex-grow"> </div>
 
-                    <div className="flex text-xl" style={{"font-size": "0.97rem", "line-height": "0.97rem"}}>
+                    <div className="flex text-xl" style={{"fontSize": "0.97rem", "lineHeight": "0.97rem"}}>
                         <div className={(props.attack ? "bg-green-200 border-green-200" : "") + " bg-white p-2 rounded border border-opacity-10 border-black p-1 mr-5"} >⚔️</div>
                         <div className={(props.defence ? "bg-green-200 border-green-200" : "") + " bg-white p-2 rounded border border-opacity-10 border-black p-1"} >🛡</div>
                     </div>

@@ -19,10 +19,22 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from pydantic import BaseModel
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 async def get_user_id(token: Annotated[str, Depends(oauth2_scheme)]) -> int:
 	user_id = redis.get_user_auth(token)
@@ -77,7 +89,7 @@ async def _token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 	return {"access_token": token, "token_type": "bearer"}
 
 
-@app.get("/tasks")
+@app.post("/tasks")
 async def _tasks(user_id: Annotated[int, Depends(get_user_id)]):
 	return db.get_tasks(user_id)
 
@@ -97,6 +109,7 @@ async def _get_task(t: GetTaskModel):
 		"service_demo": ti.service_demo,
 		"title": ti.title,
 		"download_url": ti.download_url,
+		"exploit_code": "import requests"
 	}
 
 
@@ -145,7 +158,7 @@ class BoxStatus(BaseModel):
 
 
 @app.post("/task/defence/box/status")
-async def _box_status(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
+async def _box_status(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]) -> BoxStatus:
 	m = machine.get_first_defence_machine(user_id, t.task_id)
 	if m is None:
 		raise HTTPException(status_code=404, detail="No machine found")

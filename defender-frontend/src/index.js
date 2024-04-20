@@ -1,39 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import "./index.css"
 import reportWebVitals from './reportWebVitals';
 
 import {
     BrowserRouter as Router,
-    Switch,
-    Route
+    Route,
+    Routes
 } from "react-router-dom";
 
 import Login from './pages/login';
 import Task from "./pages/task";
 import TaskList from "./pages/tasklist";
 
-export const HOST = "/api/"
+export const HOST = "http://127.0.0.1:8000/"
 
 ReactDOM.render(
   <React.StrictMode>
       <div className="App flex justify-center p-20">
           <div className="w-1/2 rounded px-8 pt-6 pb-8">
               <Router>
-                  <Switch>
-                      <Route path="/task/:id">
-                          <Task />
+                  <Routes>
+                      <Route path="/task/:id" element=<Task />>
+                          
                       </Route>
-                      <Route exact path="/tasks">
-                          <TaskList />
+                      <Route exact path="/tasks" element=<TaskList />>
+                          
                       </Route>
-                      <Route exact path="/">
-                          <Login />
+                      <Route exact path="/" element=<Login />>
+                          
                       </Route>
                       <Route exact path="/users">
                           {/*<Users />*/}
                       </Route>
-                  </Switch>
+                  </Routes>
               </Router>
           </div>
       </div>

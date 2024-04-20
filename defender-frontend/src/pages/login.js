@@ -1,18 +1,16 @@
 import React from "react";
-import { HOST } from "../index.js"
+import { call } from "../api/api"
 
 async function RegUser() {
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
-    let data = await fetch(HOST + "register", {
-        method: "POST",
-        body: JSON.stringify({
+    let data = await call("register", {
             username: username,
             password: password
-        })
-    })
-    data = await data.json()
+        }
+    )
+
     console.log(data);
     if (data["status"] === "ok")
         document.getElementById("title").innerText = "Registered."
@@ -24,14 +22,12 @@ async function LogUser() {
     let username = document.getElementById("username").value
     let password = document.getElementById("password").value
 
-    let data = await fetch(HOST + "login", {
-        method: "POST",
-        body: JSON.stringify({
+    let data = await call("login", {
             username: username,
             password: password
-        })
-    })
-    data = await data.json();
+        }
+    )
+
     if (data["status"] === "ok") {
         localStorage.setItem("username", username)
         localStorage.setItem("token", data["token"])
@@ -45,7 +41,7 @@ function Login() {
         <form class="">
             <div class="mb-9">
                 <h1 id="title" class="text-5xl">
-                    Defence 0.1.1
+                    Defender 0.2
                 </h1>
             </div>
             <div class="mb-4">
@@ -75,12 +71,12 @@ function Login() {
             </div>
             <div class="flex items-start justify-start">
                 <button onClick={RegUser}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-red-500 hover:bg-red-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="button">
                     Зарегистрироваться
                 </button>
                 <button onClick={LogUser}
-                    className="ml-2 bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="button">
                     Залогиниться
                 </button>
