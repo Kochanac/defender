@@ -389,7 +389,7 @@ func (l *Libvirt) Remove(ctx context.Context, name string) error {
 	}
 
 	err = dom.Destroy()
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "Requested operation is not valid: domain is not running") {
 		return fmt.Errorf("destroy: %w", err)
 	}
 
