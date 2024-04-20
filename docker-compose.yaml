@@ -64,6 +64,7 @@ services:
 
         volumes:
             - ./data/exploits:/exploits
+            - ./checkers:/checkers
         
         environment:
             - CELERY_BROKER=redis://redis
