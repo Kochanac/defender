@@ -141,7 +141,7 @@ def get_first_defence_checker_run(conn, user_id: int, task_id: int) -> int | Non
 
     run_id = cur.fetchone()
     if run_id is None:
-        return None   
+        return None
         
     return int(run_id[0])
 

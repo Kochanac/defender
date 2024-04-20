@@ -75,14 +75,19 @@ def simple_checker(r, self, simple_checker_run_id: int):
 	print(f"{checker=}")
 
 	proc = subprocess.Popen([checker.checker_url, hostname], stdout=subprocess.PIPE)
-	proc.wait()
+	
 
 	allgreen = True
 
-	for line in proc.stdout.readlines():
+	while True:
+		line = proc.stdout.readline()
+		if not line:
+			break
+
 		print(f"{line = }")
 		if len(line) < 2:
 			continue
+		
 		if line[0:1] != b"G":
 			allgreen = False
 		
@@ -93,6 +98,8 @@ def simple_checker(r, self, simple_checker_run_id: int):
 				passed=line[0:1] == b"G"
 			)
 		)
+	
+	proc.wait()
 
 	if allgreen:
 		print("ok")

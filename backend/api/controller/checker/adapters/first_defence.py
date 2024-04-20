@@ -25,4 +25,7 @@ def check_start(user_id: int, task_id: int):
 def check_result(task_id: int, user_id: int) -> tuple[m_checker.CheckStatus | None, m_checker.CheckerResults | None]:
     run_id = db_checks.get_first_defence_checker_run(user_id, task_id)
 
+    if run_id is None:
+        return None, None
+
     return simple_checker.check_result(m_checker.CheckerRun(run_id=run_id))

@@ -190,7 +190,7 @@ async def _box_remove(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_
 
 @app.post("/task/defence/test/start")
 async def _first_defence_check(t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]):
-	first_defence_checker.check_start(t.task_id, user_id)
+	first_defence_checker.check_start(user_id, t.task_id)
 
 class FirstDefenceStatus(BaseModel):
 	results: m_checker.CheckerResults | None

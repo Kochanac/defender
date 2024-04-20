@@ -21,7 +21,7 @@ export async function call(handler, data, auth=null) {
     })
 
     // console.log(resp);
-    if (resp.status == 404) {
+    if (resp.status === 404) {
         return {"error": 404}
     }
 

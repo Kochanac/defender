@@ -34,7 +34,6 @@ class Task extends React.Component {
                     },
                     messagebox: false,
                     check_button: false,
-                    check_results: false
                 },
 
                 messagebox_text: "test\ntest2\ntest3"
@@ -158,7 +157,6 @@ class Task extends React.Component {
                         },
                         messagebox: false,
                         check_button: false,
-                        check_results: false
                     },
                     messagebox_text: "",
                 }
@@ -169,6 +167,12 @@ class Task extends React.Component {
 
         if (data.status === "starting") {
             this.setState({
+                defence: {
+                    display: {
+                        buttons: {
+                        }
+                    }
+                },
                 machine_progress: {
                     in_progress: true,
                     process_label: "Запускаю"
@@ -217,7 +221,6 @@ class Task extends React.Component {
                         },
                         messagebox: true,
                         check_button: false,
-                        check_results: false
                     },
                     messagebox_text: ""
                 },
@@ -244,7 +247,6 @@ class Task extends React.Component {
                         },
                         messagebox: true,
                         check_button: true,
-                        check_results: true
                     },
                     messagebox_text: data.message
                 },
@@ -253,20 +255,22 @@ class Task extends React.Component {
     
             if (this.state.defence_testing) {
                 data = await this.request("task/defence/test/checks")
-    
-                if (data.checks) {
+
+                if (data.status === "in progress") {
                     this.setState({
-                        checks: data.checks
+                        defence_testing: true
                     })
-                } else {
+                }
+
+                if (data.status === "checked") {
                     this.setState({
                         defence_testing: false
                     })
                 }
-    
-                if (data.finished_checks) {
+                console.log("asd", data)
+                if (data.results != null) {
                     this.setState({
-                        defence_testing: false
+                        checks: data.results.results
                     })
                 }
             }
@@ -354,7 +358,7 @@ class Task extends React.Component {
     }
 
     async defence_test() {
-        if (this.state.defence.display.buttons.start_enabled && !this.state.defence_testing) {
+        if (this.state.defence.display.check_button) {
             this.setState({
                 defence_testing: true
             })
@@ -458,6 +462,7 @@ class Task extends React.Component {
                                 <Wait text={this.state.machine_progress.process_label}/>
                             </div>
                             }
+
                             {this.state.defence.display.messagebox &&
                                 <p className="block text-xl font-mono mb-2">
                                     { this.state.defence.messagebox_text.split("\n").map(line => (
@@ -468,14 +473,19 @@ class Task extends React.Component {
                             <p className="block text-xl font-semibold mb-2">
                                 Пофиксите и нажмите на эту кнопку
                             </p>
-                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.start_enabled && !this.state.defence_testing ? "bg-blue-500" : "bg-gray-300")}>
+                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-blue-500" : "bg-gray-300")}>
                                 Протестировать
                             </button>
 
-                            {this.state.defence.display.check_results &&
+                            {this.state.defence_testing &&
+                            <div className="text-2xl mb-2 font-semibold">
+                                <Wait text="Проверяем"/>
+                            </div>}
+                            
+                            {this.state.checks != null &&
                                 <div id="checks" className="flex justify-start flex-wrap">
                                     {this.state.checks.map(check => (
-                                        <h3 className={"p-3 rounded-md mr-2 mb-2 " + (this.check_colors[check.color])}>{check.text}</h3>
+                                        <h3 className={"p-3 rounded-md mr-2 mb-2 " + (check.passed ? this.check_colors["green"] : this.check_colors["red"])}>{check.comment}</h3>
                                     ))}
                                 </div>
                             }

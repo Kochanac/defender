@@ -18,7 +18,7 @@ export const HOST = "http://127.0.0.1:8000/"
 ReactDOM.render(
   <React.StrictMode>
       <div className="App flex justify-center p-20">
-          <div className="w-1/2 rounded px-8 pt-6 pb-8">
+          <div className="w-full lg:w-1/2 rounded px-8 pt-6 pb-8 md:w-5/6 sm:w-full">
               <Router>
                   <Routes>
                       <Route path="/task/:id" element=<Task />>

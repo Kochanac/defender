@@ -39,16 +39,19 @@ def get_tasks(conn, uid) -> list[m_task.UserTask]:
 	cur = conn.cursor()
 
 	cur.execute("""
-		SELECT tasks.id, tasks.title, count(exploit_id) > 0, count(defences.id) > 0
+		SELECT tasks.id, tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0
 			FROM tasks
-			LEFT JOIN first_exploits ON first_exploits.task_id = tasks.id AND first_exploits.user_id=%(user_id)s
-			LEFT JOIN exploit_runs ON exploit_runs.exploit_id=first_exploits.id AND exploit_runs.result = 'OK'
-			LEFT JOIN defences ON defences.task_id = tasks.id AND defences.user_id=%(user_id)s
+
+			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
+			LEFT JOIN exploit_runs as er ON er.exploit_id=fe.id AND er.result = 'OK'
+
+			LEFT JOIN first_checker_run fcr ON fcr.task_id = tasks.id AND fcr.user_id=%(user_id)s
+			LEFT JOIN checker_run as cr ON fcr.run_id = cr.id AND cr.ok
+
 			GROUP BY tasks.id, tasks.title
 	   """, {"user_id": uid})
 
 	tasks = cur.fetchall()
-	print(tasks)
 
 	def task_convert(t) -> m_task.UserTask:
 		return m_task.UserTask(

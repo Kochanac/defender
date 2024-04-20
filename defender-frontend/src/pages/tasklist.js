@@ -10,6 +10,8 @@ class TaskList extends React.Component {
     async load_tasks() {
         let data = await call("tasks", {}, localStorage.getItem("token"))
 
+        console.log(data)
+
         this.setState({tasks: data})
     }
 
@@ -34,7 +36,7 @@ class TaskList extends React.Component {
                 </div>
                 <div id="tasks" className="flex flex-col gap-4">
                     {this.state.tasks.map(task => (
-                        <Task title={task.title} attack={task.exploit} defence={task.defence} id={task.id} key={task.id}/>
+                        <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id}/>
                     ))}
                 </div>
             </div>
@@ -61,8 +63,8 @@ function Task(props) {
                     <div className="flex-grow"> </div>
 
                     <div className="flex text-xl" style={{"fontSize": "0.97rem", "lineHeight": "0.97rem"}}>
-                        <div className={(props.attack ? "bg-green-200 border-green-200" : "") + " bg-white p-2 rounded border border-opacity-10 border-black p-1 mr-5"} >⚔️</div>
-                        <div className={(props.defence ? "bg-green-200 border-green-200" : "") + " bg-white p-2 rounded border border-opacity-10 border-black p-1"} >🛡</div>
+                        <div className={(props.attack ? "bg-green-200 border-green-200" : "bg-white") + " p-2 rounded border border-opacity-10 border-black p-1 mr-5"} >⚔️</div>
+                        <div className={(props.defence ? "bg-green-200 border-green-200" : "bg-white") + " p-2 rounded border border-opacity-10 border-black p-1"} >🛡</div>
                     </div>
 
                     <div className="flex-grow"> </div>

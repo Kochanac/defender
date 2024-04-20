@@ -372,11 +372,15 @@ func (l *Libvirt) Remove(ctx context.Context, name string) error {
 
 	net, err := l.conn.LookupNetworkByName(name)
 	if err != nil {
-		return fmt.Errorf("network lookup by name: %w", err)
+		if !strings.Contains(err.Error(), "Network not found: no network with matching name") {
+			return fmt.Errorf("network lookup by name: %w", err)
+		}
 	}
-	err = net.Destroy()
-	if err != nil {
-		return fmt.Errorf("network destroy: %w", err)
+	if net != nil {
+		err = net.Destroy()
+		if err != nil {
+			return fmt.Errorf("network destroy: %w", err)
+		}
 	}
 
 	desc, err := dom.GetXMLDesc(libvirt.DOMAIN_XML_MIGRATABLE)

@@ -79,6 +79,7 @@ def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine |
 	# 1) get first defence machine name
 
 	machine_name = gen_first_machine_name(user_id, task_id)
+	print(machine_name)
 	return get_machine(machine_name)
 
 
