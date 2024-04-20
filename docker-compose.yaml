@@ -36,8 +36,8 @@ services:
     redis:
         image: redis
         restart: always
-        ports:
-            - "6379:6379"
+        # ports:
+            # - "6379:6379"
         environment:
             - ALLOW_EMPTY_PASSWORD=yes
 
@@ -56,4 +56,21 @@ services:
             - PSQL_HOST=home.kochan.fun
             - PSQL_USER=postgres
             - PSQL_PASSWORD=password
+
+    celery:
+        build:
+            context: ./backend/
+            dockerfile: celery-dockerfile
+
+        volumes:
+            - ./data/exploits:/exploits
+        
+        environment:
+            - CELERY_BROKER=redis://redis
+            - CELERY_BACKEND=redis://redis
+            - REDIS_HOST=redis
+            - PSQL_HOST=home.kochan.fun
+            - PSQL_USER=postgres
+            - PSQL_PASSWORD=password
+
 
