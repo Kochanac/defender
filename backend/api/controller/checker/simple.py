@@ -31,7 +31,12 @@ def run_check(check: m_checker.CheckerRun):
 
 
 def check_result(checker_run: m_checker.CheckerRun) -> tuple[m_checker.CheckStatus | None, m_checker.CheckerResults | None]:
+    checker_result = db_checks.get_checker_run(checker_run.run_id)
+    
     task_id = redis.get_checker_run_celery_task(checker_run.run_id)
+    if task_id is None:
+        return None, checker_result
+
     celery_status = tasks.simple_checker.AsyncResult(task_id)
 
     status = None
@@ -41,7 +46,7 @@ def check_result(checker_run: m_checker.CheckerRun) -> tuple[m_checker.CheckStat
     elif celery_status.status == "SUCCESS":
         status = m_checker.CheckStatus.checked
 
-    checker_result = db_checks.get_checker_run(checker_run.run_id)
+    
 
     return (
         status, 
