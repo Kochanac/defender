@@ -50,13 +50,10 @@ services:
             - ./data/exploits:/exploits
         
         environment:
-            - PSQL_HOST=home.kochan.fun
-            - PSQL_USER=postgres
-            - PSQL_PASSWORD=password
-
-        environment:
             - CELERY_BROKER=redis://redis
             - CELERY_BACKEND=redis://redis
             - REDIS_HOST=redis
-            - PSQL_HOST=db
+            - PSQL_HOST=home.kochan.fun
+            - PSQL_USER=postgres
+            - PSQL_PASSWORD=password
 
