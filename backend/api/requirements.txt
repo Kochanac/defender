@@ -4,4 +4,5 @@ FastAPI
 psycopg2
 redis
 celery
-gunicorn
+uvicorn
+requests

@@ -1,18 +1,18 @@
 version: "3"
 
 services:
-    db:
-        image: postgres
-        restart: always
-        volumes:
-            - ./data/db:/var/lib/postgresql/data
-            - ./configs/init.sql:/docker-entrypoint-initdb.d/init.sql
-        environment:
-            - POSTGRES_DB=defender
-            - POSTGRES_USER=root
-            - POSTGRES_PASSWORD=XThwauCbMPcaTkByRGsu
-        ports:
-            - "5432:5432"
+    # db:
+    #     image: postgres
+    #     restart: always
+    #     volumes:
+    #         - ./data/db:/var/lib/postgresql/data
+    #         - ./configs/init.sql:/docker-entrypoint-initdb.d/init.sql
+    #     environment:
+    #         - POSTGRES_DB=defender
+    #         - POSTGRES_USER=root
+    #         - POSTGRES_PASSWORD=XThwauCbMPcaTkByRGsu
+    #     ports:
+    #         - "5432:5432"
 
     nginx:
         image: nginx
@@ -48,6 +48,11 @@ services:
 
         volumes:
             - ./data/exploits:/exploits
+        
+        environment:
+            - PSQL_HOST=home.kochan.fun
+            - PSQL_USER=postgres
+            - PSQL_PASSWORD=password
 
         environment:
             - CELERY_BROKER=redis://redis
