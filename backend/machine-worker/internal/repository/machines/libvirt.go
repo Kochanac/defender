@@ -106,16 +106,10 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
 					},
-					Target: &libvirtxml.DomainInterfaceTarget{
-						Dev: "eth0",
-					},
 				},
 				{
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
-					},
-					Target: &libvirtxml.DomainInterfaceTarget{
-						Dev: "eth10",
 					},
 				},
 			},
@@ -245,10 +239,12 @@ func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err e
 	err = l.Start(ctx, vmName)
 	if err != nil {
 		removeErr := l.Remove(ctx, vmName)
-		if err != nil {
+		if removeErr != nil {
 			slog.ErrorContext(ctx, "failed to remove after failing to start a domain: %s", removeErr)
+		} else {
+			slog.ErrorContext(ctx, "successfully removed domain after failing to start")
 		}
-		return "", err
+		return "", fmt.Errorf("start domain: %w", err)
 	}
 
 	return vmName, nil

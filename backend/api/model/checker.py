@@ -4,6 +4,7 @@ from typing import List
 
 from pydantic import BaseModel
 
+
 class CheckerResult(BaseModel):
 	passed: bool
 	comment: str
@@ -24,10 +25,14 @@ class Checker(BaseModel):
 	task_id: int
 	checker_url: str
 
+class CheckVariant(str, Enum):
+	health = "health" # Проверка того что сервис работает
+	vulns = "vulns" # Проверка организаторскими эксплоитами
 
 class SimpleCheckerRun(CheckerRun):
 	target_machine_name: str
 	checker_id: int
+	variant: CheckVariant
 
 
 def parse_checker_results(x: str | None, is_ok) -> CheckerResults:

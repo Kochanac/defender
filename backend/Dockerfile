@@ -5,7 +5,7 @@ WORKDIR /app
 COPY api/requirements.txt  api/requirements.txt
 RUN pip install -r api/requirements.txt
 
-COPY api api/
-COPY tasks tasks/
+COPY . .
 
-ENTRYPOINT celery -A tasks.tasks worker --loglevel=INFO
+
+

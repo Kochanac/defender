@@ -1,22 +1,14 @@
-import os, signal
-import shutil, sys
 import subprocess
 import time
-from os import environ, devnull
+from os import devnull, environ
 
-from psycopg2.extensions import connection
-from celery import Celery
-
-from api.misc import with_redis, with_connection
-
-import api.db.db as db
-import api.db.exploits as db_exploits
-import api.db.checks as db_checks
-
-import api.model.exploit_model as exploit_model
 import api.model.checker as m_checker
-
-import api.controller.machine as machine
+import api.model.exploit_model as exploit_model
+import api.repository.checker.db.checks as db_checks
+import api.repository.exploit.db.exploits as db_exploits
+import api.repository.machine.machine as machine
+from api.misc import with_redis
+from celery import Celery
 
 environ["CELERY_BROKER"] = environ.get("CELERY_BROKER", "redis://localhost")
 environ["CELERY_BACKEND"] = environ.get("CELERY_BACKEND", "redis://localhost")
@@ -74,7 +66,7 @@ def simple_checker(r, self, simple_checker_run_id: int):
 
 	print(f"{checker=}")
 
-	proc = subprocess.Popen([checker.checker_url, hostname], stdout=subprocess.PIPE)
+	proc = subprocess.Popen([checker.checker_url, 'check-vuln', hostname], stdout=subprocess.PIPE)
 	
 
 	allgreen = True

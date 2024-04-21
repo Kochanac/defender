@@ -1,22 +1,17 @@
-import json
-
-import api.model.task as m_task
-import api.model.machine as m_machine
 import api.model.checker as m_checker
-
-import api.db.checks as db_checks
-
+import api.model.machine as m_machine
+import api.model.task as m_task
+import api.redis as redis
+import api.repository.checker.db.checks as db_checks
 import tasks.tasks as tasks
 
-import api.redis as redis
 
-
-def create_check(task: m_task.TaskInfo, machine: m_machine.Machine) -> m_checker.CheckerRun:
+def create_check(task: m_task.TaskInfo, machine: m_machine.Machine, variant: m_checker.CheckVariant) -> m_checker.CheckerRun:
     checker = db_checks.get_checker_by_task(task.id)
     if checker is None:
         raise ValueError("No checker for this task")
 
-    checker_run_id = db_checks.create_simple_checker_run(checker.id, machine.name)
+    checker_run_id = db_checks.create_simple_checker_run(checker.id, machine.name, variant)
 
     return m_checker.CheckerRun(run_id=checker_run_id)
 

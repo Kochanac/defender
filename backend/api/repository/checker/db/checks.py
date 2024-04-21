@@ -1,13 +1,7 @@
-import json
-from subprocess import run
-
-from pydantic import with_config
-
-from api.misc import with_connection
 from enum import Enum
 
 import api.model.checker as m_checker
-
+from api.misc import with_connection
 
 # CHECK RUN
 
@@ -51,15 +45,15 @@ def get_checker_by_id(conn, checker_id: int) -> m_checker.Checker | None:
 
 
 @with_connection
-def create_simple_checker_run(conn, checker_id: int, target_machine_name: str) -> int:
+def create_simple_checker_run(conn, checker_id: int, target_machine_name: str, check_variant: m_checker.CheckVariant) -> int:
     cur = conn.cursor()
 
     cur.execute("INSERT INTO checker_run (check_type) VALUES (%s) RETURNING id", [CheckerType.simple, ])
     checker_run_id = cur.fetchone()
 
     cur.execute(
-        "INSERT INTO simple_checker_run (checker_run_id, target_machine_name, checker_id) VALUES (%s, %s, %s)",
-        [checker_run_id, target_machine_name, checker_id]
+        "INSERT INTO simple_checker_run (checker_run_id, target_machine_name, checker_id, check_variant) VALUES (%s, %s, %s, %s)",
+        [checker_run_id, target_machine_name, checker_id, check_variant]
     )
 
     return checker_run_id[0]
@@ -78,20 +72,31 @@ def get_checker_run(conn, checker_run: int) -> m_checker.CheckerResults | None:
         return m_checker.parse_checker_results(res[0], res[1])
 
 
+def to_check_variant(x: str) -> m_checker.CheckVariant:
+    if x == str(m_checker.CheckVariant.health):
+        return m_checker.CheckVariant.health
+
+    if x == str(m_checker.CheckVariant.vulns):
+        return m_checker.CheckVariant.vulns
+
+    raise ValueError("not a valid check variant")
+
+
 @with_connection
 def get_simple_checker_run(conn, checker_run: int) -> m_checker.SimpleCheckerRun | None:
     cur = conn.cursor()
 
-    cur.execute("SELECT target_machine_name, checker_id FROM simple_checker_run WHERE checker_run_id=%s", [checker_run, ])
+    cur.execute("SELECT target_machine_name, checker_id, check_variant FROM simple_checker_run WHERE checker_run_id=%s", [checker_run, ])
     res = cur.fetchone()
 
-    if res is None:
+    if res is None or res[2] is None:
         return None
     else:
         return m_checker.SimpleCheckerRun(
             checker_id=int(res[1]),
             run_id=checker_run,
-            target_machine_name=str(res[0])
+            target_machine_name=str(res[0]),
+            variant=to_check_variant(res[2])
         )
 
 @with_connection

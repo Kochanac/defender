@@ -3,6 +3,7 @@ import Wait from "./elements/wait";
 
 import { call } from "../api/api.js";
 import { useParams } from "react-router-dom";
+import { TaskDemo } from "./task_demo.js";
 
 class Task extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -23,7 +24,7 @@ class Task extends React.Component {
             },
             exploit_testing: false,
 
-	    defence_unlocked: false,
+            defence_unlocked: false,
             defence: {
                 display: {
                     buttons: {
@@ -60,7 +61,7 @@ class Task extends React.Component {
         "red": "bg-red-200"
     }
 
-    async request(url, data={}) {
+    async request(url, data = {}) {
         data.task_id = this.state.task_id
         // data.token = localStorage.getItem("token")
 
@@ -110,8 +111,8 @@ class Task extends React.Component {
 
         if (data["exploit_status"] === "checked") {
             this.setState({
-                    exploit_testing: false
-                }
+                exploit_testing: false
+            }
             )
         }
 
@@ -126,12 +127,12 @@ class Task extends React.Component {
                 flag: data.flag
             })
         }
-	
-    
+
+
         this.setState({
             defence_unlocked: data.defence_unlocked
-        })	
-    
+        })
+
 
         if (this.state.defence_unlocked) {
             this.update_defence_state()
@@ -224,7 +225,7 @@ class Task extends React.Component {
                     },
                     messagebox_text: ""
                 },
-                
+
             })
         }
 
@@ -250,9 +251,9 @@ class Task extends React.Component {
                     },
                     messagebox_text: data.message
                 },
-                
+
             })
-    
+
             if (this.state.defence_testing) {
                 data = await this.request("task/defence/test/checks")
 
@@ -285,7 +286,7 @@ class Task extends React.Component {
 
             let exp_code = document.getElementById("exploit_code").value
 
-            let data = await this.request("task/exploit/upload", {exploit_text: exp_code})
+            let data = await this.request("task/exploit/upload", { exploit_text: exp_code })
         }
     }
 
@@ -300,9 +301,7 @@ class Task extends React.Component {
                     }
                 }
             })
-            let data = await this.request("task/defence/box/create")
-
-            await this.update_task(); // ?
+            await this.request("task/defence/box/create")
         }
     }
 
@@ -317,9 +316,7 @@ class Task extends React.Component {
                     }
                 }
             })
-            let data = await this.request("task/defence/box/start")
-
-            await this.update_task(); // ?
+            await this.request("task/defence/box/start")
         }
     }
 
@@ -334,12 +331,10 @@ class Task extends React.Component {
                     }
                 }
             })
-            let data = await this.request("task/defence/box/stop")
-
-            await this.update_task(); // ?
+            await this.request("task/defence/box/stop")
         }
     }
-    
+
     async remove_box() {
         if (this.state.defence.display.buttons.remove_enabled) {
             this.setState({
@@ -351,9 +346,7 @@ class Task extends React.Component {
                     }
                 }
             })
-            let data = await this.request("task/defence/box/remove")
-
-            await this.update_task(); // ?
+            await this.request("task/defence/box/remove")
         }
     }
 
@@ -371,10 +364,10 @@ class Task extends React.Component {
         return (
             <div>
                 <div className="mb-9 flex">
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded" onClick={() => {window.location.href = "/tasks"}} >{this.state.title}</h1>
-                    <div className="flex-grow"/>
+                    <h1 className="text-5xl p-4 bg-gray-200 rounded" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
+                    <div className="flex-grow" />
                     <div className="flex flex-col">
-                        <div className="flex-grow"/>
+                        <div className="flex-grow" />
                         <h1 className="text-2xl text-gray-600 align-bottom">@{this.state.username}</h1>
                     </div>
                 </div>
@@ -384,29 +377,34 @@ class Task extends React.Component {
                         0. Дисклеймер
                     </p>
                     <p className="block text-xl font-semibold mb-2">
-			Пункты 1 и 2 пока что не работают. И сама система работает не очень стабильно. Просто прокликайте кнопку в пункте 2 и запускайте себе виртуалку, ваша цель: защититься от атак системы.
+                        Пункт 2 пока что не работает. Просто прокликайте кнопку в пункте 2 и запускайте себе виртуалку, ваша цель: защититься от атак системы.
                     </p>
                 </div>
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         1. Скачайте сервис
-                        <a href = {this.state.download_url}
-                            style={{background: "#d4578e"}}
+                        <a href={this.state.download_url}
+                            style={{ background: "#d4578e" }}
                             className="transform scale-105 duration-100 ml-3 font-bold
                                 text-white text-xl rounded-md py-2 px-3 leading-tight">
                             Скачать
                         </a>
+                    </p>
+                    <p className="block text-xl font-semibold mb-4">
+                        Прочитайте код и найдите уязимость, которая позволит узнать флаги
                     </p>
                 </div>
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         2. Напишите эксплойт [TODO]
                     </p>
-                    <p className="block text-xl font-semibold mb-2">
-                        Первым аргументом (в sys.argv) он принимает ссылку на сервис, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
+                    <p className="block text-xl font-semibold mb-4">
+                        Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
                     </p>
-                    <p className="block text-xl font-semibold mb-2">
-                        Демка сервиса (с флагами) доступна <a href={this.state.service_demo} className="text-blue-900 font-bold">здесь</a>
+                    <p className="block text-xl font-semibold mb-4 flex flex-row gap-4">
+                        <div className="self-center">Демка сервиса доступна здесь:</div>
+                        <TaskDemo task_id={this.state.task_id} />
+                        {/* Демка сервиса (с флагами) доступна <a href={this.state.service_demo} className="text-blue-900 font-bold">здесь</a> */}
                     </p>
                     <p className="block text-xl font-semibold mb-2">
                         Python, Requests предустановлены:
@@ -420,7 +418,7 @@ class Task extends React.Component {
 
                     {this.state.exploit.status === "in progress" &&
                         <div className="text-2xl font-semibold pt-1">
-                            <Wait text="Тестирую"/>
+                            <Wait text="Тестирую" />
                         </div>
                     }
 
@@ -440,7 +438,7 @@ class Task extends React.Component {
                     </p>
                     {this.state.defence_unlocked &&
                         <div>
-                            <button onClick={this.create_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500": "bg-gray-300")}>
+                            <button onClick={this.create_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500" : "bg-gray-300")}>
                                 Создать виртуалку
                             </button>
                             <button onClick={this.start_box.bind(this)}
@@ -458,16 +456,16 @@ class Task extends React.Component {
 
 
                             {this.state.machine_progress.in_progress &&
-                            <div className="text-2xl mb-2 font-semibold">
-                                <Wait text={this.state.machine_progress.process_label}/>
-                            </div>
+                                <div className="text-2xl mb-2 font-semibold">
+                                    <Wait text={this.state.machine_progress.process_label} />
+                                </div>
                             }
 
                             {this.state.defence.display.messagebox &&
                                 <p className="block text-xl font-mono mb-2">
-                                    { this.state.defence.messagebox_text.split("\n").map(line => (
-                                        <span>{line}<br/></span>
-                                    )) }
+                                    {this.state.defence.messagebox_text.split("\n").map(line => (
+                                        <span>{line}<br /></span>
+                                    ))}
                                 </p>
                             }
                             <p className="block text-xl font-semibold mb-2">
@@ -478,10 +476,10 @@ class Task extends React.Component {
                             </button>
 
                             {this.state.defence_testing &&
-                            <div className="text-2xl mb-2 font-semibold">
-                                <Wait text="Проверяем"/>
-                            </div>}
-                            
+                                <div className="text-2xl mb-2 font-semibold">
+                                    <Wait text="Проверяем" />
+                                </div>}
+
                             {this.state.checks != null &&
                                 <div id="checks" className="flex justify-start flex-wrap">
                                     {this.state.checks.map(check => (
@@ -506,5 +504,5 @@ export default (props) => (
     <Task
         {...props}
         params={useParams()}
-/>)
+    />)
 // export default withRouter Task;

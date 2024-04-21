@@ -1,16 +1,16 @@
-from pydantic import BaseModel
 import api.model.machine as m_machine
 import api.model.work as m_work
-import api.db.work as db_work
-import api.db.db as db
-import api.db.machine_assignment as db_machine_assignment
+import api.repository.machine.db.machine_assignment as db_machine_assignment
+import api.repository.machine.db.work as db_work
+import requests
+from pydantic import BaseModel
 
-import requests 
 
 class WorkerInfo(BaseModel):
 	ip: str
 	task_name: str
 	is_running: bool
+
 
 def get_worker_info(worker_hostname: str, machine_name: str) -> WorkerInfo | None:
 	try:
@@ -18,6 +18,7 @@ def get_worker_info(worker_hostname: str, machine_name: str) -> WorkerInfo | Non
 		return WorkerInfo.model_validate_json(res)
 	except Exception:
 		return None
+
 
 def convert_state(work: m_work.Work, work_result: bool | None, worker_info: WorkerInfo | None) -> m_machine.MachineState | None:
 	print(work, work_result, worker_info)
@@ -70,44 +71,23 @@ def get_machine(machine_name: str) -> m_machine.Machine | None:
 	return m_machine.Machine(name=machine_name, state=state, hostname=ip)
 
 
-# TODO то что ниже кажется может называться "Адаптером" и можно это вынести в другой файл
 
-def gen_first_machine_name(user_id: int, task_id: int) -> str:
-	return f"first_user_{user_id}_task_{task_id}"
-
-def get_first_defence_machine(user_id: int, task_id: int) -> m_machine.Machine | None:
-	# 1) get first defence machine name
-
-	machine_name = gen_first_machine_name(user_id, task_id)
-	print(machine_name)
-	return get_machine(machine_name)
-
-
-def create_first_defence_machine(user_id: int, task_id: int):
-	# insert info first_defences, work
-	machine_name = gen_first_machine_name(user_id, task_id)
-
-	task_info = db.get_task_info(task_id)
-	data = m_work.CreateWorkData(task_name=task_info.title, image=task_info.image_path).model_dump_json()
+def create_machine(machine_data: m_work.CreateWorkData, machine_name: str):
+	data = machine_data.model_dump_json()
 
 	db_work.start_work(db_work.StartWork(data=data, work_type=m_work.WorkType.create, machine_name=machine_name))
 
 
-def stop_first_defence_machine(user_id: int, task_id: int):
-	machine_name = gen_first_machine_name(user_id, task_id)
-
-	db_work.start_work(db_work.StartWork(data=None, work_type=m_work.WorkType.stop, machine_name=machine_name))
-
-
-def start_first_defence_machine(user_id: int, task_id: int):
-	machine_name = gen_first_machine_name(user_id, task_id)
-
+def start_machine(machine_name: str):
 	db_work.start_work(db_work.StartWork(data=None, work_type=m_work.WorkType.start, machine_name=machine_name))
 
-def remove_first_defence_machine(user_id: int, task_id: int):
-	machine_name = gen_first_machine_name(user_id, task_id)
+def stop_machine(machine_name: str):
+	db_work.start_work(db_work.StartWork(data=None, work_type=m_work.WorkType.stop, machine_name=machine_name))
 
+def delete_machine(machine_name: str):
 	db_work.start_work(db_work.StartWork(data=None, work_type=m_work.WorkType.remove, machine_name=machine_name))
 
 
+
+	
 
