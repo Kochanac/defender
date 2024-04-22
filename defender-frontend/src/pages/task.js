@@ -372,14 +372,14 @@ class Task extends React.Component {
                     </div>
                 </div>
 
-                <div className="mb-4">
+                {/* <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         0. Дисклеймер
                     </p>
                     <p className="block text-xl font-semibold mb-2">
                         Пункт 2 пока что не работает. Просто прокликайте кнопку в пункте 2 и запускайте себе виртуалку, ваша цель: защититься от атак системы.
                     </p>
-                </div>
+                </div> */}
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         1. Скачайте сервис
@@ -396,7 +396,7 @@ class Task extends React.Component {
                 </div>
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
-                        2. Напишите эксплойт [TODO]
+                        2. Напишите эксплойт
                     </p>
                     <p className="block text-xl font-semibold mb-4">
                         Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
@@ -416,7 +416,22 @@ class Task extends React.Component {
                         Отправить
                     </button>
 
-                    {this.state.exploit.status === "in progress" &&
+                    {this.state.exploit.status === "starting" &&
+                        <div className="text-2xl font-semibold pt-1">
+                            <Wait text="Создаю машину" />
+                        </div>
+                    }
+                    {this.state.exploit.status === "waiting for machine" &&
+                        <div className="text-2xl font-semibold pt-1">
+                            <Wait text="Запускаю сервис" />
+                        </div>
+                    }
+                    {this.state.exploit.status === "sending flags" &&
+                        <div className="text-2xl font-semibold pt-1">
+                            <Wait text="Отправляю флаги" />
+                        </div>
+                    }
+                    {this.state.exploit.status === "running" &&
                         <div className="text-2xl font-semibold pt-1">
                             <Wait text="Тестирую" />
                         </div>
@@ -434,7 +449,7 @@ class Task extends React.Component {
                     </p>
 
                     <p className="block text-xl font-semibold mb-2">
-                        После успешного эксплойта вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
+                        После успешного эксплойта, вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
                     </p>
                     {this.state.defence_unlocked &&
                         <div>

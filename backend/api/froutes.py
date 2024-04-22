@@ -108,8 +108,6 @@ async def _get_task(t: GetTaskModel) -> GetTaskResponse:
     ti = tasks.get_task_info(t.task_id)
     if ti is None:
         raise HTTPException(status_code=404, detail="No task found")
-    print(ti)
-    print(dir(ti))
     
     return GetTaskResponse(
         exploit_example=ti.exploit_example,
@@ -135,6 +133,7 @@ async def _task_state(
     first_exploit_status, first_exploit_result = first_exploit.get_first_exploit_status(
         user_id, t.task_id
     )
+    print(f"{first_exploit_status=} {first_exploit_result=}")
 
     task_status = db_tasks.get_task_progress(user_id, t.task_id)
     if task_status is None:
