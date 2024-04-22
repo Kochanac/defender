@@ -5,9 +5,10 @@ import api.watcher.exploit.exploit_watcher as exploit_watcher
 
 
 async def main():
-    async with asyncio.TaskGroup() as tg:
-        task1 = tg.create_task(demo_watcher.main())
-        task2 = tg.create_task(exploit_watcher.main())
+    await asyncio.gather(
+        demo_watcher.main(),
+        exploit_watcher.main()
+    )
 
 
 asyncio.run(main())

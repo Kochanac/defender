@@ -107,13 +107,7 @@ def get_checker_run(conn, checker_run: int) -> m_checker.CheckerResults | None:
 
 
 def to_check_variant(x: str) -> m_checker.CheckVariant:
-    if x == str(m_checker.CheckVariant.health):
-        return m_checker.CheckVariant.health
-
-    if x == str(m_checker.CheckVariant.vulns):
-        return m_checker.CheckVariant.vulns
-
-    raise ValueError("not a valid check variant")
+    return m_checker.CheckVariant(x)
 
 
 @with_connection
