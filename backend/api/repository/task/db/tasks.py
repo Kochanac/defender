@@ -68,7 +68,7 @@ def get_task_info(conn, id) -> m_task.TaskInfoRaw | None:
 			download_url=t[1],
 			service_demo=t[2],
 			image_path=t[3],
-			exploit_example="kek",
+			exploit_example="https://kochan.fun/f/exploit_example.py",
 			flag=t[4]
 		)
 		return ti

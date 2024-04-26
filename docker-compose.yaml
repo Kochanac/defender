@@ -64,7 +64,7 @@ services:
         entrypoint: python3 watchers.py
 
         volumes:
-            - ./data/exploits:/exploits
+            - /tmp/exploits/:/tmp/exploits/
 
         environment:
             - CELERY_BROKER=redis://redis
@@ -81,7 +81,6 @@ services:
         entrypoint: celery -A tasks.tasks worker --loglevel=INFO
 
         volumes:
-            - ./data/exploits:/exploits
             - ./checkers:/checkers
 
         environment:

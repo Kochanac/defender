@@ -24,6 +24,8 @@ celery.conf.update(
 
 
 def convert_args_and_variant(variant: m_checker.CheckVariant, flag: str | None, hostname: str, args: List[str] | None) -> List[str]:
+    print(variant)
+    
     if args is None:
         args = []
 

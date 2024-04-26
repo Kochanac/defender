@@ -99,7 +99,7 @@ async def ensure_all_tasks_have_demo_machines():
             m_machine.MachineState.removing,
             m_machine.MachineState.turning_off,
         ]:
-            logging.info("Machine is in progress, ignoring")
+            logging.info(f"Machine is in progress, ignoring. state {mach.state}")
             continue
 
         if mach.state == m_machine.MachineState.off:
