@@ -61,6 +61,22 @@ func isNotFound(err error) bool {
 func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, imageName string) (string, error) {
 	zp := uint(0)
 
+	interfaces := []libvirtxml.DomainInterface{
+		{
+			Source: &libvirtxml.DomainInterfaceSource{
+				Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
+			},
+		},
+	}
+
+	if l.c.AddNetwork(ctx) != "" {
+		interfaces = append(interfaces, libvirtxml.DomainInterface{
+			Source: &libvirtxml.DomainInterfaceSource{
+				Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
+			},
+		})
+	}
+
 	dom := &libvirtxml.Domain{
 		Type: "kvm",
 		Name: mod.VMName,
@@ -101,18 +117,7 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 					},
 				},
 			},
-			Interfaces: []libvirtxml.DomainInterface{
-				{
-					Source: &libvirtxml.DomainInterfaceSource{
-						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
-					},
-				},
-				{
-					Source: &libvirtxml.DomainInterfaceSource{
-						Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
-					},
-				},
-			},
+			Interfaces: interfaces,
 			Serials: []libvirtxml.DomainSerial{
 				{
 					Source: &libvirtxml.DomainChardevSource{
