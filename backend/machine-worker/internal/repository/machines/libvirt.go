@@ -162,6 +162,42 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 	return name, nil
 }
 
+func getNewIP(n4 iplib.Net4, addr net.IP) (net.IP, error) {
+	a, err := n4.NextIP(addr)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	a, err = n4.NextIP(a)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
+}
+
 func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, error) {
 	ip, subnet := l.c.Subnet(ctx)
 
@@ -170,7 +206,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, e
 	n4 := iplib.NewNet4(net.ParseIP(ip), int(subnet))
 
 	var err error
-	for addr := n4.FirstAddress(); !errors.Is(err, iplib.ErrAddressOutOfRange); addr, err = n4.NextIP(addr) {
+	for addr := n4.FirstAddress(); !errors.Is(err, iplib.ErrAddressOutOfRange); addr, err = getNewIP(n4, addr) {
 		maskSize := 30
 		machineNet := iplib.NewNet4(addr, maskSize)
 
@@ -211,6 +247,10 @@ func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, e
 			if strings.Contains(err.Error(), fmt.Sprintf("network '%s' already exists with uuid", networkDOM.Name)) {
 				return networkDOM.Name, nil // already made
 			}
+			if strings.Contains(err.Error(), "Address already in use") {
+				continue
+			}
+
 			return "", fmt.Errorf("create network domain: %w", err)
 		}
 
