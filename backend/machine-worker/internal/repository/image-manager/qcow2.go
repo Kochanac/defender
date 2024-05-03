@@ -49,7 +49,7 @@ func (Q *QCOW2Manager) MakeChildImage(ctx context.Context, baseImagePath string)
 	cmd := exec.Command("qemu-img", "create", "-f", "qcow2", "-F", "qcow2", "-b", baseImagePath, newImagePath)
 	err = cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("running qemu-img create -f qcow2 -b %s %s: %w", baseImagePath, newImagePath, err)
+		return "", fmt.Errorf("running qemu-img create -f qcow2 -F qcow2 -b %s %s: %w", baseImagePath, newImagePath, err)
 	}
 
 	return newImagePath, nil

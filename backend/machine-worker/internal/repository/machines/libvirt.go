@@ -213,7 +213,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 		Name: l.c.LibvirtNetworkName(ctx),
 		Forward: &libvirtxml.NetworkForward{
 			Mode: "nat",
-			Dev:  l.c.RoutedNetworkName(ctx),
+			// Dev:  l.c.RoutedNetworkName(ctx),
 		},
 		IPs: []libvirtxml.NetworkIP{
 			{
