@@ -2,7 +2,6 @@ package machines
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -17,9 +16,10 @@ import (
 )
 
 type Config struct {
-	Subnet            func(ctx context.Context) (string, uint8) // (10.2.N.0, 24) – N is important
-	RoutedNetworkName func(ctx context.Context) string
-	AddNetwork        func(ctx context.Context) string
+	Subnet             func(ctx context.Context) (string, uint8) // (10.2.N.0, 24) – N is important
+	LibvirtNetworkName func(ctx context.Context) string
+	RoutedNetworkName  func(ctx context.Context) string
+	AddNetwork         func(ctx context.Context) string
 }
 
 type Libvirt struct {
@@ -162,43 +162,45 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 	return name, nil
 }
 
-func getNewIP(n4 iplib.Net4, addr net.IP) (net.IP, error) {
-	a, err := n4.NextIP(addr)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	a, err = n4.NextIP(a)
-	if err != nil {
-		return nil, err
-	}
-	return a, nil
-}
+// func getNewIP(n4 iplib.Net4, addr net.IP) (net.IP, error) {
+// 	a, err := n4.NextIP(addr)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	a, err = n4.NextIP(a)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return a, nil
+// }
 
-func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, error) {
+// createNetwork Кайнда временное решение -- пытаемся создать дефолтную сеть каждый раз когда мы создаем тачку. Всегда будет создаваться одна и та же сеть -- единая сеть для тачек.
+// Необходимо отдельным воркером расхуячивать iptables так, чтобы можно было попасть в эту сеть, но чтобы тачк не могли ходить друг в друга
+func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, error) {
 	ip, subnet := l.c.Subnet(ctx)
 
 	log.Printf("ip %v subnet %v", ip, subnet)
@@ -206,63 +208,55 @@ func (l *Libvirt) createNetwork(ctx context.Context, mod CreateModel) (string, e
 	n4 := iplib.NewNet4(net.ParseIP(ip), int(subnet))
 
 	var err error
-	for addr := n4.FirstAddress(); !errors.Is(err, iplib.ErrAddressOutOfRange); addr, err = getNewIP(n4, addr) {
-		maskSize := 30
-		machineNet := iplib.NewNet4(addr, maskSize)
 
-		networkDOM := libvirtxml.Network{
-			Name: mod.VMName,
-			Forward: &libvirtxml.NetworkForward{
-				Mode: "route",
-				Dev:  l.c.RoutedNetworkName(ctx),
-			},
-			IPs: []libvirtxml.NetworkIP{
-				{
-					Address: addr.String(),
-					Prefix:  uint(maskSize),
-					DHCP: &libvirtxml.NetworkDHCP{
-						Ranges: []libvirtxml.NetworkDHCPRange{ // может поменять на статический.. наверное похуй
-							{
-								Start: machineNet.FirstAddress().String(),
-								End:   machineNet.LastAddress().String(),
-							},
+	networkDOM := libvirtxml.Network{
+		Name: l.c.LibvirtNetworkName(ctx),
+		Forward: &libvirtxml.NetworkForward{
+			Mode: "nat",
+			Dev:  l.c.RoutedNetworkName(ctx),
+		},
+		IPs: []libvirtxml.NetworkIP{
+			{
+				Address: ip,
+				Prefix:  uint(subnet),
+				DHCP: &libvirtxml.NetworkDHCP{
+					Ranges: []libvirtxml.NetworkDHCPRange{
+						{
+							Start: n4.FirstAddress().String(),
+							End:   n4.LastAddress().String(),
 						},
 					},
 				},
 			},
-		}
-
-		networkXML, err := networkDOM.Marshal()
-		if err != nil {
-			return "", fmt.Errorf("marshal network domain XML: %w", err)
-		}
-
-		//fmt.Println(networkXML)
-
-		net, err := l.conn.NetworkCreateXML(networkXML)
-		if err != nil {
-			if strings.Contains(err.Error(), "Network is already in use") {
-				continue
-			}
-			if strings.Contains(err.Error(), fmt.Sprintf("network '%s' already exists with uuid", networkDOM.Name)) {
-				return networkDOM.Name, nil // already made
-			}
-			if strings.Contains(err.Error(), "Address already in use") {
-				continue
-			}
-
-			return "", fmt.Errorf("create network domain: %w", err)
-		}
-
-		netUUID, err := net.GetName()
-		if err != nil {
-			return "", fmt.Errorf("network getUUID string: %w", err)
-		}
-
-		return netUUID, nil
+		},
 	}
 
-	return "", fmt.Errorf("not found a viable network")
+	networkXML, err := networkDOM.Marshal()
+	if err != nil {
+		return "", fmt.Errorf("marshal network domain XML: %w", err)
+	}
+
+	net, err := l.conn.NetworkCreateXML(networkXML)
+	if err != nil {
+		if strings.Contains(err.Error(), "Network is already in use") {
+			return "", fmt.Errorf("network already in use: %w", err)
+		}
+		if strings.Contains(err.Error(), fmt.Sprintf("network '%s' already exists with uuid", networkDOM.Name)) {
+			return networkDOM.Name, nil // already made
+		}
+		if strings.Contains(err.Error(), "Address already in use") {
+			return "", fmt.Errorf("address already in use: %w", err)
+		}
+
+		return "", fmt.Errorf("create network domain: %w", err)
+	}
+
+	netUUID, err := net.GetName()
+	if err != nil {
+		return "", fmt.Errorf("network getUUID string: %w", err)
+	}
+
+	return netUUID, nil
 }
 
 func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err error) {
@@ -271,12 +265,12 @@ func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err e
 		return "", fmt.Errorf("creating child image: %w", err)
 	}
 
-	net, err := l.createNetwork(ctx, mod)
+	_, err = l.createNetwork(ctx, mod)
 	if err != nil {
 		return "", err
 	}
 
-	vmName, err := l.createVM(ctx, mod, net, image)
+	vmName, err := l.createVM(ctx, mod, l.c.LibvirtNetworkName(ctx), image)
 	if err != nil {
 		return "", err
 	}

@@ -13,7 +13,7 @@ def get_tasks(conn, uid) -> list[m_task.UserTask]:
 			FROM tasks
 
 			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
-			LEFT JOIN exploit_runs as er ON er.exploit_id=fe.id AND er.result = 'OK'
+			LEFT JOIN exploit_runs as er ON er.run_id=fe.run_id AND er.result = 'OK'
 
 			LEFT JOIN first_checker_run fcr ON fcr.task_id = tasks.id AND fcr.user_id=%(user_id)s
 			LEFT JOIN checker_run as cr ON fcr.run_id = cr.id AND cr.ok
@@ -84,7 +84,7 @@ def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 			FROM tasks
 
 			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
-			LEFT JOIN exploit_runs as er ON er.exploit_id=fe.id AND er.result = 'OK'
+			LEFT JOIN exploit_runs as er ON er.run_id=fe.run_id AND er.result = 'OK'
 
 			LEFT JOIN first_checker_run fcr ON fcr.task_id = tasks.id AND fcr.user_id=%(user_id)s
 			LEFT JOIN checker_run as cr ON fcr.run_id = cr.id AND cr.ok

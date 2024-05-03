@@ -6,15 +6,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/c-robinson/iplib"
-	"github.com/knadh/koanf"
-	"github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/file"
 	"machine-worker/internal/provider/postgres"
 	machine_assignment "machine-worker/internal/repository/machine-assignment"
 	"machine-worker/internal/repository/machines"
 	"machine-worker/internal/repository/work"
 	"machine-worker/internal/worker"
+
+	"github.com/c-robinson/iplib"
+	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
 )
 
 const CONFIG_PATH = "/etc/defender-worker/config.yaml"
@@ -33,12 +34,13 @@ const (
 	PostgresConnString  = PostgresPrefix + "conn_string"
 	PostgresConnections = PostgresPrefix + "connections"
 
-	MachinesPrefix            = "machines."
-	MachinesDefaultCPU        = MachinesPrefix + "default_cpu"
-	MachinesDefaultMemory     = MachinesPrefix + "default_memory_mb"
-	MachinesSubnet            = MachinesPrefix + "subnet"
-	MachinesRoutedNetworkName = MachinesPrefix + "routed_network_name"
-	MachinesAddNetwork        = MachinesPrefix + "additional_network"
+	MachinesPrefix             = "machines."
+	MachinesDefaultCPU         = MachinesPrefix + "default_cpu"
+	MachinesDefaultMemory      = MachinesPrefix + "default_memory_mb"
+	MachinesSubnet             = MachinesPrefix + "subnet"
+	MachinesRoutedNetworkName  = MachinesPrefix + "routed_network_name"
+	MachinesAddNetwork         = MachinesPrefix + "additional_network"
+	MachinesLibvirtNetworkName = MachinesPrefix + "libvirt_network_name"
 
 	ImagesPrefix   = "images."
 	ImagesBasePath = ImagesPrefix + "base_path"
