@@ -139,6 +139,9 @@ func (c *Controller) GetMachinesConfig() *machines.Config {
 		AddNetwork: func(_ context.Context) string {
 			return c.k.String(MachinesAddNetwork)
 		},
+		LibvirtNetworkName: func(_ context.Context) string {
+			return c.k.String(MachinesLibvirtNetworkName)
+		},
 	}
 }
 
