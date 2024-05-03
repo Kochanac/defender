@@ -219,7 +219,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 		},
 		IPs: []libvirtxml.NetworkIP{
 			{
-				Address: ip,
+				Address: start.String(), // важно чтобы он был с 1
 				Prefix:  uint(subnet),
 				DHCP: &libvirtxml.NetworkDHCP{
 					Ranges: []libvirtxml.NetworkDHCPRange{
