@@ -38,8 +38,6 @@ const (
 	MachinesDefaultCPU         = MachinesPrefix + "default_cpu"
 	MachinesDefaultMemory      = MachinesPrefix + "default_memory_mb"
 	MachinesSubnet             = MachinesPrefix + "subnet"
-	MachinesRoutedNetworkName  = MachinesPrefix + "routed_network_name"
-	MachinesAddNetwork         = MachinesPrefix + "additional_network"
 	MachinesLibvirtNetworkName = MachinesPrefix + "libvirt_network_name"
 
 	ImagesPrefix   = "images."
@@ -132,12 +130,6 @@ func (c *Controller) GetMachinesConfig() *machines.Config {
 			}
 			ones, _ := n.Mask().Size()
 			return cidr.String(), uint8(ones)
-		},
-		RoutedNetworkName: func(_ context.Context) string {
-			return c.k.String(MachinesRoutedNetworkName)
-		},
-		AddNetwork: func(_ context.Context) string {
-			return c.k.String(MachinesAddNetwork)
 		},
 		LibvirtNetworkName: func(_ context.Context) string {
 			return c.k.String(MachinesLibvirtNetworkName)

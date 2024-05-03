@@ -18,8 +18,6 @@ import (
 type Config struct {
 	Subnet             func(ctx context.Context) (string, uint8) // (10.2.N.0, 24) – N is important
 	LibvirtNetworkName func(ctx context.Context) string
-	RoutedNetworkName  func(ctx context.Context) string
-	AddNetwork         func(ctx context.Context) string
 }
 
 type Libvirt struct {
@@ -67,14 +65,6 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 				Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: networkName},
 			},
 		},
-	}
-
-	if l.c.AddNetwork(ctx) != "" {
-		interfaces = append(interfaces, libvirtxml.DomainInterface{
-			Source: &libvirtxml.DomainInterfaceSource{
-				Network: &libvirtxml.DomainInterfaceSourceNetwork{Network: l.c.AddNetwork(ctx)},
-			},
-		})
 	}
 
 	dom := &libvirtxml.Domain{
@@ -162,42 +152,6 @@ func (l *Libvirt) createVM(ctx context.Context, mod CreateModel, networkName, im
 	return name, nil
 }
 
-// func getNewIP(n4 iplib.Net4, addr net.IP) (net.IP, error) {
-// 	a, err := n4.NextIP(addr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	a, err = n4.NextIP(a)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return a, nil
-// }
-
 // createNetwork Кайнда временное решение -- пытаемся создать дефолтную сеть каждый раз когда мы создаем тачку. Всегда будет создаваться одна и та же сеть -- единая сеть для тачек.
 // Необходимо отдельным воркером расхуячивать iptables так, чтобы можно было попасть в эту сеть, но чтобы тачк не могли ходить друг в друга
 func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, error) {
@@ -215,7 +169,6 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 		Name: l.c.LibvirtNetworkName(ctx),
 		Forward: &libvirtxml.NetworkForward{
 			Mode: "nat",
-			// Dev:  l.c.RoutedNetworkName(ctx),
 		},
 		IPs: []libvirtxml.NetworkIP{
 			{
