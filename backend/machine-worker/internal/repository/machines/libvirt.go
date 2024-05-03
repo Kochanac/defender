@@ -219,7 +219,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 		},
 		IPs: []libvirtxml.NetworkIP{
 			{
-				Address: start.String(), // важно чтобы он был с 1
+				Address: n4.FirstAddress().String(), // важно чтобы он был с 1. libvirt использует этот адрес как адрес default gateway
 				Prefix:  uint(subnet),
 				DHCP: &libvirtxml.NetworkDHCP{
 					Ranges: []libvirtxml.NetworkDHCPRange{
