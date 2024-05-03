@@ -1,7 +1,7 @@
 
 
-export const HOST = "http://localhost:8000/"
-// export const HOST = "http://home.kochan.fun:7777/api/"
+// export const HOST = "http://localhost:8000/"
+export const HOST = "/api/"
 
 
 

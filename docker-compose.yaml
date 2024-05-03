@@ -35,8 +35,8 @@ services:
     redis:
         image: redis
         restart: always
-        # ports:
-        # - "6379:6379"
+        ports:
+        - "6379:6379"
         environment:
             - ALLOW_EMPTY_PASSWORD=yes
 
@@ -45,7 +45,7 @@ services:
             context: ./backend/
 
         volumes:
-            - ./data/exploits:/exploits
+            - /tmp/exploits/:/exploits
 
         entrypoint: uvicorn --log-level debug --reload --host 0.0.0.0 --port 8000 api.froutes:app
 
@@ -57,22 +57,22 @@ services:
             - PSQL_USER=postgres
             - PSQL_PASSWORD=password
 
-    watchers:
-        build:
-            context: ./backend/
+    # watchers:
+    #     build:
+    #         context: ./backend/
 
-        entrypoint: python3 watchers.py
+    #     entrypoint: python3 watchers.py
 
-        volumes:
-            - /tmp/exploits/:/tmp/exploits/
+    #     volumes:
+    #         - /tmp/exploits/:/tmp/exploits/
 
-        environment:
-            - CELERY_BROKER=redis://redis
-            - CELERY_BACKEND=redis://redis
-            - REDIS_HOST=redis
-            - PSQL_HOST=home.kochan.fun
-            - PSQL_USER=postgres
-            - PSQL_PASSWORD=password
+    #     environment:
+    #         - CELERY_BROKER=redis://redis
+    #         - CELERY_BACKEND=redis://redis
+    #         - REDIS_HOST=redis
+    #         - PSQL_HOST=home.kochan.fun
+    #         - PSQL_USER=postgres
+    #         - PSQL_PASSWORD=password
 
     celery:
         build:
