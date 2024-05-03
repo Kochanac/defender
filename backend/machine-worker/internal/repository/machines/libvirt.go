@@ -209,6 +209,8 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 
 	var err error
 
+	start := iplib.NextIP(n4.FirstAddress())
+
 	networkDOM := libvirtxml.Network{
 		Name: l.c.LibvirtNetworkName(ctx),
 		Forward: &libvirtxml.NetworkForward{
@@ -222,7 +224,7 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 				DHCP: &libvirtxml.NetworkDHCP{
 					Ranges: []libvirtxml.NetworkDHCPRange{
 						{
-							Start: n4.FirstAddress().String(),
+							Start: start.String(),
 							End:   n4.LastAddress().String(),
 						},
 					},
