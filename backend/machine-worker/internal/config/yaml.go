@@ -74,15 +74,14 @@ func InitConfig() (*Controller, error) {
 
 func (c *Controller) setDefaults() error {
 	defaults := map[string]interface{}{
-		WorkerBatchLimit:          1,
-		WorkerTimeout:             1 * time.Minute,
-		WorkerDelayBetweenRuns:    10 * time.Second,
-		MachinesDefaultCPU:        1,
-		MachinesDefaultMemory:     1024,
-		ImagesBasePath:            "/var/lib/libvirt/images",
-		PostgresConnections:       1,
-		MachinesRoutedNetworkName: "eth0",
-		MachinesAddNetwork:        "default",
+		WorkerBatchLimit:           1,
+		WorkerTimeout:              1 * time.Minute,
+		WorkerDelayBetweenRuns:     10 * time.Second,
+		MachinesDefaultCPU:         1,
+		MachinesDefaultMemory:      1024,
+		ImagesBasePath:             "/var/lib/libvirt/images",
+		PostgresConnections:        1,
+		MachinesLibvirtNetworkName: "defence",
 	}
 
 	for key, val := range defaults {
