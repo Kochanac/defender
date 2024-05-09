@@ -48,7 +48,8 @@ class Task extends React.Component {
             checks: [
             ],
 
-            flag: "???"
+            flag: "???",
+            passed_to_rating: false
         }
     }
 
@@ -124,7 +125,8 @@ class Task extends React.Component {
 
         if (data.flag) {
             this.setState({
-                flag: data.flag
+                flag: data.flag,
+                passed_to_rating: true
             })
         }
 
@@ -363,8 +365,9 @@ class Task extends React.Component {
     render() {
         return (
             <div>
-                <div className="mb-9 flex">
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
+                <div className="mb-9 flex gap-4">
+                    <div className="text-5xl p-4 bg-gray-200 rounded" onClick={() => { window.location.href = "/tasks" }}> <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div></div>
+                    <h1 className="text-5xl p-4  rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
                     <div className="flex-grow" />
                     <div className="flex flex-col">
                         <div className="flex-grow" />
@@ -385,7 +388,7 @@ class Task extends React.Component {
                         1. Скачайте сервис
                         <a href={this.state.download_url}
                             style={{ background: "#d4578e" }}
-                            className="transform scale-105 duration-100 ml-3 font-bold
+                            className="hover:scale-105 duration-500 ml-3 font-bold inline-block
                                 text-white text-xl rounded-md py-2 px-3 leading-tight">
                             Скачать
                         </a>
@@ -404,7 +407,6 @@ class Task extends React.Component {
                     <p className="block text-xl font-semibold mb-4 flex flex-row gap-4">
                         <div className="self-center">Демка сервиса доступна здесь:</div>
                         <TaskDemo task_id={this.state.task_id} />
-                        {/* Демка сервиса (с флагами) доступна <a href={this.state.service_demo} className="text-blue-900 font-bold">здесь</a> */}
                     </p>
                     <p className="block text-xl font-semibold mb-2">
                         Python, Requests предустановлены:
@@ -412,7 +414,7 @@ class Task extends React.Component {
                     <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10">
 
                     </textarea>
-                    <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-blue-500")}>
+                    <button onClick={this.send_exploit.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-blue-500 hover:scale-105")}>
                         Отправить
                     </button>
 
@@ -453,19 +455,19 @@ class Task extends React.Component {
                     </p>
                     {this.state.defence_unlocked &&
                         <div>
-                            <button onClick={this.create_box.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500" : "bg-gray-300")}>
+                            <button onClick={this.create_box.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500 hover:scale-105" : "bg-gray-300")}>
                                 Создать виртуалку
                             </button>
                             <button onClick={this.start_box.bind(this)}
-                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_enabled ? "bg-green-400" : "bg-gray-300")}>
+                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_enabled ? "bg-green-400 hover:scale-105" : "bg-gray-300")}>
                                 Включить
                             </button>
                             <button onClick={this.stop_box.bind(this)}
-                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400" : "bg-gray-300")}>
+                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400 hover:scale-105" : "bg-gray-300")}>
                                 Выключить
                             </button>
                             <button onClick={this.remove_box.bind(this)}
-                                className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.remove_enabled ? "bg-black" : "bg-gray-300")}>
+                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.remove_enabled ? "bg-black hover:scale-105" : "bg-gray-300")}>
                                 Удалить виртуалку
                             </button>
 
@@ -486,7 +488,7 @@ class Task extends React.Component {
                             <p className="block text-xl font-semibold mb-2">
                                 Пофиксите и нажмите на эту кнопку
                             </p>
-                            <button onClick={this.defence_test.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-blue-500" : "bg-gray-300")}>
+                            <button onClick={this.defence_test.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-blue-500 hover:scale-105" : "bg-gray-300")}>
                                 Протестировать
                             </button>
 
@@ -510,6 +512,18 @@ class Task extends React.Component {
                         4. {this.state.flag}
                     </p>
                 </div>
+                <div className="mb-4">
+                    <p className="block text-3xl font-semibold mb-6">
+                        5. Учавствуйте в рейтинговой игре против других участников
+                    </p>
+
+                    {this.state.passed_to_rating &&
+                        <a href={"/scoreboard/" + this.state.task_id} className="duration-500 w-full p-4 bg-purple-500 text-white rounded-md appearance-none font-bold inline-block text-center hover:scale-105">
+                            Перейти в рейтинговую игру
+                        </a>
+                    }
+                </div>
+
             </div>
         );
     }
