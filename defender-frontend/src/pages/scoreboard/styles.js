@@ -70,8 +70,8 @@ function Styles() {
                         -45deg, 
                         transparent, 
                         transparent 1rem,
-                        #fff 1rem,
-                        #fff 2rem
+                        rgb(96 165 250) 1rem,
+                        rgb(96 165 250) 2rem
                     );
                 background-size: 200% 200%;
                 animation: barberpole 5s linear infinite;
@@ -85,6 +85,17 @@ function Styles() {
             
             .score {
                 min-width: 9rem;
+            }
+
+            .deactivated {
+                background: repeating-linear-gradient(
+                    45deg,
+                    rgba(0, 0, 0, 0.0),
+                    rgba(0, 0, 0, 0.0) 10px,
+                    rgba(0, 0, 0, 0.1) 10px,
+                    rgba(0, 0, 0, 0.1) 20px
+                  );
+                // background: black;
             }
             `}
         </style>

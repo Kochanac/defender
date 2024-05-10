@@ -91,7 +91,28 @@ class Attacks extends React.Component {
         return (
             <div>
                 <Styles />
-                <h1 className="text-5xl pb-6">Атаки</h1>
+
+
+                <div className="mb-9 flex gap-4">
+                    <div className="text-5xl p-4 bg-gray-200 rounded duration-200 hover:scale-110" onClick={() => { window.location.href = "/tasks" }}>
+                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
+                        Таски
+                    </div>
+                    <div className="text-5xl pt-4 pb-4">/</div>
+                    <h1 className="text-5xl p-4 bg-gray-200 rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
+
+                    <div className="text-5xl pt-4 pb-4">/</div>
+                    <h1 className="text-5xl p-4 bg-gray-200 rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >Атаки</h1>
+
+                    <div className="flex-grow" />
+                    <div className="flex flex-col">
+                        <div className="flex-grow" />
+                        <h1 className="text-2xl text-gray-600 align-bottom">@{this.state.username}</h1>
+                    </div>
+                </div>
+
+
+
                 <div id="tabs" className="pt-4">
                     <nav className="flex gap-4">
                         <a className="p-4 rounded-xl  bg-gray-300" href={"/scoreboard/" + (this.state.task_id)}>Рейтинг</a>
@@ -110,7 +131,7 @@ class Attacks extends React.Component {
                     <p className="block text-xl font-semibold mb-2">
                         Python, Requests предустановлены:
                     </p>
-                    <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10"/>
+                    <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10" />
 
                     <label class="block font-semibold mb-2" for="name">
                         Имя атаки (будет видно всем)
@@ -147,14 +168,17 @@ class Attacks extends React.Component {
                                 <td className="long text-2xl text-right"><span className="pr-5">#10</span></td>
                                 <td className="long"><span className="pr-3">2024, 5 May, 13:37</span></td>
                                 <td className="long whitespace-nowrap">
-                                    <span className="pr-3">обкуренный слон</span>
+                                    <span className="pr-3">обкуренный слон</span><br />
+                                    <button className="p-3 border-2 border-black text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap hover:scale-105 duration-200">
+                                        Деактивировать
+                                    </button>
                                 </td>
                                 <td className="long2 whitespace-nowrap">
                                     <div className="h-full flex p-1">
                                         <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
                                             <div className="align-middle text-center">
                                                 <span className=""><Wait text="Проверяется" /></span><br />
-                                                <span className="">⚔️ 2/4</span>
+                                                <span className="">⚔️ 3/4</span>
                                             </div>
                                         </div>
                                     </div>
@@ -170,7 +194,7 @@ class Attacks extends React.Component {
                                     </div>
                                 </td>
                                 <td>
-                                    <div className="aspect-square stripes bg-blue-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
+                                    <div className="aspect-square stripes bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
                                         <Wait text="Запускаю машину" />
                                     </div>
                                 </td>
@@ -184,7 +208,49 @@ class Attacks extends React.Component {
                                 <td className="long text-2xl text-right"><span className="pr-5">#9</span></td>
                                 <td className="long"><span className="pr-3">2024, 5 May, 2:28</span></td>
                                 <td className="long whitespace-nowrap">
-                                    <span className="pr-3">лось и смычок и лось и смычок и лось и смычок</span>
+                                    <span className="pr-3">лось и смычок и лось и смычок и лось и смычок</span><br />
+                                    <button className="p-3 border-2 border-black text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap hover:scale-105 duration-200">
+                                        Деактивировать
+                                    </button>
+                                </td>
+                                <td className="long2 whitespace-nowrap">
+                                    <div className="h-full flex p-1">
+                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
+                                            <div className="align-middle text-center">
+                                                <span className="">⚔️ 0/4</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square stripes bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
+                                        <Wait text="Запускаю машину" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr className="deactivated">
+                                <td className="long text-2xl text-right"><span className="pr-5">#8</span></td>
+                                <td className="long"><span className="pr-3">2024, 5 May, 1:111</span></td>
+                                <td className="long whitespace-nowrap">
+                                    <span className="pr-3">Привет</span><br />
+                                    <button className="p-3 bg-black text-white text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap">
+                                        Деактивирован
+                                    </button>
                                 </td>
                                 <td className="long2 whitespace-nowrap">
                                     <div className="h-full flex p-1">
@@ -193,6 +259,23 @@ class Attacks extends React.Component {
                                                 <span className="">⚔️ 1/4</span>
                                             </div>
                                         </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
+                                    </div>
+                                </td>
+                                <td>
+                                </td>
+                                <td>
+                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                        Не взлом
                                     </div>
                                 </td>
                             </tr>

@@ -51,10 +51,10 @@ class TaskDemo extends React.Component {
                 <div className="p-1 flex flex-row gap-2">
 
                 {this.state.status === "ok" &&
-                    <div class="mt-0.5 w-4 h-4 bg-green-500 rounded-full self-center"></div>
+                    <div class="mt-0.5 w-4 h-4 bg-green-500 rounded-full self-center aspect-square"></div>
                 }
                 {this.state.status === "fail" &&
-                    <div class="mt-0.5 w-4 h-4 bg-red-500 rounded-full self-center"></div>
+                    <div class="mt-0.5 w-4 h-4 bg-red-500 rounded-full self-center aspect-square"></div>
                 }
 
                 {this.state.status === "ok" &&
@@ -63,19 +63,6 @@ class TaskDemo extends React.Component {
                 {this.state.status === "fail" &&
                     <Wait text="Демка скоро поднимется" />
                 }
-                        {/* {(this.state.status === "ok") && (
-                            
-                                
-                                <div class="m-1 w-4 h-4 bg-red-500 rounded-full"></div> 
-                                
-                            </div>
-                        )}
-                        {this.state.status === "fail" &&
-                            <div className="p-2 flex flex-row">
-                                
-                                <div>FAIL</div>
-                            </div>
-                        } */}
                 </div>
             </div>
         )
