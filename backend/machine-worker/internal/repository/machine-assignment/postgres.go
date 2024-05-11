@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+var _ Repository = &Postgres{}
+
 type Config struct {
 	WorkerID       string
 	WorkerHostname string
@@ -24,7 +26,7 @@ func NewPostgres(pg *pgxpool.Pool, cfg *Config) *Postgres {
 	return &Postgres{pg: pg, cfg: cfg}
 }
 
-func (p *Postgres) AssignMachine(ctx context.Context, machineName string) error {
+func (p *Postgres) AssignMachine(ctx context.Context, machineName string, meta Metadata) error {
 	tx, err := p.pg.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
@@ -52,7 +54,7 @@ func (p *Postgres) AssignMachine(ctx context.Context, machineName string) error 
 		return nil
 	}
 
-	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id, worker_hostname) VALUES ($1, $2, $3)", p.cfg.WorkerID, machineName, p.cfg.WorkerHostname)
+	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id, worker_hostname, image_path) VALUES ($1, $2, $3)", p.cfg.WorkerID, machineName, p.cfg.WorkerHostname, meta.ImagePath)
 	if err != nil {
 		return fmt.Errorf("insert machine_assignment: %w", err)
 	}
@@ -72,4 +74,26 @@ func (p *Postgres) RemoveMachine(ctx context.Context, machineName string) error 
 	}
 
 	return nil
+}
+
+// GetMeta implements Repository.
+func (p *Postgres) GetMeta(ctx context.Context, machineName string) (meta Metadata, err error) {
+	row := p.pg.QueryRow(ctx, "SELECT worker_id, image_path FROM machine_assignment WHERE machine_id=$1", machineName)
+	var workerID, imagePath string
+	err = row.Scan(&workerID, &imagePath)
+	notFound := errors.Is(err, pgx.ErrNoRows)
+	if err != nil {
+		return Metadata{}, fmt.Errorf("query existing value: %w", err)
+	}
+	if notFound {
+		return Metadata{}, errors.New("not found")
+	}
+
+	if !notFound && workerID != p.cfg.WorkerID {
+		return Metadata{}, fmt.Errorf("worker of this machine does not match the real worker. %s != %s", workerID, p.cfg.WorkerID)
+	}
+
+	return Metadata{
+		ImagePath: imagePath,
+	}, nil
 }

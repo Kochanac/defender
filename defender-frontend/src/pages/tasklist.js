@@ -72,8 +72,8 @@ function Task(props) {
                 </div>
             </div>
             { props.attack && props.defence &&
-            <div className="bg-gray-100 gap-y-2 hover:scale-105 cursor-pointer transform ease-in-out duration-100 rounded-2xl p-4 pl-6 pr-6 flex flex-wrap text-2xl">
-                <h3 className="flex-none font-semibold" onClick={() => { window.location.href = "/scoreboard/" + props.id }}>
+            <div className="bg-gray-100 gap-y-2 hover:scale-105 cursor-pointer transform ease-in-out duration-100 rounded-2xl p-4 pl-6 pr-6 flex flex-wrap text-2xl" onClick={() => { window.location.href = "/scoreboard/" + props.id }}>
+                <h3 className="flex-none font-semibold">
                     Рейтинг
                 </h3>
             </div>

@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 
+	image_manager "machine-worker/internal/repository/image-manager"
 	machine_assignment "machine-worker/internal/repository/machine-assignment"
 	"machine-worker/internal/repository/machines"
 	"machine-worker/internal/repository/work"
@@ -26,10 +27,17 @@ type Worker struct {
 	mach              machines.Repository
 	work              work.Repository
 	machineAssignment machine_assignment.Repository
+	imageManager      image_manager.Repository
 }
 
-func NewWorker(cfg *Config, mach machines.Repository, work work.Repository, machineAssignment machine_assignment.Repository) *Worker {
-	return &Worker{cfg: cfg, mach: mach, work: work, machineAssignment: machineAssignment}
+func NewWorker(cfg *Config, mach machines.Repository, work work.Repository, machineAssignment machine_assignment.Repository, imageManager image_manager.Repository) *Worker {
+	return &Worker{
+		cfg:               cfg,
+		mach:              mach,
+		work:              work,
+		machineAssignment: machineAssignment,
+		imageManager:      imageManager,
+	}
 }
 
 func (w Worker) Work(ctx context.Context) error {
@@ -95,7 +103,7 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			TaskName:      cm.TaskName,
 			VMName:        wrk.MachineName,
 		}
-		name, err := w.mach.Create(ctx, createMod)
+		name, imagePath, err := w.mach.Create(ctx, createMod)
 		if err != nil {
 			return "", fmt.Errorf("create: %w", err)
 		}
@@ -103,7 +111,7 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			slog.Error("created name != requested machine name")
 		}
 
-		err = w.machineAssignment.AssignMachine(ctx, name)
+		err = w.machineAssignment.AssignMachine(ctx, name, machine_assignment.Metadata{ImagePath: imagePath})
 		if err != nil {
 			removeErr := w.mach.Remove(ctx, name)
 			if removeErr != nil {
@@ -142,6 +150,25 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			return "", err
 		}
 
+		return ResultOK, nil
+	case work.TypeUploadImage:
+		info, err := w.mach.GetInfo(ctx, wrk.MachineName)
+		if err != nil {
+			return "", err
+		}
+		if info.IsRunning {
+			return ResultErr, errors.New("machine should not be running")
+		}
+
+		meta, err := w.machineAssignment.GetMeta(ctx, wrk.MachineName)
+		if err != nil {
+			return "", err
+		}
+
+		err = w.imageManager.UploadImage(ctx, meta.ImagePath)
+		if err != nil {
+			return "", fmt.Errorf("upload: %w", err)
+		}
 		return ResultOK, nil
 	case work.TypeUnknown:
 		return "", fmt.Errorf("unknown work type")

@@ -214,20 +214,20 @@ func (l *Libvirt) createNetwork(ctx context.Context, _ CreateModel) (string, err
 	return netUUID, nil
 }
 
-func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err error) {
+func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, imageName string, err error) {
 	image, err := l.imageManager.MakeChildImage(ctx, mod.BaseImagePath)
 	if err != nil {
-		return "", fmt.Errorf("creating child image: %w", err)
+		return "", "", fmt.Errorf("creating child image: %w", err)
 	}
 
 	_, err = l.createNetwork(ctx, mod)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	vmName, err := l.createVM(ctx, mod, l.c.LibvirtNetworkName(ctx), image)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	err = l.Start(ctx, vmName)
@@ -238,10 +238,10 @@ func (l *Libvirt) Create(ctx context.Context, mod CreateModel) (id string, err e
 		} else {
 			slog.ErrorContext(ctx, "successfully removed domain after failing to start")
 		}
-		return "", fmt.Errorf("start domain: %w", err)
+		return "", "", fmt.Errorf("start domain: %w", err)
 	}
 
-	return vmName, nil
+	return vmName, image, nil
 }
 
 func (l *Libvirt) Start(ctx context.Context, name string) error {

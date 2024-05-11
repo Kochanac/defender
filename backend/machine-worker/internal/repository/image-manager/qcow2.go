@@ -7,19 +7,47 @@ import (
 	"os/exec"
 	"path"
 
+	objectstorage "machine-worker/internal/storage/object-storage"
 	"machine-worker/internal/util"
 )
 
+var _ Repository = &QCOW2Manager{}
+
 type QCOW2Manager struct {
 	basePath string
+
+	objStore objectstorage.Storage
 }
 
-func NewQCOW2Manager(basePath string) *QCOW2Manager {
-	return &QCOW2Manager{basePath: basePath}
+func NewQCOW2Manager(basePath string, objStore objectstorage.Storage) *QCOW2Manager {
+	return &QCOW2Manager{
+		basePath: basePath,
+		objStore: objStore,
+	}
 }
 
-func (Q *QCOW2Manager) EnsureImage(ctx context.Context, image string) (path string, err error) {
-	return image, nil
+func (Q *QCOW2Manager) EnsureImage(ctx context.Context, imagePath string) (path string, err error) {
+	_, err = os.Stat(imagePath)
+	if !os.IsNotExist(err) {
+		return imagePath, nil
+	}
+
+	err = Q.objStore.DownloadTo(ctx, imagePath, imagePath)
+	if err != nil {
+		return "", fmt.Errorf("obj store download: %w", err)
+	}
+
+	return imagePath, nil
+}
+
+// UploadImage implements Repository.
+func (Q *QCOW2Manager) UploadImage(ctx context.Context, image string) (err error) {
+	err = Q.objStore.UploadFrom(ctx, image, image)
+	if err != nil {
+		return fmt.Errorf("obj store upload: %w", err)
+	}
+
+	return nil
 }
 
 func generateChildrenPathName(baseImagePath string) string {

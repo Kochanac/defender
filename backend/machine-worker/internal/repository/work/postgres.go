@@ -34,6 +34,8 @@ func convertWorkType(t string) Type {
 		return TypeStartMachine
 	case "remove":
 		return TypeRemoveMachine
+	case "upload-image":
+		return TypeUploadImage
 	default:
 		return TypeUnknown
 	}

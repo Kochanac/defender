@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("failed to connect to libvirt: %s", err)
 	}
 
-	vm, err := mash.Create(ctx, machines.CreateModel{
+	vm, _, err := mash.Create(ctx, machines.CreateModel{
 		MemoryMB:      1000,
 		VCPU:          1,
 		BaseImagePath: "ssh.qcow2",

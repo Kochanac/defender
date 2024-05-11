@@ -26,7 +26,7 @@ var (
 )
 
 type Repository interface {
-	Create(ctx context.Context, mod CreateModel) (id string, err error)
+	Create(ctx context.Context, mod CreateModel) (id string, imageName string, err error)
 	Start(ctx context.Context, name string) error
 	GetInfo(ctx context.Context, name string) (Info, error)
 	Stop(ctx context.Context, name string) error

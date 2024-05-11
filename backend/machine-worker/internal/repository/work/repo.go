@@ -12,6 +12,7 @@ const (
 	TypeStopMachine
 	TypeStartMachine
 	TypeRemoveMachine
+	TypeUploadImage
 )
 
 type EventType int

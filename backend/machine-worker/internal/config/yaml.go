@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"time"
 
 	"machine-worker/internal/provider/postgres"
 	machine_assignment "machine-worker/internal/repository/machine-assignment"
 	"machine-worker/internal/repository/machines"
 	"machine-worker/internal/repository/work"
+	objectstorage "machine-worker/internal/storage/object-storage"
 	"machine-worker/internal/worker"
 
 	"github.com/c-robinson/iplib"
@@ -42,6 +44,9 @@ const (
 
 	ImagesPrefix   = "images."
 	ImagesBasePath = ImagesPrefix + "base_path"
+	ImagesS3Prefix = ImagesPrefix + "s3_prefix"
+
+	S3URL = "s3_url"
 )
 
 type Controller struct {
@@ -82,6 +87,7 @@ func (c *Controller) setDefaults() error {
 		ImagesBasePath:             "/var/lib/libvirt/images",
 		PostgresConnections:        1,
 		MachinesLibvirtNetworkName: "defence",
+		ImagesS3Prefix:             "images",
 	}
 
 	for key, val := range defaults {
@@ -163,4 +169,42 @@ func (c *Controller) GetPeriodic() (timeout time.Duration, delay time.Duration) 
 
 func (c *Controller) GetHostname() string {
 	return c.k.String(ApiAddress)
+}
+
+func (c *Controller) parseS3url() *url.URL {
+	urlStr := c.k.String(S3URL)
+
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		panic(fmt.Sprintf("s3 url parse: %s", err))
+	}
+
+	return u
+}
+
+func (c *Controller) GetS3ConnectInfo() (tokenID, tokenValue, endpoint string) {
+	u := c.parseS3url()
+
+	tokenID = u.User.Username()
+	tokenValue, isSet := u.User.Password()
+	if !isSet {
+		panic("s3 password is not set")
+	}
+
+	endpoint = u.Host
+
+	return tokenID, tokenValue, endpoint
+}
+
+func (c *Controller) GetS3StorageConfig() *objectstorage.Config {
+	u := c.parseS3url()
+
+	bucket := u.Path
+	if bucket[0] == '/' {
+		bucket = bucket[1:]
+	}
+
+	return &objectstorage.Config{
+		Bucket: bucket,
+	}
 }
