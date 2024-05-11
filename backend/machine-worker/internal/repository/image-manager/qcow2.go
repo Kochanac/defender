@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 
 	objectstorage "machine-worker/internal/storage/object-storage"
 	"machine-worker/internal/util"
@@ -59,6 +60,10 @@ func (Q *QCOW2Manager) CopyImage(ctx context.Context, image string, newName stri
 	}
 	defer from.Close()
 
+	err = os.MkdirAll(filepath.Dir(newName), 0644)
+	if err != nil {
+		return err
+	}
 	to, err := os.OpenFile(newName, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return fmt.Errorf("open file to write to: %w", err)
