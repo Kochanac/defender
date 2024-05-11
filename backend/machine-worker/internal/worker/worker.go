@@ -82,6 +82,10 @@ type CreateMachine struct {
 	Image    string `json:"image"`
 }
 
+type UploadMachine struct {
+	ImageName string `json:"image_name"`
+}
+
 var (
 	ResultOK  = "OK"
 	ResultErr = "ERROR"
@@ -158,6 +162,12 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 
 		return ResultOK, nil
 	case work.TypeUploadImage:
+		data := UploadMachine{}
+		err = json.Unmarshal([]byte(wrk.Data), &data)
+		if err != nil {
+			return "", fmt.Errorf("unmarshall: %w", err)
+		}
+
 		info, err := w.mach.GetInfo(ctx, wrk.MachineName)
 		if err != nil {
 			return "", err
@@ -171,7 +181,12 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 			return "", err
 		}
 
-		err = w.imageManager.UploadImage(ctx, meta.ImagePath)
+		err = w.imageManager.CopyImage(ctx, meta.ImagePath, data.ImageName)
+		if err != nil {
+			return "", fmt.Errorf("copy image: %w", err)
+		}
+
+		err = w.imageManager.UploadImage(ctx, data.ImageName)
 		if err != nil {
 			return "", fmt.Errorf("upload: %w", err)
 		}

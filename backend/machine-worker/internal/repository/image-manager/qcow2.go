@@ -3,6 +3,7 @@ package image_manager
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -45,6 +46,28 @@ func (Q *QCOW2Manager) UploadImage(ctx context.Context, image string) (err error
 	err = Q.objStore.UploadFrom(ctx, image, image)
 	if err != nil {
 		return fmt.Errorf("obj store upload: %w", err)
+	}
+
+	return nil
+}
+
+// UploadImage implements Repository.
+func (Q *QCOW2Manager) CopyImage(ctx context.Context, image string, newName string) (err error) {
+	from, err := os.OpenFile(image, os.O_RDONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("open file to read from: %w", err)
+	}
+	defer from.Close()
+
+	to, err := os.OpenFile(newName, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return fmt.Errorf("open file to write to: %w", err)
+	}
+	defer to.Close()
+
+	_, err = io.Copy(to, from)
+	if err != nil {
+		return fmt.Errorf("copy image: %w", err)
 	}
 
 	return nil
