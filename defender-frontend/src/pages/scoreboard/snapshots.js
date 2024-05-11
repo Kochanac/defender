@@ -134,6 +134,10 @@ class Snapshots extends React.Component {
                     <div className="text-2xl font-semibold pt-1">
                         <Wait text="Выключаю машину" />
                     </div>
+
+                    <div className="bg-red-200 rounded-md p-4 text-xl mt-4">
+                        ! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны
+                    </div>
                 </div>
                 <div className="pt-6">
                     <table className="table-auto overflow-auto">
