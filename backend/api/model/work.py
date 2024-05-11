@@ -1,12 +1,14 @@
+from enum import Enum
+
 from pydantic import BaseModel
 
-from enum import Enum
 
 class WorkType(str, Enum):
 	create = "create"
 	stop = "stop"
 	start = "start"
 	remove = "remove"
+	upload_image = "upload-image"
 
 class WorkEventStatus(str, Enum):
 	assigned = "ASSIGNED"

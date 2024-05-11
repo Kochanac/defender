@@ -54,7 +54,7 @@ func (p *Postgres) AssignMachine(ctx context.Context, machineName string, meta M
 		return nil
 	}
 
-	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id, worker_hostname, image_path) VALUES ($1, $2, $3)", p.cfg.WorkerID, machineName, p.cfg.WorkerHostname, meta.ImagePath)
+	_, err = tx.Exec(ctx, "INSERT INTO machine_assignment (worker_id, machine_id, worker_hostname, image_path) VALUES ($1, $2, $3, $4)", p.cfg.WorkerID, machineName, p.cfg.WorkerHostname, meta.ImagePath)
 	if err != nil {
 		return fmt.Errorf("insert machine_assignment: %w", err)
 	}
