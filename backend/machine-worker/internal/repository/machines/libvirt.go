@@ -340,7 +340,7 @@ func (l *Libvirt) Stop(ctx context.Context, name string) error {
 		return fmt.Errorf("lookup by name: %w", err)
 	}
 
-	err = dom.Destroy()
+	err = dom.DestroyFlags(libvirt.DOMAIN_DESTROY_GRACEFUL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Requested operation is not valid: domain is not running") {
 			return nil
