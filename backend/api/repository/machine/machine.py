@@ -45,7 +45,7 @@ def get_machine(machine_name: str) -> m_machine.Machine | None:
 	# 1) get info about work queue
 	# 2) get info from worker
 
-	work_info = db_work.get_last_by_machine_name(machine_name)
+	work_info = db_work.get_last_status_by_machine_name(machine_name)
 
 	assignment = db_machine_assignment.get_machine_assignment(machine_name)
 	if assignment is None:

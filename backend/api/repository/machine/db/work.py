@@ -1,9 +1,9 @@
-from api.misc import with_connection
-import api.model.task as task
 import api.model.exploit_model as exploit_model
-
+import api.model.task as task
 import api.model.work as mWork
+from api.misc import with_connection
 from pydantic import BaseModel
+
 
 class StartWork(BaseModel):
 	data: str | None
@@ -18,10 +18,14 @@ def start_work(conn, w: StartWork):
 
 
 @with_connection
-def get_last_by_machine_name(conn, machine_id: str) -> tuple[mWork.Work, bool | None] | None:
+def get_last_status_by_machine_name(conn, machine_id: str) -> tuple[mWork.Work, bool | None] | None:
 	cur = conn.cursor()
 
-	cur.execute("SELECT id, type, data, result FROM work WHERE machine_id = %s ORDER BY id DESC LIMIT 1", [machine_id, ])
+	allowed_types = [
+		mWork.WorkType.create, mWork.WorkType.remove, mWork.WorkType.start, mWork.WorkType.stop
+	]
+
+	cur.execute("SELECT id, type, data, result FROM work WHERE machine_id = %s AND type = ANY (%s)  ORDER BY id DESC LIMIT 1", [machine_id, allowed_types])
 
 	res = cur.fetchone()
 	if res is None:
