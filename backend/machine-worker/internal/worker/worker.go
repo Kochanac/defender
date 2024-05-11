@@ -93,16 +93,22 @@ func (w Worker) handleWork(ctx context.Context, wrk work.Work) (result string, e
 		cm := CreateMachine{}
 		err = json.Unmarshal([]byte(wrk.Data), &cm)
 		if err != nil {
-			return "", fmt.Errorf("failed to unmarshall: %w", err)
+			return "", fmt.Errorf("unmarshall: %w", err)
+		}
+
+		path, err := w.imageManager.EnsureImage(ctx, cm.Image)
+		if err != nil {
+			return "", fmt.Errorf("ensure image: %w", err)
 		}
 
 		createMod := machines.CreateModel{
 			MemoryMB:      w.cfg.DefaultMachineMemory,
 			VCPU:          w.cfg.DefaultMachineVCPU,
-			BaseImagePath: cm.Image,
+			BaseImagePath: path,
 			TaskName:      cm.TaskName,
 			VMName:        wrk.MachineName,
 		}
+
 		name, imagePath, err := w.mach.Create(ctx, createMod)
 		if err != nil {
 			return "", fmt.Errorf("create: %w", err)
