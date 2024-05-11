@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -36,6 +37,11 @@ func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string
 		return fmt.Errorf("s3 get object: %w", err)
 	}
 	defer obj.Close()
+
+	err = os.MkdirAll(filepath.Dir(localPath), 0644)
+	if err != nil {
+		return err
+	}
 
 	file, err := os.OpenFile(localPath, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
