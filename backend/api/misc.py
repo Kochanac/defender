@@ -1,9 +1,9 @@
 from collections.abc import Callable
+from functools import wraps
 from os import environ
 
-import redis
 import psycopg2
-from functools import wraps
+import redis
 
 db = {
 	"host": environ.get("PSQL_HOST", "localhost"),

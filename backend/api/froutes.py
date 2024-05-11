@@ -5,6 +5,7 @@ import api.db.users as db
 import api.model.checker as m_checker
 import api.model.exploit_model as exploit_model
 import api.model.machine as m_machine
+import api.model.snapshot as m_snapshot
 import api.model.task as m_task
 import api.redis as redis
 import api.repository.checker.adapters.first_defence as first_defence_checker
@@ -12,6 +13,8 @@ import api.repository.exploit.adapters.first_exploit as first_exploit
 import api.repository.exploit.exploit as exploit
 import api.repository.machine.adapters.first_defence as first_defence
 import api.repository.machine.machine as machine
+import api.repository.snapshot.adapters.user_snapshot as user_snapshot
+import api.repository.snapshot.snapshot as snapshot
 import api.repository.task.db.tasks as db_tasks
 import api.repository.task.tasks as tasks
 from fastapi import Depends, FastAPI, HTTPException
@@ -236,3 +239,21 @@ async def _first_defence_check_result(
 ) -> FirstDefenceStatus:
     status, result = first_defence_checker.check_result(t.task_id, user_id)
     return FirstDefenceStatus(status=status, results=result)
+
+
+class SnapshotCreateModel(BaseModel):
+    task_id: int
+    name: str
+
+@app.post("/task/snapshot/create")
+async def _snapshot_create(
+    t: SnapshotCreateModel, user_id: Annotated[int, Depends(get_user_id)]
+):
+    user_snapshot.create_snapshot(t.task_id, user_id, t.name)
+    
+
+@app.post("/task/snapshot/get-latest-snapshot-status")
+async def _snapshot_get_all(
+    t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
+) -> m_snapshot.Snapshot | None:
+    return snapshot.get_latest_snapshot(t.task_id, user_id)

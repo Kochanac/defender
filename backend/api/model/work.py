@@ -24,4 +24,6 @@ class CreateWorkData(BaseModel):
 	task_name: str
 	image: str
 
+class UploadImageWorkData(BaseModel):
+	image_name: str # new image name
 

@@ -15,5 +15,6 @@ class Snapshot(BaseModel):
     task_id: int
     user_id: int
     image_path: str
+    name: str
 
     state: SnapshotState | None

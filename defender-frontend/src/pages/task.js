@@ -4,6 +4,7 @@ import Wait from "./elements/wait";
 import { call } from "../api/api.js";
 import { useParams } from "react-router-dom";
 import { TaskDemo } from "./task_demo.js";
+import MyMachine from "./elements/my-machine.js";
 
 class Task extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -25,24 +26,24 @@ class Task extends React.Component {
             exploit_testing: false,
 
             defence_unlocked: false,
-            defence: {
-                display: {
-                    buttons: {
-                        create_enabled: false,
-                        start_enabled: false,
-                        stop_enabled: false,
-                        remove_enabled: false,
-                    },
-                    messagebox: false,
-                    check_button: false,
-                },
+            // defence: {
+            //     display: {
+            //         buttons: {
+            //             create_enabled: false,
+            //             start_enabled: false,
+            //             stop_enabled: false,
+            //             remove_enabled: false,
+            //         },
+            //         messagebox: false,
+            //         check_button: false,
+            //     },
 
-                messagebox_text: "test\ntest2\ntest3"
-            },
-            machine_progress: {
-                in_progress: false,
-                process_label: ""
-            },
+            //     messagebox_text: "test\ntest2\ntest3"
+            // },
+            // machine_progress: {
+            //     in_progress: false,
+            //     process_label: ""
+            // },
             defence_testing: false,
 
             checks: [
@@ -135,149 +136,6 @@ class Task extends React.Component {
             defence_unlocked: data.defence_unlocked
         })
 
-
-        if (this.state.defence_unlocked) {
-            this.update_defence_state()
-        }
-    }
-
-    async update_defence_state() {
-        var data = await this.request("task/defence/box/status")
-        console.log("kek", data)
-
-        if (data.error === 404) {
-            this.setState({
-                machine_progress: {
-                    in_progress: false,
-                },
-                defence: {
-                    display: {
-                        buttons: {
-                            create_enabled: true,
-                            start_enabled: false,
-                            stop_enabled: false,
-                            remove_enabled: false,
-                        },
-                        messagebox: false,
-                        check_button: false,
-                    },
-                    messagebox_text: "",
-                }
-            })
-            return
-        }
-
-
-        if (data.status === "starting") {
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                        }
-                    }
-                },
-                machine_progress: {
-                    in_progress: true,
-                    process_label: "Запускаю"
-                }
-            })
-            return
-        }
-
-        if (data.status === "removing") {
-            this.setState({
-                machine_progress: {
-                    in_progress: true,
-                    process_label: "Удаляю"
-                }
-            })
-            return
-        }
-
-        if (data.status === "turning_off") {
-            this.setState({
-                machine_progress: {
-                    in_progress: true,
-                    process_label: "Выключаю"
-                }
-            })
-            return
-        }
-
-        if (data.status === "off") {
-            this.setState({
-                machine_progress: {
-                    in_progress: false,
-                    process_label: ""
-                }
-            })
-
-
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            create_enabled: false,
-                            start_enabled: true,
-                            stop_enabled: false,
-                            remove_enabled: true,
-                        },
-                        messagebox: true,
-                        check_button: false,
-                    },
-                    messagebox_text: ""
-                },
-
-            })
-        }
-
-        if (data.status === "on") {
-            this.setState({
-                machine_progress: {
-                    in_progress: false,
-                    process_label: ""
-                }
-            })
-
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            create_enabled: false,
-                            start_enabled: false,
-                            stop_enabled: true,
-                            remove_enabled: true,
-                        },
-                        messagebox: true,
-                        check_button: true,
-                    },
-                    messagebox_text: data.message
-                },
-
-            })
-
-            if (this.state.defence_testing) {
-                data = await this.request("task/defence/test/checks")
-
-                if (data.status === "in progress") {
-                    this.setState({
-                        defence_testing: true
-                    })
-                }
-
-                if (data.status === "checked") {
-                    this.setState({
-                        defence_testing: false
-                    })
-                }
-                console.log("asd", data)
-                if (data.results != null) {
-                    this.setState({
-                        checks: data.results.results
-                    })
-                }
-            }
-        }
     }
 
     async send_exploit() {
@@ -289,76 +147,6 @@ class Task extends React.Component {
             let exp_code = document.getElementById("exploit_code").value
 
             let data = await this.request("task/exploit/upload", { exploit_text: exp_code })
-        }
-    }
-
-    async create_box() {
-        if (this.state.defence.display.buttons.create_enabled) {
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            create_enabled: false
-                        }
-                    }
-                }
-            })
-            await this.request("task/defence/box/create")
-        }
-    }
-
-    async start_box() {
-        if (this.state.defence.display.buttons.start_enabled) {
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            start_enabled: false
-                        }
-                    }
-                }
-            })
-            await this.request("task/defence/box/start")
-        }
-    }
-
-    async stop_box() {
-        if (this.state.defence.display.buttons.stop_enabled) {
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            stop_enabled: false
-                        }
-                    }
-                }
-            })
-            await this.request("task/defence/box/stop")
-        }
-    }
-
-    async remove_box() {
-        if (this.state.defence.display.buttons.remove_enabled) {
-            this.setState({
-                defence: {
-                    display: {
-                        buttons: {
-                            remove_enabled: false
-                        }
-                    }
-                }
-            })
-            await this.request("task/defence/box/remove")
-        }
-    }
-
-    async defence_test() {
-        if (this.state.defence.display.check_button) {
-            this.setState({
-                defence_testing: true
-            })
-
-            await this.request("task/defence/test/start")
         }
     }
 
@@ -459,55 +247,7 @@ class Task extends React.Component {
                     </p>
                     {this.state.defence_unlocked &&
                         <div>
-                            <button onClick={this.create_box.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500 hover:scale-105" : "bg-gray-300")}>
-                                Создать виртуалку
-                            </button>
-                            <button onClick={this.start_box.bind(this)}
-                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_enabled ? "bg-green-400 hover:scale-105" : "bg-gray-300")}>
-                                Включить
-                            </button>
-                            <button onClick={this.stop_box.bind(this)}
-                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400 hover:scale-105" : "bg-gray-300")}>
-                                Выключить
-                            </button>
-                            <button onClick={this.remove_box.bind(this)}
-                                className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.remove_enabled ? "bg-black hover:scale-105" : "bg-gray-300")}>
-                                Удалить виртуалку
-                            </button>
-
-
-                            {this.state.machine_progress.in_progress &&
-                                <div className="text-2xl mb-2 font-semibold">
-                                    <Wait text={this.state.machine_progress.process_label} />
-                                </div>
-                            }
-
-                            {this.state.defence.display.messagebox &&
-                                <p className="block text-xl font-mono mb-2">
-                                    {this.state.defence.messagebox_text.split("\n").map(line => (
-                                        <span>{line}<br /></span>
-                                    ))}
-                                </p>
-                            }
-                            <p className="block text-xl font-semibold mb-2">
-                                Пофиксите и нажмите на эту кнопку
-                            </p>
-                            <button onClick={this.defence_test.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-blue-500 hover:scale-105" : "bg-gray-300")}>
-                                Протестировать
-                            </button>
-
-                            {this.state.defence_testing &&
-                                <div className="text-2xl mb-2 font-semibold">
-                                    <Wait text="Проверяем" />
-                                </div>}
-
-                            {this.state.checks != null &&
-                                <div id="checks" className="flex justify-start flex-wrap">
-                                    {this.state.checks.map(check => (
-                                        <h3 className={"p-3 rounded-md mr-2 mb-2 " + (check.passed ? this.check_colors["green"] : this.check_colors["red"])}>{check.comment}</h3>
-                                    ))}
-                                </div>
-                            }
+                            <MyMachine />
                         </div>
                     }
                 </div>

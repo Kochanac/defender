@@ -4,7 +4,7 @@ import Wait from "../elements/wait";
 import { call } from "../../api/api.js";
 import { useParams } from "react-router-dom";
 import Styles from "./styles.js";
-import Machine from "./components/machine.js";
+import MyMachine from "../elements/my-machine.js";
 
 class Snapshots extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -16,6 +16,12 @@ class Snapshots extends React.Component {
             task_id: this.props.params.id,
             task: {
                 title: "kek"
+            },
+
+            new_snapshot_enabled: true,
+            snapshot: {
+                show_label: false,
+                label_text: "",
             }
         }
     }
@@ -75,16 +81,62 @@ class Snapshots extends React.Component {
             },
         })
 
-
+        let snapshotInfo = await this.request("task/snapshot/get-latest-snapshot-status")
+        console.log(snapshotInfo)
+        if (snapshotInfo !== null) {
+            if (snapshotInfo["state"] === null) {
+                this.setState({
+                    snapshot: {
+                        show_label: true,
+                        label_text: "🎀 Выключаю машину",
+                    },
+                    new_snapshot_enabled: false,
+                })
+            }
+            if (snapshotInfo["state"] === "creating") {
+                this.setState({
+                    snapshot: {
+                        show_label: true,
+                        label_text: "💾 Создаю образ",
+                    },
+                    new_snapshot_enabled: false,
+                })
+            }
+            if (snapshotInfo["state"] === "checking") {
+                this.setState({
+                    snapshot: {
+                        show_label: true,
+                        label_text: "🤔 Образ проверяется",
+                    },
+                    new_snapshot_enabled: false,
+                })
+            }
+            if (snapshotInfo["state"] === "active") {
+                this.setState({
+                    snapshot: {
+                        show_label: true,
+                        label_text: "🚀 Образ активен",
+                    },
+                    new_snapshot_enabled: true,
+                })
+            }
+        } else {
+            this.setState({
+                snapshot: {
+                    show_label: false,
+                    label_text: "",
+                }
+            })
+        }
     }
 
 
-    async send_exploit() {
-        if (!this.state.exploit_testing) {
+    async create_new_snapshot() {
+        if (this.state.new_snapshot_enabled) {
             this.setState({
-                exploit_testing: true
+                new_snapshot_enabled: false
             })
-
+            await this.request("task/snapshot/create", {"name": document.getElementById("snapshot-name").value})
         }
     }
 
@@ -119,21 +171,25 @@ class Snapshots extends React.Component {
                     </nav>
                 </div>
                 <div className="pb-4">
-                    <h2 className="text-3xl">Ваша машина</h2>
-                    <Machine />
+                    <h2 className="text-3xl mb-4 font-bold">Ваша машина</h2>
+                    <MyMachine hide_checks={true} />
                 </div>
                 <div className="flex flex-col w-1/3 min-w-80">
                     <label class="block font-semibold mb-2" for="name">
                         Имя снапшота (будет видно всем)
                     </label>
-                    <input name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none" placeholder="обветренный лох" />
+                    <input id="snapshot-name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none" placeholder="обветренный лох" />
                     <button
-                        className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mt-3 " + (true ? "bg-indigo-400" : "bg-gray-300")}>
+                        className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mt-3 " + (this.state.new_snapshot_enabled ? "bg-indigo-400 hover:scale-105 duration-200" : "bg-gray-300")}
+                        onClick={this.create_new_snapshot.bind(this)}>
                         Отправить новую версию машины
                     </button>
-                    <div className="text-2xl font-semibold pt-1">
-                        <Wait text="Выключаю машину" />
-                    </div>
+
+                    {this.state.snapshot.show_label &&
+                        <div className="text-2xl font-semibold pt-1">
+                            <Wait text={this.state.snapshot.label_text} />
+                        </div>
+                    }
 
                     <div className="bg-red-200 rounded-md p-4 text-xl mt-4">
                         ! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны
