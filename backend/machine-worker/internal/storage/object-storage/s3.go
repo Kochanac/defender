@@ -30,7 +30,7 @@ func New(cfg *Config, conn *minio.Client) *s3 {
 }
 
 // DownloadTo implements Storage.
-func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string) error {
+func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string) (err error) {
 	obj, err := s.conn.GetObject(ctx, s.cfg.Bucket, remotePath, minio.GetObjectOptions{})
 	if err != nil {
 		return fmt.Errorf("s3 get object: %w", err)
@@ -42,6 +42,11 @@ func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string
 		return fmt.Errorf("open file: %w", err)
 	}
 	defer file.Close()
+	defer func() {
+		if err != nil {
+			os.Remove(localPath)
+		}
+	}()
 
 	w, err := io.Copy(file, obj)
 	if err != nil {
@@ -56,7 +61,7 @@ func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string
 }
 
 // UploadFrom implements Storage.
-func (s *s3) UploadFrom(ctx context.Context, localPath string, remotePath string) error {
+func (s *s3) UploadFrom(ctx context.Context, localPath string, remotePath string) (err error) {
 	file, err := os.OpenFile(localPath, os.O_RDONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
