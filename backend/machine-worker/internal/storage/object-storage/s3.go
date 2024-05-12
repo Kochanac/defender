@@ -38,12 +38,12 @@ func (s *s3) DownloadTo(ctx context.Context, remotePath string, localPath string
 	}
 	defer obj.Close()
 
-	err = os.MkdirAll(filepath.Dir(localPath), 0644)
+	err = os.MkdirAll(filepath.Dir(localPath), 0777)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.OpenFile(localPath, os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(localPath, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
 	}
