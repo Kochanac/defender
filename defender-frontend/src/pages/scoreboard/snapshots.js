@@ -3,8 +3,11 @@ import Wait from "../elements/wait";
 
 import { call } from "../../api/api.js";
 import { useParams } from "react-router-dom";
+import { convert_status, attack, snapshot } from "../utils.js";
 import Styles from "./styles.js";
 import MyMachine from "../elements/my-machine.js";
+
+const MAGIC_SYMBOL = "%"
 
 class Snapshots extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -17,12 +20,19 @@ class Snapshots extends React.Component {
             task: {
                 title: "kek"
             },
+            updating: false,
 
             new_snapshot_enabled: true,
             snapshot: {
                 show_label: false,
                 label_text: "",
-            }
+            },
+
+            attacks: {},
+            attack_ids: [],
+            snapshots: [],
+            statuses: {},
+            users: {},
         }
     }
 
@@ -72,13 +82,12 @@ class Snapshots extends React.Component {
     }
 
     async update_task() {
-        let data = await this.request("task/state")
+        if (this.state.updating) {
+            return
+        }
 
         this.setState({
-            exploit: {
-                status: data["exploit_status"],
-                result: (data["exploit_result"] && data["exploit_result"] === "OK")
-            },
+            "updating": true
         })
 
         let snapshotInfo = await this.request("task/snapshot/get-latest-snapshot-status")
@@ -114,7 +123,7 @@ class Snapshots extends React.Component {
             if (snapshotInfo["state"] === "active") {
                 this.setState({
                     snapshot: {
-                        show_label: true,
+                        show_label: false,
                         label_text: "🚀 Образ активен",
                     },
                     new_snapshot_enabled: true,
@@ -128,6 +137,58 @@ class Snapshots extends React.Component {
                 }
             })
         }
+
+        await this.update_table()
+        this.setState({
+            "updating": false
+        })
+    }
+
+
+    async update_table() {
+        let data = await this.request("task/snapshot/get-snapshot-states")
+
+        let snaps = data["snapshots"]
+        let snapshots = []
+        let attacks = {}
+        let statuses = {}
+        let attack_ids = []
+        snaps.forEach(data => {
+            let snap = data[0]
+            snap = new snapshot(snap["id"], snap["user_id"], snap["name"], snap["state"], new Date(snap["created_at"]), data[1])
+
+            if (snap.state === "creating" || snap.state === null || snap.state === undefined) {
+                return
+            }
+
+            snapshots.push(
+                snap
+            )
+
+            data[2].forEach(data => {
+                let att = data[0]
+                let at = new attack(att["id"], att["user_id"], att["name"], att["state"], new Date(att["created_at"]), null)
+                attacks[at.id] = at;
+
+                statuses[snap["id"] + MAGIC_SYMBOL + at.id] = [data[1], data[2]]
+                attack_ids.push(at.id)
+            });
+        });
+
+        attack_ids = [...new Set(attack_ids)]
+        attack_ids.sort().reverse()
+
+        snapshots.sort((a, b) => b.id - a.id)
+
+        this.setState({
+            attacks: attacks,
+            attack_ids: attack_ids,
+            snapshots: snapshots,
+            statuses: statuses,
+            users: data["usernames"],
+        })
+
+        console.log("state", this.state)
     }
 
 
@@ -136,7 +197,7 @@ class Snapshots extends React.Component {
             this.setState({
                 new_snapshot_enabled: false
             })
-            await this.request("task/snapshot/create", {"name": document.getElementById("snapshot-name").value})
+            await this.request("task/snapshot/create", { "name": document.getElementById("snapshot-name").value })
         }
     }
 
@@ -192,7 +253,9 @@ class Snapshots extends React.Component {
                     }
 
                     <div className="bg-red-200 rounded-md p-4 text-xl mt-4">
-                        ! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны
+                        <p>! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны.</p>
+                        <p>В целом, рекомендуется перезапустить машину перед отправкой в систему и убедиться в её работоспособности</p>
+
                     </div>
                 </div>
                 <div className="pt-6">
@@ -207,323 +270,75 @@ class Snapshots extends React.Component {
 
                                 <th className="text-left align-bottom text-xl" style={{ transform: "rotate(0)" }}> <div className="pb-4">Результат</div> </th>
 
-
-                                <th className="rotate"><div><span>Attack #100 <span className="p-1.5 bg-gray-200 rounded-lg">@kochan</span></span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
-                                <th className="rotate"><div><span>Attack #1</span></div></th>
-                                <th className="rotate"><div><span>Attack #2</span></div></th>
+                                {this.state.attack_ids.map(attack_id => (
+                                    <th className="rotate">
+                                        <div>
+                                            <span>Attack #{this.state.attacks[attack_id].id} ({this.state.attacks[attack_id].name})
+                                                <span className="p-1.5 bg-gray-200 rounded-lg ml-0.5">@{this.state.users[this.state.attacks[attack_id].user_id] || "??"}</span>
+                                            </span>
+                                        </div>
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#10</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 13:37</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <span className="pr-3">обкуренный слон</span>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className=""><Wait text="Проверяется" /></span><br />
+                            {this.state.snapshots.map(snap => (
+                                <tr>
+                                    <td className="long text-2xl text-right"><span className="pr-5">#{snap.id}</span></td>
+                                    <td className="long"><span className="pr-3 inline-block">{snap.created_at.toLocaleString('ru-RU')}</span></td>
+                                    <td className="long whitespace-nowrap">
+                                        <span className="pr-3">{snap.name}</span><br />
+                                        {snap.state === "active" &&
+                                            <div className=" inline-block p-3 border-2 border-green-400 text-xs rounded-md mt-1 mr-2 whitespace-nowrap">Активен</div>
+                                        }
+                                    </td>
+                                    <td className="long2 whitespace-nowrap">
+                                        <div className="h-full flex p-1">
+                                            <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
+                                                <div className="align-middle text-center">
+                                                    {snap.state === "checking" &&
+                                                        <span className=""><Wait text="Проверяется" /><br /></span>
+                                                    }
+                                                    <span className="">🛡 {snap.score[0]}/{snap.score[1]}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#9</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 2:28</span></td>
-                                <td className="long align-top">
-                                    <span className="pr-3 whitespace-nowrap">лось и смычок и лось и смычок и лось и смычок</span><br />
-                                    <div className=" inline-block p-3 border-2 border-green-400 text-xs rounded-md mt-1 mr-2 whitespace-nowrap">Активен</div>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className="">🛡 50/300</span>
+                                    </td>
+
+                                    {this.state.attack_ids.map(attack_id => {
+                                        let st = this.state.statuses[snap.id + MAGIC_SYMBOL + attack_id]
+                                        if (st === null || st === undefined) {
+                                            return <td></td>
+                                        }
+
+                                        let status = st[0]
+                                        let result = st[1]
+
+                                        if (result === "OK") {
+                                            return <td>
+                                                <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                                    Взлом
+                                                </div>
+                                            </td>
+                                        }
+                                        if (result === "NO FLAGS") {
+                                            return <td>
+                                                <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                                    Не взлом
+                                                </div>
+                                            </td>
+                                        }
+
+                                        return (<td>
+                                            <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
+                                                <Wait text={convert_status(status)} />
                                             </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#8</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 2:28</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <span className="pr-3">алло это пожарные пожарьте мне</span>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className="">🛡 50/300</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                            </tr>
+                                        </td>)
+                                    })}
+
+                                </tr>
+
+                            ))}
                         </tbody>
                     </table>
                 </div>

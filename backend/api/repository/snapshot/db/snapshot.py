@@ -136,3 +136,54 @@ def get_latest_snapshots_by_user(conn, task_id: int) -> List[m_snapshot.Snapshot
 
     r = [convert_one(row) for row in res]
     return [x for x in r if x is not None]
+
+
+@with_connection
+def get_rating_snapshots_in_task(conn, task_id: int) -> List[m_snapshot.Snapshot]:
+    cur = conn.cursor()
+    cur.execute(
+        f"""SELECT {cols}
+           FROM snapshot
+           WHERE task_id = %s AND state = 'checking' OR state = 'active'
+           ORDER BY id ASC""",
+        [task_id],
+    )
+
+    res = cur.fetchall()
+
+    r = [convert_one(row) for row in res]
+    return [x for x in r if x is not None]
+
+
+@with_connection
+def get_active_snapshots_in_task(conn, task_id: int) -> List[m_snapshot.Snapshot]:
+    cur = conn.cursor()
+    cur.execute(
+        f"""SELECT {cols}
+           FROM snapshot
+           WHERE task_id = %s AND state = 'active'
+           ORDER BY id ASC""",
+        [task_id],
+    )
+
+    res = cur.fetchall()
+
+    r = [convert_one(row) for row in res]
+    return [x for x in r if x is not None]
+
+
+@with_connection
+def get_snapshosts_of_user(conn, user_id: int, task_id: int) -> List[m_snapshot.Snapshot]:
+    cur = conn.cursor()
+    cur.execute(
+        f"""SELECT {cols}
+           FROM snapshot
+           WHERE user_id = %s AND task_id = %s
+           ORDER BY id ASC""",
+        [user_id, task_id],
+    )
+
+    res = cur.fetchall()
+
+    r = [convert_one(row) for row in res]
+    return [x for x in r if x is not None]

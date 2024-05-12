@@ -1,4 +1,6 @@
 import hashlib
+from typing import List, Mapping
+
 from api.misc import with_connection
 
 
@@ -32,3 +34,14 @@ def login(conn, username, password) -> int | None:
 		return None
 
 
+@with_connection
+def get_by_ids(conn, id: List[int]) -> Mapping[int, str]:
+	cur = conn.cursor()
+
+	cur.execute("SELECT id, username FROM users WHERE id = ANY (%s)", [list(id)])
+
+	res = cur.fetchall()
+	if res is None:
+		return {}
+	
+	return {int(r[0]): str(r[1]) for r in res}

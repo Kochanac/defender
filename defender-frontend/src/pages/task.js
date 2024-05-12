@@ -4,6 +4,7 @@ import Wait from "./elements/wait";
 import { call } from "../api/api.js";
 import { useParams } from "react-router-dom";
 import { TaskDemo } from "./task_demo.js";
+import { convert_status } from "./utils.js";
 import MyMachine from "./elements/my-machine.js";
 
 class Task extends React.Component {
@@ -210,24 +211,9 @@ class Task extends React.Component {
                         Отправить
                     </button>
 
-                    {this.state.exploit.status === "starting" &&
+                    {this.state.exploit.status != null && this.state.exploit.status !== "checked" &&
                         <div className="text-2xl font-semibold pt-1">
-                            <Wait text="Создаю машину" />
-                        </div>
-                    }
-                    {this.state.exploit.status === "waiting for machine" &&
-                        <div className="text-2xl font-semibold pt-1">
-                            <Wait text="Запускаю сервис" />
-                        </div>
-                    }
-                    {this.state.exploit.status === "sending flags" &&
-                        <div className="text-2xl font-semibold pt-1">
-                            <Wait text="Отправляю флаги" />
-                        </div>
-                    }
-                    {this.state.exploit.status === "running" &&
-                        <div className="text-2xl font-semibold pt-1">
-                            <Wait text="Тестирую" />
+                            <Wait text={convert_status(this.state.exploit.status)} />
                         </div>
                     }
 

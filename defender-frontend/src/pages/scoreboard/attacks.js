@@ -4,10 +4,12 @@ import Wait from "../elements/wait";
 import { call } from "../../api/api.js";
 import { useParams } from "react-router-dom";
 import Styles from "./styles.js";
+import { attack, convert_status, snapshot } from "../utils.js";
+
+const MAGIC_SYMBOL = "%"
+
 
 class Attacks extends React.Component {
-    // TODO: Make defence (and attack?) another component
-
     constructor(props) {
         super(props);
         this.state = {
@@ -15,17 +17,20 @@ class Attacks extends React.Component {
             task_id: this.props.params.id,
             task: {
                 title: "kek"
-            }
+            },
+
+            attacks: [],
+            snap_ids: [],
+            snapshots: {},
+            latest_statuses: {},
+            active_results: {},
+            users: {},
+            updating: false,
         }
     }
 
     componentDidMount() {
         this.prepare_task()
-    }
-
-    check_colors = {
-        "green": "bg-green-200",
-        "red": "bg-red-200"
     }
 
     async request(url, data = {}) {
@@ -65,16 +70,71 @@ class Attacks extends React.Component {
     }
 
     async update_task() {
-        let data = await this.request("task/state")
-
+        if (this.state.updating) {
+            return
+        }
         this.setState({
-            exploit: {
-                status: data["exploit_status"],
-                result: (data["exploit_result"] && data["exploit_result"] === "OK")
-            },
+            "updating": true
         })
 
+        await this.update_table()
+        this.setState({
+            "updating": false
+        })
+    }
 
+    async update_table() {
+
+        let data = await this.request("task/attack/get-attack-states")
+
+        // let snaps = 
+        let snapshots = {}
+        let attacks = []
+        let latest_statuses = {}
+        let active_results = {}
+        let snap_ids = []
+        data["attacks"].forEach(data => {
+            let att = data[0]
+            att = new attack(att["id"], att["user_id"], att["name"], att["state"], new Date(att["created_at"]), data[1])
+
+            if (att.state === null || att.state === undefined) {
+                return
+            }
+
+            attacks.push(
+                att
+            )
+
+            data[2].forEach(data => {
+                let snap = data[0]
+                snap = new snapshot(snap["id"], snap["user_id"], snap["name"], snap["state"], new Date(snap["created_at"]))
+                snapshots[snap.user_id] = snap;
+
+                latest_statuses[att.id + MAGIC_SYMBOL + snap.user_id] = [data[1], data[2]]
+                if (snap.state === "active") {
+                    active_results[att.id + MAGIC_SYMBOL + snap.user_id] = data[2]
+                }
+
+                snap_ids.push(snap.user_id)
+            });
+        });
+
+        snap_ids = [...new Set(snap_ids)]
+        snap_ids.sort().reverse()
+
+        attacks.sort((a, b) => b.id - a.id)
+
+        this.setState({
+            attacks: attacks,
+            snap_ids: snap_ids,
+            snapshots: snapshots,
+            latest_statuses: latest_statuses,
+            active_results: active_results,
+            users: data["usernames"],
+            exploit_testing: false
+        })
+
+        console.log("state", this.state)
     }
 
 
@@ -84,7 +144,19 @@ class Attacks extends React.Component {
                 exploit_testing: true
             })
 
+            let exp_code = document.getElementById("exploit_code").value
+
+            let name = document.getElementById("name").value
+
+            await this.request("task/attack/create", { "name": name, "exploit_text": exp_code })
         }
+    }
+
+    async deactivate_exploit(event) {
+        event.target.className += " hidden"
+        console.log(event)
+        console.log(event.target.id)
+        await this.request("task/attack/deactivate", { "attack_id": event.target.id })
     }
 
     render() {
@@ -136,7 +208,7 @@ class Attacks extends React.Component {
                     <label class="block font-semibold mb-2" for="name">
                         Имя атаки (будет видно всем)
                     </label>
-                    <input name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none mb-2" placeholder="обветренный лох" />
+                    <input id="name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none mb-2" placeholder="обветренный лох" />
 
                     <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-pink-600")}>
                         Отправить
@@ -155,141 +227,92 @@ class Attacks extends React.Component {
 
                                 <th className="text-left align-bottom text-xl" style={{ transform: "rotate(0)" }}> <div className="pb-4">Результат</div> </th>
 
-
-                                <th className="rotate"><div><span>v2 (сука сука сука) <span className="p-1.5 bg-gray-200 rounded-lg">@kochan</span></span></div></th>
-                                <th className="rotate"><div><span>v5 (самая крутая тачка) <span className="p-1.5 bg-gray-200 rounded-lg">@mochalkinblues</span></span></div></th>
-                                <th className="rotate"><div><span>v1 <span className="p-1.5 bg-gray-200 rounded-lg">@debil online</span></span></div></th>
-                                <th className="rotate"><div><span>v100 <span className="p-1.5 bg-gray-200 rounded-lg">@kotolyi</span></span></div></th>
+                                {this.state.snap_ids.map(user_id => (
+                                    <th className="rotate">
+                                        <div>
+                                            <span>#{this.state.snapshots[user_id].id} ({this.state.snapshots[user_id].name})
+                                                <span className="p-1.5 bg-gray-200 rounded-lg ml-0.5">@{this.state.users[this.state.snapshots[user_id].user_id] || "??"}</span>
+                                            </span>
+                                        </div>
+                                    </th>
+                                ))}
 
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#10</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 13:37</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <span className="pr-3">обкуренный слон</span><br />
-                                    <button className="p-3 border-2 border-black text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap hover:scale-105 duration-200">
-                                        Деактивировать
-                                    </button>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className=""><Wait text="Проверяется" /></span><br />
-                                                <span className="">⚔️ 3/4</span>
+                            {this.state.attacks.map((attack) => (
+                                <tr className={attack.state === "dead" ? "deactivated" : ""}>
+                                    <td className="long text-2xl text-right"><span className="pr-5">#{attack.id}</span></td>
+                                    <td className="long"><span className="pr-3">{attack.created_at.toLocaleString('ru-RU')}</span></td>
+                                    <td className="long whitespace-nowrap">
+                                        <span className="pr-3">{attack.name}</span><br />
+                                        {attack.state === "dead" &&
+                                            <button className="p-3 bg-black text-white text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap">
+                                                Деактивирован
+                                            </button>
+                                        }
+                                        {attack.state !== "dead" &&
+                                            <button
+                                                id={attack.id}
+                                                onClick={this.deactivate_exploit.bind(this)}
+                                                className="p-3 border-2 border-black text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap hover:scale-105 duration-200">
+                                                Деактивировать
+                                            </button>
+                                        }
+                                    </td>
+                                    <td className="long2 whitespace-nowrap">
+                                        <div className="h-full flex p-1">
+                                            <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
+                                                <div className="align-middle text-center">
+                                                    {/* <span className=""><Wait text="Проверяется" /></span><br /> */}
+                                                    <span className="">⚔️ {attack.score[0]}/{attack.score[1]}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Взлом
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#9</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 2:28</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <span className="pr-3">лось и смычок и лось и смычок и лось и смычок</span><br />
-                                    <button className="p-3 border-2 border-black text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap hover:scale-105 duration-200">
-                                        Деактивировать
-                                    </button>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className="">⚔️ 0/4</span>
+                                    </td>
+                                    {this.state.snap_ids.map((user_id) => {
+                                        let st = this.state.latest_statuses[attack.id + MAGIC_SYMBOL + user_id]
+                                        if (st === null || st === undefined) {
+                                            return <td></td>
+                                        }
+
+                                        let status = st[0]
+                                        let result = st[1]
+
+                                        if (result === "OK") {
+                                            return <td>
+                                                <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                                    Взлом
+                                                </div>
+                                            </td>
+                                        }
+                                        if (result === "NO FLAGS") {
+                                            return <td>
+                                                <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                                                    Не взлом
+                                                </div>
+                                            </td>
+                                        }
+                                        
+                                        let bg = "bg-white"
+                                        let act_res = this.state.active_results[attack.id + MAGIC_SYMBOL + user_id]
+                                        
+                                        if (act_res === "OK") {
+                                            bg = "bg-green-400"
+                                        }
+                                        if (act_res === "NO FLAGS") {
+                                            bg = "bg-red-400"
+                                        }
+
+                                        return (<td>
+                                            <div className={"aspect-square stripes rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm " + bg}>
+                                                <Wait text={convert_status(status)} />
                                             </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square stripes bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                        <Wait text="Запускаю машину" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr className="deactivated">
-                                <td className="long text-2xl text-right"><span className="pr-5">#8</span></td>
-                                <td className="long"><span className="pr-3">2024, 5 May, 1:111</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <span className="pr-3">Привет</span><br />
-                                    <button className="p-3 bg-black text-white text-xs rounded-md mt-3 inline mr-2 whitespace-nowrap">
-                                        Деактивирован
-                                    </button>
-                                </td>
-                                <td className="long2 whitespace-nowrap">
-                                    <div className="h-full flex p-1">
-                                        <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
-                                            <div className="align-middle text-center">
-                                                <span className="">⚔️ 1/4</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                    <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                        Не взлом
-                                    </div>
-                                </td>
-                            </tr>
-                            {/* <tr>
-                                <td className="long text-2xl text-right"><span className="pr-5">#3</span></td>
-                                <td className="long text-xl"><span className="pr-5">@debil online</span></td>
-                                <td className="long whitespace-nowrap">
-                                    <div className="pr-3 pl-3 align-middle">
-                                        <span className="">⚔️ 100/200</span><br />
-                                        <span className="">🛡 50/300</span><br />
-                                        <span className="">{'= 500'}</span>
-                                    </div>
-                                </td>
-                            </tr> */}
+                                        </td>)
+
+                                    })}
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

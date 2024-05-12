@@ -37,3 +37,10 @@ def get_task_info(task_id: int) -> m_task.TaskInfo | None:
     )
 
 
+
+def format_task_url(task_id, hostname: str):
+    task_info = db_tasks.get_task_info(task_id)
+    if task_info is None:
+        raise ValueError("no such task")
+
+    return task_info.service_demo.format(host=hostname)

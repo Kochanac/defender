@@ -6,6 +6,7 @@ import logging
 from typing import List
 
 import api.model.snapshot as m_snapshot
+import cachetools.func
 
 from .db import snapshot as db
 
@@ -32,7 +33,7 @@ def change_state(snapshot_id: int, new_state: m_snapshot.SnapshotState):
     db.change_state(snapshot_id, new_state)
 
 def delete(snapshot_id: int):
-    db.change_state(snapshot_id)
+    db.change_state(snapshot_id, m_snapshot.SnapshotState.dead)
 
 def get_active_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | None:
     return db.get_active_snapshot(task_id, user_id)
@@ -40,4 +41,9 @@ def get_active_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | Non
 def get_latest_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | None:
     return db.get_latest_snapshot(task_id, user_id)
 
+TTL = 10
+
+@cachetools.func.ttl_cache(maxsize=500, ttl=TTL)
+def get_snapshot(id: int) -> m_snapshot.Snapshot | None:
+    return db.get_snapshot(id)
 

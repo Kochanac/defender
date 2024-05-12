@@ -27,6 +27,8 @@ def handle_active_attack(at: m_attack.Attack):
             continue
 
     for snap in to_run_exploit_against:
+        if snap.user_id == at.user_id:
+            continue
         if snap.state not in [
             m_snapshot.SnapshotState.active,
             m_snapshot.SnapshotState.checking,

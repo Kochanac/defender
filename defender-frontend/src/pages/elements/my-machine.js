@@ -29,6 +29,7 @@ class MyMachine extends React.Component {
             },
 
             hide_checks: this.props.hide_checks,
+            updating_defence: false,
         }
     }
 
@@ -66,6 +67,23 @@ class MyMachine extends React.Component {
     }
 
     async update_task() {
+        if (this.state.updating_defence) {
+            return
+        }
+
+        this.setState({
+            "updating_defence": true
+        })
+
+        await this.update_box()
+
+        this.setState({
+            "updating_defence": false
+        })
+    }
+
+    async update_box() {
+
         var data = await this.request("task/defence/box/status")
         console.log("kek", data)
 

@@ -6,3 +6,5 @@ redis
 celery
 uvicorn
 requests
+
+cachetools

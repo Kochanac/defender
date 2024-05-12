@@ -34,7 +34,7 @@ def convert_args_and_variant(variant: m_checker.CheckVariant, flag: str | None, 
     
     if variant == m_checker.CheckVariant.put:
         assert flag is not None
-        return ["put", hostname, flag, *args]
+        return ["put", hostname, args[0], flag, *args[1:]] # :D args[0] is flag_id
     
     if variant == m_checker.CheckVariant.get:
         assert flag is not None
