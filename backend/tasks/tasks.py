@@ -27,7 +27,7 @@ def convert_args_and_variant(variant: m_checker.CheckVariant, flag: str | None, 
     print(variant)
     
     if args is None:
-        args = [""] # it ought to use flag_id as some "seed" to generate such data acc to https://github.com/pomo-mondreganto/ForcAD/wiki/Writing-a-checker
+        args = []
 
     if variant == m_checker.CheckVariant.health:
         return ["check", hostname]
@@ -80,6 +80,7 @@ def simple_checker(r, self, simple_checker_run_id: int):
     
 
     args = convert_args_and_variant(checker_run.variant, checker_run.flag, hostname, checker_run.args)
+    print(f"{args=}")
 
     # todo convert to normal labels and so on
     proc = subprocess.Popen([checker.checker_url, *args], stdout=subprocess.PIPE)
