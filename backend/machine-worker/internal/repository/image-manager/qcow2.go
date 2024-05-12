@@ -64,7 +64,7 @@ func (Q *QCOW2Manager) CopyImage(ctx context.Context, image string, newName stri
 	if err != nil {
 		return err
 	}
-	to, err := os.OpenFile(newName, os.O_WRONLY|os.O_CREATE, 0644)
+	to, err := os.OpenFile(newName, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return fmt.Errorf("open file to write to: %w", err)
 	}
