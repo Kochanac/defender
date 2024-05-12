@@ -131,7 +131,7 @@ def get_simple_checker_run(conn, checker_run: int) -> m_checker.SimpleCheckerRun
             target_machine_name=str(res[0]),
             variant=to_check_variant(res[2]),
             flag=res[3], # none works huh?
-            args=list(json.dumps(str(res[4]))),
+            args=list(json.loads(str(res[4]))),
         )
 
 
