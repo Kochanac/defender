@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 
 from pydantic import BaseModel
@@ -18,3 +19,4 @@ class Snapshot(BaseModel):
     name: str
 
     state: SnapshotState | None
+    created_at: datetime.datetime

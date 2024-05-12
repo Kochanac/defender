@@ -3,12 +3,14 @@ from typing import List
 import api.model.snapshot as m_snapshot
 from api.misc import with_connection
 
-cols = "id, task_id, user_id, image_path, state, name"
+cols = "id, task_id, user_id, image_path, state, name, created_at"
+
+
 def convert_one(row) -> m_snapshot.Snapshot | None:
     if row is None:
         return None
 
-    if len(row) != 6:
+    if len(row) != 7:
         return None
 
     state = row[4]
@@ -20,7 +22,9 @@ def convert_one(row) -> m_snapshot.Snapshot | None:
         state=state,
         image_path=str(row[3]),
         name=row[5],
+        created_at=row[6],
     )
+
 
 @with_connection
 def get_alive_snapshots(conn) -> List[m_snapshot.Snapshot]:
@@ -95,8 +99,6 @@ def get_latest_snapshot(conn, task_id, user_id) -> m_snapshot.Snapshot | None:
 
     res = cur.fetchone()
 
-
-
     return convert_one(res)
 
 
@@ -113,3 +115,24 @@ def get_snapshot(conn, id) -> m_snapshot.Snapshot | None:
 
     res = cur.fetchone()
     return convert_one(res)
+
+
+@with_connection
+def get_latest_snapshots_by_user(conn, task_id: int) -> List[m_snapshot.Snapshot]:
+    cur = conn.cursor()
+    cur.execute(
+        f"""SELECT {cols}
+           FROM snapshot
+           WHERE id in (
+               SELECT MAX(id) FROM snapshot
+               WHERE task_id=%s
+               GROUP BY user_id
+           )
+           ORDER BY id ASC""",
+        [task_id],
+    )
+
+    res = cur.fetchall()
+
+    r = [convert_one(row) for row in res]
+    return [x for x in r if x is not None]

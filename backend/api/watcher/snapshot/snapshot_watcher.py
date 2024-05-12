@@ -1,8 +1,11 @@
 import asyncio
 import logging
 
+import api.model.exploit_model as m_exploit
 import api.model.machine as m_machine
 import api.model.snapshot as m_snapshot
+import api.repository.attack.adapters.snapshot_watcher as attack_adapter
+import api.repository.exploit.exploit as exploit_repo
 import api.repository.machine.adapters.first_defence as fd_machine
 import api.repository.snapshot.snapshot as snapshot
 
@@ -57,7 +60,17 @@ def handle_creating(snap: m_snapshot.Snapshot):
 
 def handle_checking(snap: m_snapshot.Snapshot):
     logging.info("checking")
-    snapshot.change_state(snap.id, m_snapshot.SnapshotState.active)
+
+    exploit_runs = attack_adapter.get_exploit_runs_of_attacks_before_time(snap.task_id, snap.id, snap.created_at)
+
+    ready = True
+    for exp in exploit_runs:
+        status, _ = exploit_repo.get_exploit_status(exp)
+        if status != m_exploit.ExploitStatus.checked:
+            ready = False
+
+    if ready:
+        snapshot.change_state(snap.id, m_snapshot.SnapshotState.active)
 
 
 def handle_active(snap: m_snapshot.Snapshot):

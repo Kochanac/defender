@@ -8,6 +8,7 @@ import api.model.machine as m_machine
 import api.model.snapshot as m_snapshot
 import api.model.task as m_task
 import api.redis as redis
+import api.repository.attack.attack as attack
 import api.repository.checker.adapters.first_defence as first_defence_checker
 import api.repository.exploit.adapters.first_exploit as first_exploit
 import api.repository.exploit.exploit as exploit
@@ -257,3 +258,17 @@ async def _snapshot_get_all(
     t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
 ) -> m_snapshot.Snapshot | None:
     return snapshot.get_latest_snapshot(t.task_id, user_id)
+
+
+
+class AttackCreateModel(BaseModel):
+    task_id: int
+    name: str
+    exploit_text: str
+
+@app.post("/task/attack/create")
+async def _attack_create(
+    m: AttackCreateModel, user_id: Annotated[int, Depends(get_user_id)]
+):
+    exp = exploit.upload_exploit(m.task_id, user_id, m.exploit_text)
+    attack.create_attack(user_id, m.task_id, exp.exploit_id, m.name)
