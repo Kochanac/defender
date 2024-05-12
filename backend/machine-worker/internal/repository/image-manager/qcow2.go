@@ -60,7 +60,7 @@ func (Q *QCOW2Manager) CopyImage(ctx context.Context, image string, newName stri
 	}
 	defer from.Close()
 
-	err = os.MkdirAll(filepath.Dir(newName), 0644)
+	err = os.MkdirAll(filepath.Dir(newName), 0777)
 	if err != nil {
 		return err
 	}
