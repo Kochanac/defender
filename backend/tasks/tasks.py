@@ -27,7 +27,7 @@ def convert_args_and_variant(variant: m_checker.CheckVariant, flag: str | None, 
     print(variant)
     
     if args is None:
-        args = []
+        args = [""]
 
     if variant == m_checker.CheckVariant.health:
         return ["check", hostname]
