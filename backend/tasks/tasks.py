@@ -27,7 +27,7 @@ def convert_args_and_variant(variant: m_checker.CheckVariant, flag: str | None, 
     print(variant)
     
     if args is None:
-        args = [""]
+        args = [""] # it ought to use flag_id as some "seed" to generate such data acc to https://github.com/pomo-mondreganto/ForcAD/wiki/Writing-a-checker
 
     if variant == m_checker.CheckVariant.health:
         return ["check", hostname]
