@@ -239,7 +239,7 @@ class Snapshots extends React.Component {
                     <label class="block font-semibold mb-2" for="name">
                         Имя снапшота (будет видно всем)
                     </label>
-                    <input id="snapshot-name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none" placeholder="обветренный лох" />
+                    <input id="snapshot-name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none" placeholder="имя имя" />
                     <button
                         className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mt-3 " + (this.state.new_snapshot_enabled ? "bg-indigo-400 hover:scale-105 duration-200" : "bg-gray-300")}
                         onClick={this.create_new_snapshot.bind(this)}>

@@ -244,7 +244,7 @@ class Task extends React.Component {
                 </div>
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-6">
-                        5. Учавствуйте в рейтинговой игре против других участников
+                        5. Участвуйте в рейтинговой игре против других участников
                     </p>
 
                     {this.state.passed_to_rating &&
