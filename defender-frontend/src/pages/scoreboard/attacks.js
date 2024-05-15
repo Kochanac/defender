@@ -208,7 +208,7 @@ class Attacks extends React.Component {
                     <label class="block font-semibold mb-2" for="name">
                         Имя атаки (будет видно всем)
                     </label>
-                    <input id="name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none mb-2" placeholder="обветренный лох" />
+                    <input id="name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none mb-2" placeholder="самая сильная атака" />
 
                     <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-pink-600")}>
                         Отправить
