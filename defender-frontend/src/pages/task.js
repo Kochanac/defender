@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { TaskDemo } from "./task_demo.js";
 import { convert_status } from "./utils.js";
 import MyMachine from "./elements/my-machine.js";
+import Breadcrumbs, { Breadcrumb } from "./elements/breadcrumbs.js";
 
 class Task extends React.Component {
     // TODO: Make defence (and attack?) another component
@@ -154,81 +155,102 @@ class Task extends React.Component {
     render() {
         return (
             <div>
-                <div className="mb-9 flex gap-4">
-                    <div className="text-5xl p-4 bg-gray-200 rounded duration-200 hover:scale-110" onClick={() => { window.location.href = "/tasks" }}>
-                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
+                <Breadcrumbs username={this.state.username}>
+                    <Breadcrumb href="/tasks">
                         Таски
-                    </div>
-                    <div className="text-5xl pt-4 pb-4">/</div>
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
-                    <div className="flex-grow" />
-                    <div className="flex flex-col">
-                        <div className="flex-grow" />
-                        <h1 className="text-2xl text-gray-600 align-bottom">@{this.state.username}</h1>
-                    </div>
-                </div>
+                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
+                    </Breadcrumb>
+                    <Breadcrumb href="/tasks">
+                        <span>{this.state.title}</span>
+                    </Breadcrumb>
+                </Breadcrumbs>
 
                 {/* <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-2">
-                        0. Дисклеймер
-                    </p>
-                    <p className="block text-xl font-semibold mb-2">
-                        Пункт 2 пока что не работает. Просто прокликайте кнопку в пункте 2 и запускайте себе виртуалку, ваша цель: защититься от атак системы.
+                    <p className="block text-2xl font-semibold mb-2">
+                        Задача с RuCTF 2034
                     </p>
                 </div> */}
-                <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-2">
-                        1. Скачайте сервис
-                        <a href={this.state.download_url}
-                            style={{ background: "#d4578e" }}
-                            className="hover:scale-105 duration-500 ml-3 font-bold inline-block
-                                text-white text-xl rounded-md py-2 px-3 leading-tight">
-                            Скачать
-                        </a>
-                    </p>
-                    <p className="block text-xl font-semibold mb-4">
-                        Прочитайте код и найдите уязимость, которая позволит узнать флаги
-                    </p>
+
+
+                <div className="p-6 rounded-xl shadow-md
+                bg-light-surface text-light-onSurface
+                dark:bg-dark-surface dark:text-dark-onSurface
+                    ">
+                    <h1 className="block text-3xl font-semibold mb-8">
+                        Атакуйте
+                    </h1>
+                    <div className="my-4 p-6 rounded-xl
+                        bg-light-primaryContainer text-light-onPrimaryContainer
+                        dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer
+                    ">
+                        <p className="block text-2xl font-semibold mb-2">
+                            Скачайте сервис
+                            <a href={this.state.download_url}
+                                // style={{ background: "#d4578e" }}
+                                className="hover:scale-105 duration-500 ml-3 font-bold inline-block
+                             text-xl rounded-md py-2 px-3 leading-tight
+                            bg-light-primary text-light-onPrimary
+                            dark:bg-dark-primary dark:text-dark-onPrimary
+                            ">
+                                Скачать
+                            </a>
+                        </p>
+                        <p className="block text-xl font-semibold mb-4">
+                            Прочитайте код и найдите уязимость, которая позволит узнать флаги
+                        </p>
+                    </div>
+                    <div className="
+                    my-4 p-6 rounded-xl shadow-md
+                    bg-light-primaryContainer text-light-onPrimaryContainer
+                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer
+                    ">
+                        <p className="block text-2xl font-semibold mb-2">
+                            Напишите эксплойт
+                        </p>
+                        <p className="block text-xl font-semibold mb-4">
+                            Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-600 dark:text-blue-300 font-bold">пример</a>
+                        </p>
+                        <p className="block text-xl font-semibold mb-4 flex flex-row gap-4">
+                            <div className="self-center">Демка сервиса доступна здесь:</div>
+                            <TaskDemo task_id={this.state.task_id} />
+                        </p>
+                        <p className="block text-xl font-semibold mb-2">
+                            Python, Requests предустановлены:
+                        </p>
+                        <textarea id="exploit_code" className="
+                            p-4 w-full code text-md my-4 rounded-xl duration-75
+                            bg-light-surfaceVariant text-light-onSurfaceVariant
+                            dark:bg-dark-surfaceVariant dark:text-dark-onSurfaceVariant
+                        " rows="10">
+
+                        </textarea>
+                        <button onClick={this.send_exploit.bind(this)} className={"duration-500 text-light-onPrimary dark:text-dark-onPrimary font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-light-primary dark:bg-dark-primary hover:scale-105")}>
+                            Отправить
+                        </button>
+
+                        {this.state.exploit.status != null && this.state.exploit.status !== "checked" &&
+                            <div className="text-2xl font-semibold pt-1">
+                                <Wait text={convert_status(this.state.exploit.status)} />
+                            </div>
+                        }
+
+                        {this.state.exploit.status === "checked" &&
+                            <div className={"text-5xl font-bold pt-1 " + (this.state.exploit.result ? "text-green-500" : "text-red-500")}>
+                                {this.state.exploit.result ? "✓" : "⨯"}
+                            </div>
+                        }
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-2">
-                        2. Напишите эксплойт
+
+
+                <div className="p-6 my-4 rounded-xl shadow-md
+                bg-light-surface text-light-onSurface
+                dark:bg-dark-surface dark:text-dark-onSurface">
+                    <p className="block text-3xl font-semibold mb-8">
+                        Защититесь
                     </p>
+
                     <p className="block text-xl font-semibold mb-4">
-                        Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-900 font-bold">пример</a>
-                    </p>
-                    <p className="block text-xl font-semibold mb-4 flex flex-row gap-4">
-                        <div className="self-center">Демка сервиса доступна здесь:</div>
-                        <TaskDemo task_id={this.state.task_id} />
-                    </p>
-                    <p className="block text-xl font-semibold mb-2">
-                        Python, Requests предустановлены:
-                    </p>
-                    <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10">
-
-                    </textarea>
-                    <button onClick={this.send_exploit.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-blue-500 hover:scale-105")}>
-                        Отправить
-                    </button>
-
-                    {this.state.exploit.status != null && this.state.exploit.status !== "checked" &&
-                        <div className="text-2xl font-semibold pt-1">
-                            <Wait text={convert_status(this.state.exploit.status)} />
-                        </div>
-                    }
-
-                    {this.state.exploit.status === "checked" &&
-                        <div className={"text-5xl font-bold pt-1 " + (this.state.exploit.result ? "text-green-500" : "text-red-500")}>
-                            {this.state.exploit.result ? "✓" : "⨯"}
-                        </div>
-                    }
-                </div>
-                <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-2">
-                        3. Защитите сервис
-                    </p>
-
-                    <p className="block text-xl font-semibold mb-2">
                         После успешного эксплойта, вы сможете запустить виртуалку с сервисом и исправить на ней уязвимости
                     </p>
                     {this.state.defence_unlocked &&
@@ -237,6 +259,8 @@ class Task extends React.Component {
                         </div>
                     }
                 </div>
+
+
                 <div className="mb-4">
                     <p className="block text-3xl font-semibold mb-2">
                         4. {this.state.flag}

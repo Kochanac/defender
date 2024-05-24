@@ -47,22 +47,24 @@ class TaskDemo extends React.Component {
 
     render() {
         return (
-            <div className="p-3 bg-gray-100 rounded-xl">
+            <div className="p-3 rounded-xl
+            bg-light-tertiaryContainer text-light-onTertiaryContainer
+            dark:bg-dark-tertiaryContainer dark:text-dark-onTertiaryContainer">
                 <div className="p-1 flex flex-row gap-2">
 
-                {this.state.status === "ok" &&
-                    <div class="mt-0.5 w-4 h-4 bg-green-500 rounded-full self-center aspect-square"></div>
-                }
-                {this.state.status === "fail" &&
-                    <div class="mt-0.5 w-4 h-4 bg-red-500 rounded-full self-center aspect-square"></div>
-                }
+                    {this.state.status === "ok" &&
+                        <div class="mt-0.5 w-4 h-4 bg-green-500 rounded-full self-center aspect-square"></div>
+                    }
+                    {this.state.status === "fail" &&
+                        <div class="mt-0.5 w-4 h-4 bg-red-500 rounded-full self-center aspect-square"></div>
+                    }
 
-                {this.state.status === "ok" &&
-                    <a className="self-center text-blue-600" href={this.state.label}>{this.state.label}</a>
-                }
-                {this.state.status === "fail" &&
-                    <Wait text="Демка скоро поднимется" />
-                }
+                    {this.state.status === "ok" &&
+                        <a className="self-center text-blue-600 dark:text-blue-300" href={this.state.label}>{this.state.label}</a>
+                    }
+                    {this.state.status === "fail" &&
+                        <Wait text="Демка скоро поднимется" />
+                    }
                 </div>
             </div>
         )

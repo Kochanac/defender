@@ -38,8 +38,8 @@ class MyMachine extends React.Component {
     }
 
     check_colors = {
-        "green": "bg-green-200",
-        "red": "bg-red-200"
+        "green": "bg-green-200 dark:bg-green-800",
+        "red": "bg-red-200 dark:bg-red-800"
     }
 
     async request(url, data = {}) {
@@ -296,19 +296,24 @@ class MyMachine extends React.Component {
     render() {
         return (
             <div className="mb-4">
-                <button onClick={this.create_box.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.create_enabled ? "bg-red-500 hover:scale-105" : "bg-gray-300")}>
+                <button onClick={this.create_box.bind(this)}
+                    className={"duration-500 font-bold appearance-none rounded-md p-3 mb-3 mr-2  " 
+                    + (this.state.defence.display.buttons.create_enabled ? "bg-light-primary dark:bg-dark-primary text-light-onPrimary dark:text-dark-onPrimary hover:scale-105" : "bg-gray-300 text-white")}>
                     Создать виртуалку
                 </button>
                 <button onClick={this.start_box.bind(this)}
-                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.start_enabled ? "bg-green-400 hover:scale-105" : "bg-gray-300")}>
+                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " 
+                    + (this.state.defence.display.buttons.start_enabled ? "bg-green-400 hover:scale-105" : "bg-gray-300")}>
                     Включить
                 </button>
                 <button onClick={this.stop_box.bind(this)}
-                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400 hover:scale-105" : "bg-gray-300")}>
+                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 mr-2 " 
+                    + (this.state.defence.display.buttons.stop_enabled ? "bg-red-400 hover:scale-105" : "bg-gray-300")}>
                     Выключить
                 </button>
                 <button onClick={this.remove_box.bind(this)}
-                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.buttons.remove_enabled ? "bg-black hover:scale-105" : "bg-gray-300")}>
+                    className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " 
+                    + (this.state.defence.display.buttons.remove_enabled ? "bg-black hover:scale-105" : "bg-gray-300")}>
                     Удалить виртуалку
                 </button>
 
@@ -328,10 +333,10 @@ class MyMachine extends React.Component {
 
                 {!this.state.hide_checks &&
                     <div>
-                        <p className="block text-xl font-semibold mb-2">
-                            Пофиксите и нажмите на эту кнопку
+                        <p className="block text-xl font-semibold mb-4">
+                            Исправьте уязимости и нажмите на эту кнопку
                         </p>
-                        <button onClick={this.defence_test.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-blue-500 hover:scale-105" : "bg-gray-300")}>
+                        <button onClick={this.defence_test.bind(this)} className={"duration-500 text-white font-bold appearance-none rounded-md p-3 mb-3 " + (this.state.defence.display.check_button ? "bg-light-primary dark:bg-dark-primary text-light-onPrimary dark:text-dark-onPrimary hover:scale-105" : "bg-gray-300")}>
                             Протестировать
                         </button>
 

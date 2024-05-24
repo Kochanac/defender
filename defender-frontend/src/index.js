@@ -15,13 +15,14 @@ import TaskList from "./pages/tasklist";
 import Table from "./pages/scoreboard/table";
 import Attacks from './pages/scoreboard/attacks';
 import Snapshots from './pages/scoreboard/snapshots';
+import ThemeSwitch from './pages/elements/theme-switcher.tsx';
 
 export const HOST = "http://127.0.0.1:8000/"
 
 ReactDOM.render(
     <React.StrictMode>
-        <div className="App flex justify-center lg:p-20 md:p-16 sm:p-6">
-            <div className="giga-container rounded px-8 pt-6 pb-8 w-full xl:w-1/2 lg:w-3/4 md:w-5/6 sm:w-full">
+        <div className="App flex justify-center lg:p-20 md:p-16 sm:p-6 bg-light-surfaceContainer dark:bg-dark-surfaceContainer text-light-onSurface dark:text-dark-onSurface min-h-screen">
+            <div className="giga-container rounded px-8 pt-6 pb-8 w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full">
                 <Router>
                     <Routes>
                         <Route path="/task/:id" element=   <Task />   >
@@ -50,6 +51,10 @@ ReactDOM.render(
                     </Routes>
                 </Router>
 
+            </div>
+            <div className='fixed top-0 right-0 p-4'>
+
+                <ThemeSwitch/>
             </div>
         </div>
 

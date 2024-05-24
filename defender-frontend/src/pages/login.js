@@ -6,9 +6,9 @@ async function RegUser() {
     let password = document.getElementById("password").value;
 
     let data = await call("register", {
-            username: username,
-            password: password
-        }
+        username: username,
+        password: password
+    }
     )
 
     console.log(data);
@@ -23,9 +23,9 @@ async function LogUser() {
     let password = document.getElementById("password").value
 
     let data = await call("login", {
-            username: username,
-            password: password
-        }
+        username: username,
+        password: password
+    }
     )
 
     if (data["status"] === "ok") {
@@ -41,21 +41,24 @@ function Login() {
         <form class="">
             <div class="mb-9">
                 <h1 id="title" class="text-5xl">
-                    Defender 0.2
+                    Defender 0.3
                 </h1>
             </div>
-            <div class="mb-4">
+            <div class="mb-6">
                 <label class="block font-semibold mb-2" for="title">
                     Юзернейм
                 </label>
                 <input
-                    class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    class="
+                    bg-light-primaryContainer text-light-primary
+                    dark:bg-dark-primaryContainer dark:text-dark-primary
+                    appearance-none rounded-xl w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline"
                     id="username"
                     type="text"
                     placeholder=""
                 />
             </div>
-            <div class="mb-4">
+            <div class="mb-6">
                 <label
                     class="block font-semibold mb-2"
                     for="username"
@@ -63,22 +66,31 @@ function Login() {
                     Пароль
                 </label>
                 <input
-                    class="bg-gray-100 appearance-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    class="
+                    bg-light-primaryContainer text-light-primary
+                    dark:bg-dark-primaryContainer dark:text-dark-primary
+                    appearance-none rounded-xl w-full py-4 px-3 leading-tight focus:outline-none focus:shadow-outline"
                     id="password"
                     type="password"
                     placeholder=""
                 />
             </div>
-            <div class="flex items-start justify-start">
+            <div class="flex mt-10">
                 <button onClick={RegUser}
-                    className="bg-red-500 hover:bg-red-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="w-full
+                    bg-light-secondaryContainer text-light-onSecondaryContainer hover:bg-light-secondaryFixedDim
+                    dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer dark:hover:bg-dark-surfaceVariant
+                    font-bold py-6 px-4 rounded-xl focus:outline-none focus:shadow-outline"
                     type="button">
                     Зарегистрироваться
                 </button>
                 <button onClick={LogUser}
-                    className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="ml-2 w-full
+                    bg-light-primaryContainer text-light-onPrimaryContainer hover:bg-light-primaryFixedDim
+                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer dark:hover:bg-dark-surfaceVariant
+                    font-bold py-6 px-4 rounded-xl focus:outline-none focus:shadow-outline"
                     type="button">
-                    Залогиниться
+                    Войти
                 </button>
             </div>
         </form>
