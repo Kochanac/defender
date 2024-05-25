@@ -179,12 +179,12 @@ class Task extends React.Component {
                     <h1 className="block text-3xl font-semibold mb-8">
                         Атакуйте
                     </h1>
-                    <div className="my-4 p-6 rounded-xl
-                        bg-light-primaryContainer text-light-onPrimaryContainer
-                        dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer
+                    {/* bg-light-primaryContainer text-light-onPrimaryContainer
+                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer */}
+                    <div className="my-4 py-2 rounded-xl
                     ">
                         <p className="block text-2xl font-semibold mb-2">
-                            Скачайте сервис
+                            1. Скачайте сервис
                             <a href={this.state.download_url}
                                 // style={{ background: "#d4578e" }}
                                 className="hover:scale-105 duration-500 ml-3 font-bold inline-block
@@ -199,13 +199,13 @@ class Task extends React.Component {
                             Прочитайте код и найдите уязимость, которая позволит узнать флаги
                         </p>
                     </div>
+                    {/* bg-light-primaryContainer text-light-onPrimaryContainer
+                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer */}
                     <div className="
-                    my-4 p-6 rounded-xl shadow-md
-                    bg-light-primaryContainer text-light-onPrimaryContainer
-                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer
+                    my-4 py-2 rounded-xl shadow-md
                     ">
                         <p className="block text-2xl font-semibold mb-2">
-                            Напишите эксплойт
+                            2. Напишите эксплойт
                         </p>
                         <p className="block text-xl font-semibold mb-4">
                             Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-600 dark:text-blue-300 font-bold">пример</a>
@@ -258,26 +258,34 @@ class Task extends React.Component {
                             <MyMachine />
                         </div>
                     }
+
+
                 </div>
 
-
-                <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-2">
-                        4. {this.state.flag}
+                <div className="p-6 my-4 rounded-xl shadow-md
+                bg-light-surface text-light-onSurface
+                dark:bg-dark-surface dark:text-dark-onSurface">
+                    {/* <p className="block text-3xl font-semibold mb-8">
+                        
+                    </p> */}
+                    <p className="block text-xl font-semibold mb-4">
+                        После успешной защиты, вы получите флаг и сможете перейти к рейтинговой игре
+                    </p>
+                    <p className="block text-xl font-semibold mb-4">
+                        Ваш флаг: {this.state.flag}
                     </p>
                 </div>
-                <div className="mb-4">
-                    <p className="block text-3xl font-semibold mb-6">
-                        5. Участвуйте в рейтинговой игре против других участников
-                    </p>
 
-                    {this.state.passed_to_rating &&
-                        <a href={"/scoreboard/" + this.state.task_id} className="duration-500 w-full p-4 bg-purple-500 text-white rounded-md appearance-none font-bold inline-block text-center hover:scale-105">
-                            Перейти в рейтинговую игру
-                        </a>
-                    }
-                </div>
-
+                {this.state.passed_to_rating &&
+                    <a href={"/scoreboard/" + this.state.task_id} 
+                    className="duration-500 w-full p-4 h-32 shadow-md
+                    bg-light-primaryContainer text-light-onPrimaryContainer hover:bg-light-primaryFixedDim
+                    dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer dark:hover:bg-dark-onPrimary
+                    text-center align-middle flex justify-center flex-col
+                    rounded-xl appearance-none font-bold">
+                        Перейти в рейтинговую игру
+                    </a>
+                }
             </div>
         );
     }
