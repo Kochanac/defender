@@ -17,7 +17,7 @@ function addSeparator(array, separator) {
 
 export function Breadcrumbs(props) {
 
-    let children = addSeparator(props.children, <div className="pt-10 pb-4">/</div>)
+    let children = addSeparator(props.children, <div className="py-6 sm:py-6 md:py-8 lg:py-10 pb-4">/</div>)
     let username = props.username;
 
     return (
@@ -38,7 +38,7 @@ export function Breadcrumbs(props) {
 export function Breadcrumb(props) {
     return (
         <a href={props.href} className='
-        p-10
+        p-6 sm:p-6 md:p-8 lg:p-10
         bg-light-secondaryContainer text-light-onSecondaryContainer dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
         hover:bg-light-secondaryFixedDim dark:hover:bg-dark-surfaceVariant  hover:scale-105
         rounded-xl duration-200

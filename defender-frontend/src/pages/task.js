@@ -202,7 +202,7 @@ class Task extends React.Component {
                     {/* bg-light-primaryContainer text-light-onPrimaryContainer
                     dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer */}
                     <div className="
-                    my-4 py-2 rounded-xl shadow-md
+                    my-4 py-2 rounded-xl
                     ">
                         <p className="block text-2xl font-semibold mb-2">
                             2. Напишите эксплойт

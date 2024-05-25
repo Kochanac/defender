@@ -48,8 +48,8 @@ class TaskDemo extends React.Component {
     render() {
         return (
             <div className="p-3 rounded-xl
-            bg-light-tertiaryContainer text-light-onTertiaryContainer
-            dark:bg-dark-tertiaryContainer dark:text-dark-onTertiaryContainer">
+            bg-light-primaryContainer text-light-onPrimaryContainer
+            dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer">
                 <div className="p-1 flex flex-row gap-2">
 
                     {this.state.status === "ok" &&

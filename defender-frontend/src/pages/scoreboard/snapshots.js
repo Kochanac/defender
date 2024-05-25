@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { convert_status, attack, snapshot } from "../utils.js";
 import Styles from "./styles.js";
 import MyMachine from "../elements/my-machine.js";
+import Breadcrumbs, { Breadcrumb } from "../elements/breadcrumbs.js";
 
 const MAGIC_SYMBOL = "%"
 
@@ -206,29 +207,25 @@ class Snapshots extends React.Component {
             <div>
                 <Styles />
 
-                <div className="mb-9 flex gap-4">
-                    <div className="text-5xl p-4 bg-gray-200 rounded duration-200 hover:scale-110" onClick={() => { window.location.href = "/tasks" }}>
-                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
+                <Breadcrumbs username={this.state.username}>
+                    <Breadcrumb href="/tasks">
                         Таски
-                    </div>
-                    <div className="text-5xl pt-4 pb-4">/</div>
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >{this.state.title}</h1>
-
-                    <div className="text-5xl pt-4 pb-4">/</div>
-                    <h1 className="text-5xl p-4 bg-gray-200 rounded flex justify-end flex-col" onClick={() => { window.location.href = "/tasks" }} >Снапшоты</h1>
-
-                    <div className="flex-grow" />
-                    <div className="flex flex-col">
-                        <div className="flex-grow" />
-                        <h1 className="text-2xl text-gray-600 align-bottom">@{this.state.username}</h1>
-                    </div>
-                </div>
+                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
+                    </Breadcrumb>
+                    <Breadcrumb href={"/task/"+this.state.task_id}>
+                        <span>{this.state.title}</span>
+                    </Breadcrumb>
+                    <Breadcrumb href="#">
+                        <span>Снапшоты</span>
+                    </Breadcrumb>
+                </Breadcrumbs>
 
                 <div id="tabs" className="pt-4 pb-4">
                     <nav className="flex gap-4">
-                        <a className="p-4 rounded-xl  bg-gray-300" href={"/scoreboard/" + (this.state.task_id)}>Рейтинг</a>
-                        <a className="p-4 rounded-xl bg-gray-300" href={"/attacks/" + (this.state.task_id)}>Атаки</a>
-                        <a className="p-4 rounded-xl bg-gray-800 text-white" href={"/snapshots/" + (this.state.task_id)}>Снапшоты</a>
+                        <a className="p-4 rounded-xl  bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/scoreboard/" + (this.state.task_id)}>Рейтинг</a>
+                        <a className="p-4 rounded-xl bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/attacks/" + (this.state.task_id)}>Атаки</a>
+                        <a className="p-4 rounded-xl bg-light-primary text-light-onPrimary dark:bg-dark-primary dark:text-dark-onPrimary
+                        " href={"/snapshots/" + (this.state.task_id)}>Снапшоты</a>
                     </nav>
                 </div>
                 <div className="pb-4">
