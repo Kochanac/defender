@@ -65,7 +65,7 @@ def get_snapshot_score(snapshot_id: int) -> Tuple[int, int]:
             m_exploit.ExploitStatus.checked,
             m_exploit.ExploitStatus.to_delete_machine,
         ]:
-            if result == m_exploit.ExploitResult.ok:
+            if result != m_exploit.ExploitResult.no_flags:
                 hackers.add(attack.user_id)
 
     return len(snaps) - len(hackers), len(snaps)

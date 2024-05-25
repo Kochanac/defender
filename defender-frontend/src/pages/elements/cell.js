@@ -24,8 +24,22 @@ export function Cell(props) {
     }
     if (result === "MACHINE START TIMEOUT") {
         return <td>
-            <div className="aspect-square bg-yellow text-light-onError dark:bg-dark-errorContainer dark:text-dark-onErrorContainer rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+            <div className="aspect-square bg-yellow-300 text-black dark:bg-yellow-600 dark:text-white text-sm rounded-2xl text-center align-middle flex justify-center flex-col m-1">
                 Таймаут запуска сервиса
+            </div>
+        </td>
+    }
+    if (result === "OTHER CHECKER FAIL") {
+        return <td>
+            <div className="aspect-square bg-purple-300 text-black dark:bg-purple-600 dark:text-white text-sm rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                Ошибка чекера
+            </div>
+        </td>
+    }
+    if (result == null && status === "checked") {
+        return <td>
+            <div className="aspect-square bg-purple-300 text-black dark:bg-purple-600 dark:text-white text-sm rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                Ошибка
             </div>
         </td>
     }
