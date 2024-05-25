@@ -13,8 +13,8 @@ function ThemeSwitch() {
   const [theme, setTheme] = useLocalStorage('theme', 'light')
 
   useEffect(() => {
-    document.body.classList.remove('light', 'dark')
-    document.body.classList.add(theme)
+    window.document.documentElement.classList.remove('light', 'dark')
+    window.document.documentElement.classList.add(theme)
   }, [theme])
 
   const [enabled, setEnabled] = useState(theme === 'light')

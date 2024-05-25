@@ -184,10 +184,10 @@ class Task extends React.Component {
                     <div className="my-4 py-2 rounded-xl
                     ">
                         <p className="block text-2xl font-semibold mb-2">
-                            1. Скачайте сервис
+                            <span className="mr-3">1. Скачайте сервис</span>
                             <a href={this.state.download_url}
                                 // style={{ background: "#d4578e" }}
-                                className="hover:scale-105 duration-500 ml-3 font-bold inline-block
+                                className="hover:scale-105 duration-500 my-3 font-bold inline-block
                              text-xl rounded-md py-2 px-3 leading-tight
                             bg-light-primary text-light-onPrimary
                             dark:bg-dark-primary dark:text-dark-onPrimary
@@ -210,7 +210,7 @@ class Task extends React.Component {
                         <p className="block text-xl font-semibold mb-4">
                             Первым аргументом (в sys.argv) он принимает адрес машины с сервисом, и должен вывести все найденные флаги в stdout. <a href={this.state.exploit_example} className="text-blue-600 dark:text-blue-300 font-bold">пример</a>
                         </p>
-                        <p className="block text-xl font-semibold mb-4 flex flex-row gap-4">
+                        <p className="text-xl font-semibold mb-4 flex flex-row gap-4 flex-wrap">
                             <div className="self-center">Демка сервиса доступна здесь:</div>
                             <TaskDemo task_id={this.state.task_id} />
                         </p>
@@ -281,7 +281,7 @@ class Task extends React.Component {
                     className="duration-500 w-full p-4 h-32 shadow-md
                     bg-light-primaryContainer text-light-onPrimaryContainer hover:bg-light-primaryFixedDim
                     dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer dark:hover:bg-dark-onPrimary
-                    text-center align-middle flex justify-center flex-col
+                    text-center align-middle flex justify-center flex-col hover:shadow-md
                     rounded-xl appearance-none font-bold">
                         Перейти в рейтинговую игру
                     </a>

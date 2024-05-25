@@ -9,7 +9,7 @@ import api.repository.exploit.exploit as exploit_repo
 import api.repository.machine.adapters.first_defence as fd_machine
 import api.repository.snapshot.snapshot as snapshot
 
-WATCHER_EVERY_X_SECONDS = 5
+WATCHER_EVERY_X_SECONDS = 2
 CHECK_EVERY_X_MINUTES = 1
 
 

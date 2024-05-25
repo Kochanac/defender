@@ -8,7 +8,7 @@ import api.repository.attack.attack as attack
 import api.repository.exploit.exploit as exploit_repo
 import api.repository.snapshot.adapters.attack_watcher as snapshot_adapter
 
-WATCHER_EVERY_X_SECONDS = 5
+WATCHER_EVERY_X_SECONDS = 2
 
 
 def handle_active_attack(at: m_attack.Attack):

@@ -27,7 +27,7 @@ function Styles() {
                 // position: relative;
             }
             .long {
-                padding: 1rem 0rem 1rem 0rem;
+                // padding: 1rem 0rem 1rem 0rem;
                 max-width: fit-content;
                 min-width: fit-content;
                 width: fit-content;
@@ -45,6 +45,7 @@ function Styles() {
                 white-space: nowrap;
                 position: relative;
                 width: auto;
+                z-index: 0;
                 
                 // transform: rotate(-45deg);
                 // margin-bottom: 50%;
@@ -52,6 +53,7 @@ function Styles() {
 
             th.rotate > div {
                 position: absolute;
+                z-index: -10;
                 transform: rotate(-45deg);
                 bottom: 0;
                 left: 0;
@@ -59,6 +61,7 @@ function Styles() {
             }
             th.rotate > div > span {
                 position: absolute;
+                z-index: -10;
                 bottom: 0;
                 left: 0;
                 border-bottom: 1px solid gray;

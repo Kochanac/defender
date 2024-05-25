@@ -7,6 +7,8 @@ import { convert_status, attack, snapshot } from "../utils.js";
 import Styles from "./styles.js";
 import MyMachine from "../elements/my-machine.js";
 import Breadcrumbs, { Breadcrumb } from "../elements/breadcrumbs.js";
+import { Navbar, NavbarEntry } from "../elements/navbar.js";
+import { Cell } from "../elements/cell.js";
 
 const MAGIC_SYMBOL = "%"
 
@@ -212,49 +214,71 @@ class Snapshots extends React.Component {
                         Таски
                         {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
                     </Breadcrumb>
-                    <Breadcrumb href={"/task/"+this.state.task_id}>
+                    <Breadcrumb href={"/task/" + this.state.task_id}>
                         <span>{this.state.title}</span>
                     </Breadcrumb>
                     <Breadcrumb href="#">
-                        <span>Снапшоты</span>
+                        <span>Рейтинг</span>
                     </Breadcrumb>
                 </Breadcrumbs>
 
-                <div id="tabs" className="pt-4 pb-4">
-                    <nav className="flex gap-4">
-                        <a className="p-4 rounded-xl  bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/scoreboard/" + (this.state.task_id)}>Рейтинг</a>
-                        <a className="p-4 rounded-xl bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/attacks/" + (this.state.task_id)}>Атаки</a>
-                        <a className="p-4 rounded-xl bg-light-primary text-light-onPrimary dark:bg-dark-primary dark:text-dark-onPrimary
-                        " href={"/snapshots/" + (this.state.task_id)}>Снапшоты</a>
-                    </nav>
-                </div>
-                <div className="pb-4">
-                    <h2 className="text-3xl mb-4 font-bold">Ваша машина</h2>
-                    <MyMachine hide_checks={true} />
-                </div>
-                <div className="flex flex-col w-1/3 min-w-80">
-                    <label class="block font-semibold mb-2" for="name">
-                        Имя снапшота (будет видно всем)
-                    </label>
-                    <input id="snapshot-name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none" placeholder="имя имя" />
-                    <button
-                        className={"text-white font-bold appearance-none rounded-md p-3 mb-3 mt-3 " + (this.state.new_snapshot_enabled ? "bg-indigo-400 hover:scale-105 duration-200" : "bg-gray-300")}
-                        onClick={this.create_new_snapshot.bind(this)}>
-                        Отправить новую версию машины
-                    </button>
+                <Navbar>
+                    <NavbarEntry href={"/scoreboard/" + (this.state.task_id)} active={false} icon={<span class="material-symbols-outlined">group</span>}>
+                        Рейтинг
+                    </NavbarEntry>
+                    <NavbarEntry href={"/attacks/" + (this.state.task_id)} active={false} icon={<span class="material-symbols-outlined">swords</span>}>
+                        Атаки
+                    </NavbarEntry>
+                    <NavbarEntry href={"/snapshots/" + (this.state.task_id)} active={true} icon={<span class="material-symbols-outlined">shield</span>}>
+                        Снапшоты
+                    </NavbarEntry>
+                </Navbar>
 
-                    {this.state.snapshot.show_label &&
-                        <div className="text-2xl font-semibold pt-1">
-                            <Wait text={this.state.snapshot.label_text} />
+
+                <div className="
+                p-4 rounded-xl shadow-md z-20
+                bg-light-surface text-light-onSurface
+                dark:bg-dark-surface dark:text-dark-onSurface
+                w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full
+                ">
+                    <div className="pb-4 z-10">
+                        <h2 className="text-3xl mb-4 font-bold">Ваша машина</h2>
+                        <MyMachine 
+                        // hide_checks={true} 
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <label class="block font-semibold mb-2" for="name">
+                            Имя снапшота (будет видно всем)
+                        </label>
+                        <input id="snapshot-name" name="name" className="h-full p-2 rounded-md 
+                        bg-light-surfaceVariant text-light-onSurfaceVariant
+                        dark:bg-dark-surfaceVariant dark:text-dark-onSurfaceVariant
+                        appearance-none" placeholder="имя имя" />
+                        <button
+                            className={"text-white font-bold appearance-none rounded-md p-3 py-6 mb-3 mt-3 " + 
+                            (this.state.new_snapshot_enabled ? 
+                                "bg-light-primary dark:bg-dark-primary text-light-onPrimary dark:text-dark-onPrimary hover:scale-105 duration-200" 
+                                : "bg-gray-300")}
+                            onClick={this.create_new_snapshot.bind(this)}>
+                            Отправить новую версию машины
+                        </button>
+
+                        {this.state.snapshot.show_label &&
+                            <div className="text-2xl font-semibold pt-1">
+                                <Wait text={this.state.snapshot.label_text} />
+                            </div>
+                        }
+
+                        <div className="bg-light-errorContainer text-light-onErrorContainer dark:bg-dark-errorContainer dark:text-dark-onErrorContainer rounded-md p-4 text-xl mt-4 z-20">
+                            <p>! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны.</p>
+                            <p>В целом, рекомендуется перезапустить машину перед отправкой в систему и убедиться в её работоспособности</p>
+
                         </div>
-                    }
-
-                    <div className="bg-red-200 rounded-md p-4 text-xl mt-4">
-                        <p>! Рекомендуется запускать команду `sync` перед созданием новой версии машины, чтобы кеши дисков точно пролились. Я пока не разобрался как решить эту проблему со своей стороны.</p>
-                        <p>В целом, рекомендуется перезапустить машину перед отправкой в систему и убедиться в её работоспособности</p>
-
                     </div>
                 </div>
+
+
                 <div className="pt-6">
                     <table className="table-auto overflow-auto">
                         <thead>
@@ -271,7 +295,10 @@ class Snapshots extends React.Component {
                                     <th className="rotate">
                                         <div>
                                             <span>Attack #{this.state.attacks[attack_id].id} ({this.state.attacks[attack_id].name})
-                                                <span className="p-1.5 bg-gray-200 rounded-lg ml-0.5">@{this.state.users[this.state.attacks[attack_id].user_id] || "??"}</span>
+                                                <span className="p-1.5  rounded-lg ml-0.5
+                                                                bg-light-secondaryContainer text-light-onSecondaryContainer
+                                                                dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
+                                                ">@{this.state.users[this.state.attacks[attack_id].user_id] || "??"}</span>
                                             </span>
                                         </div>
                                     </th>
@@ -282,21 +309,59 @@ class Snapshots extends React.Component {
                             {this.state.snapshots.map(snap => (
                                 <tr>
                                     <td className="long text-2xl text-right"><span className="pr-5">#{snap.id}</span></td>
-                                    <td className="long"><span className="pr-3 inline-block">{snap.created_at.toLocaleString('ru-RU')}</span></td>
+                                    <td className="long">
+                                        <div className="p-1 h-full">
+                                            <div className="h-full p-2 rounded-xl
+                                        bg-light-surface text-light-onSurface
+                                        dark:bg-dark-surface dark:text-dark-onSurface
+                                        flex flex-col text-right justify-center
+                                        ">
+                                                <span className="inline-block">{snap.created_at.toLocaleString('ru-RU')}</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td className="long whitespace-nowrap">
-                                        <span className="pr-3">{snap.name}</span><br />
-                                        {snap.state === "active" &&
-                                            <div className=" inline-block p-3 border-2 border-green-400 text-xs rounded-md mt-1 mr-2 whitespace-nowrap">Активен</div>
-                                        }
+                                        <div className="p-1 h-full min-w-80">
+                                            <div className="h-full px-4 py-2 rounded-xl
+                                        bg-light-surface text-light-onSurface
+                                        dark:bg-dark-surface dark:text-dark-onSurface
+                                        flex flex-col text-right justify-center
+                                        gap-2
+                                        ">
+                                                <span className="">{snap.name}</span>
+
+                                                {snap.state === "active" &&
+                                                    <div className="text-center inline-block p-1.5 my-2  
+                                                        bg-light-secondaryContainer text-light-onSecondaryContainer
+                                                        dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
+                                                    text-xs rounded-md whitespace-nowrap">Активен</div>
+                                                }
+                                            </div>
+                                        </div>
+
+
                                     </td>
                                     <td className="long2 whitespace-nowrap">
                                         <div className="h-full flex p-1">
-                                            <div className=" pr-4 pl-4 border-2 rounded-md flex flex-col justify-center score">
+                                            <div className=" pr-4 pl-4 
+                                            shadow-md
+                                            bg-light-surfaceVariant text-light-onSurfaceVariant
+                                            dark:bg-dark-surfaceVariant dark:text-dark-onSurfaceVariant
+                                            rounded-md flex flex-col justify-center score">
                                                 <div className="align-middle text-center">
                                                     {snap.state === "checking" &&
                                                         <span className=""><Wait text="Проверяется" /><br /></span>
                                                     }
-                                                    <span className="">🛡 {snap.score[0]}/{snap.score[1]}</span>
+                                                    <span className="">
+                                                        <div className="flex flex-row gap-1 justify-center">
+                                                            <div className="text-center align-middle flex justify-center flex-col">
+                                                                <span class="material-symbols-outlined">shield</span>
+                                                            </div>
+                                                            <span>
+                                                                {snap.score[0]}/{snap.score[1]}
+                                                            </span>
+                                                        </div>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -311,26 +376,7 @@ class Snapshots extends React.Component {
                                         let status = st[0]
                                         let result = st[1]
 
-                                        if (result === "OK") {
-                                            return <td>
-                                                <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                                    Взлом
-                                                </div>
-                                            </td>
-                                        }
-                                        if (result === "NO FLAGS") {
-                                            return <td>
-                                                <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                                    Не взлом
-                                                </div>
-                                            </td>
-                                        }
-
-                                        return (<td>
-                                            <div className="aspect-square stripes bg-white rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm">
-                                                <Wait text={convert_status(status)} />
-                                            </div>
-                                        </td>)
+                                        return <Cell status={status} result={result} />
                                     })}
 
                                 </tr>
@@ -339,7 +385,7 @@ class Snapshots extends React.Component {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div >
         );
     }
 }

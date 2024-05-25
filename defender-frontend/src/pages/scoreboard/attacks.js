@@ -6,6 +6,8 @@ import { useParams } from "react-router-dom";
 import Styles from "./styles.js";
 import { attack, convert_status, snapshot } from "../utils.js";
 import Breadcrumbs, { Breadcrumb } from "../elements/breadcrumbs.js";
+import { Navbar, NavbarEntry } from "../elements/navbar.js";
+import { Cell } from "../elements/cell.js";
 
 const MAGIC_SYMBOL = "%"
 
@@ -171,28 +173,36 @@ class Attacks extends React.Component {
                         Таски
                         {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
                     </Breadcrumb>
-                    <Breadcrumb href={"/task/"+this.state.task_id}>
+                    <Breadcrumb href={"/task/" + this.state.task_id}>
                         <span>{this.state.title}</span>
                     </Breadcrumb>
                     <Breadcrumb href="#">
-                        <span>Атаки</span>
+                        <span>Рейтинг</span>
                     </Breadcrumb>
                 </Breadcrumbs>
 
 
+                <Navbar>
+                    <NavbarEntry href={"/scoreboard/" + (this.state.task_id)} active={false} icon={<span class="material-symbols-outlined">group</span>}>
+                        Рейтинг
+                    </NavbarEntry>
+                    <NavbarEntry href={"/attacks/" + (this.state.task_id)} active={true} icon={<span class="material-symbols-outlined">swords</span>}>
+                        Атаки
+                    </NavbarEntry>
+                    <NavbarEntry href={"/snapshots/" + (this.state.task_id)} active={false} icon={<span class="material-symbols-outlined">shield</span>}>
+                        Снапшоты
+                    </NavbarEntry>
+                </Navbar>
 
 
-                <div id="tabs" className="pt-4">
-                    <nav className="flex gap-4">
-                        <a className="p-4 rounded-xl  bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/scoreboard/" + (this.state.task_id)}>Рейтинг</a>
-                        <a className="p-4 rounded-xl 
-                        bg-light-primary text-light-onPrimary dark:bg-dark-primary dark:text-dark-onPrimary
-                        " href={"/attacks/" + (this.state.task_id)}>Атаки</a>
-                        <a className="p-4 rounded-xl bg-light-secondaryContainer dark:bg-dark-secondaryContainer" href={"/snapshots/" + (this.state.task_id)}>Снапшоты</a>
-                    </nav>
-                </div>
+                <div className="
+                p-4 rounded-xl shadow-md z-20
+                bg-light-surface text-light-onSurface
+                dark:bg-dark-surface dark:text-dark-onSurface
+                w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full
 
-                <div className="flex flex-col w-1/3 min-w-80 pt-4">
+                flex flex-col
+                ">
                     <p className="block text-xl font-semibold mb-4">
                         Напишите эксплойт, который будет запущен против снапшотов дргуих участников
                     </p>
@@ -202,14 +212,26 @@ class Attacks extends React.Component {
                     <p className="block text-xl font-semibold mb-2">
                         Python, Requests предустановлены:
                     </p>
-                    <textarea id="exploit_code" className="p-3 w-full font-mono text-lg bg-gray-100 mb-2" rows="10" />
+                    <textarea id="exploit_code" className="
+                            p-4 w-full code text-md my-4 rounded-xl duration-75
+                            bg-light-surfaceVariant text-light-onSurfaceVariant
+                            dark:bg-dark-surfaceVariant dark:text-dark-onSurfaceVariant
+                        " rows="10">
+
+                    </textarea>
 
                     <label class="block font-semibold mb-2" for="name">
                         Имя атаки (будет видно всем)
                     </label>
-                    <input id="name" name="name" className="h-full border-2 p-2 rounded-md bg-gray-100 appearance-none mb-2" placeholder="самая сильная атака" />
+                    <input id="name" name="name" className="h-full p-2 rounded-md
+                    bg-light-surfaceVariant text-light-onSurfaceVariant
+                    dark:bg-dark-surfaceVariant dark:text-dark-onSurfaceVariant
+                    appearance-none mb-2" placeholder="самая сильная атака" />
 
-                    <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " + (this.state.exploit_testing ? "bg-gray-300" : "bg-pink-600")}>
+                    <button onClick={this.send_exploit.bind(this)} className={"text-white font-bold appearance-none rounded-md p-3 mb-2 " +
+                        (this.state.exploit_testing ?
+                            "bg-gray-300"
+                            : "bg-light-primary dark:bg-dark-primary text-light-onPrimary dark:text-dark-onPrimary hover:scale-105 duration-200")}>
                         Отправить
                     </button>
                 </div>
@@ -230,7 +252,10 @@ class Attacks extends React.Component {
                                     <th className="rotate">
                                         <div>
                                             <span>#{this.state.snapshots[user_id].id} ({this.state.snapshots[user_id].name})
-                                                <span className="p-1.5 bg-gray-200 rounded-lg ml-0.5">@{this.state.users[this.state.snapshots[user_id].user_id] || "??"}</span>
+                                                <span className="p-1.5  rounded-lg ml-0.5
+                                                                                                                bg-light-secondaryContainer text-light-onSecondaryContainer
+                                                                                                                dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
+                                                ">@{this.state.users[this.state.snapshots[user_id].user_id] || "??"}</span>
                                             </span>
                                         </div>
                                     </th>
@@ -277,38 +302,9 @@ class Attacks extends React.Component {
 
                                         let status = st[0]
                                         let result = st[1]
-
-                                        if (result === "OK") {
-                                            return <td>
-                                                <div className="aspect-square bg-green-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                                    Взлом
-                                                </div>
-                                            </td>
-                                        }
-                                        if (result === "NO FLAGS") {
-                                            return <td>
-                                                <div className="aspect-square bg-red-400 rounded-2xl text-center align-middle flex justify-center flex-col m-1">
-                                                    Не взлом
-                                                </div>
-                                            </td>
-                                        }
-                                        
-                                        let bg = "bg-white"
                                         let act_res = this.state.active_results[attack.id + MAGIC_SYMBOL + user_id]
-                                        
-                                        if (act_res === "OK") {
-                                            bg = "bg-green-400"
-                                        }
-                                        if (act_res === "NO FLAGS") {
-                                            bg = "bg-red-400"
-                                        }
 
-                                        return (<td>
-                                            <div className={"aspect-square stripes rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm " + bg}>
-                                                <Wait text={convert_status(status)} />
-                                            </div>
-                                        </td>)
-
+                                        return <Cell status={status} result={result} prev_res={act_res}/>
                                     })}
                                 </tr>
                             ))}

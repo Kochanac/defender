@@ -21,7 +21,7 @@ export function Breadcrumbs(props) {
     let username = props.username;
 
     return (
-        <div className="
+        <div key="breadcrumbs" className="
                 mb-9 flex flex-row gap-4 font-bold flex-wrap
                 text-2xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl">
             {children}
@@ -40,10 +40,11 @@ export function Breadcrumb(props) {
         <a href={props.href} className='
         p-6 sm:p-6 md:p-8 lg:p-10
         bg-light-secondaryContainer text-light-onSecondaryContainer dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
-        hover:bg-light-secondaryFixedDim dark:hover:bg-dark-surfaceVariant  hover:scale-105
-        rounded-xl duration-200
+        hover:bg-light-secondaryFixedDim dark:hover:bg-dark-surfaceVariant
+        rounded-xl duration-200 hover:shadow-md
         flex justify-self-stretch
         whitespace-nowrap
+        z-50
         '>
             {props.children}
         </a>

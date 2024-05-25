@@ -16,7 +16,11 @@ code {
     monospace;
 }
 
-body * {
+html {
+  transition: 0.3s;
+}
+
+html * {
   transition: 0.3s;
 }
 
@@ -33,3 +37,19 @@ body * {
   'GRAD' 0,
   'opsz' 16
 }
+
+/* @layer base {
+  html {
+      @apply bg-light-surfaceContainer dark:bg-dark-surfaceContainer text-light-onSurface dark:text-dark-onSurface;
+  }
+} */
+
+html.light {
+  @apply bg-light-surfaceContainer  text-light-onSurface;
+}
+
+html.dark {
+  @apply bg-dark-surfaceContainer text-dark-onSurface;
+}
+
+
