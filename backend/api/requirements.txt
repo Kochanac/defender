@@ -9,4 +9,4 @@ requests
 
 cachetools
 
-lmxl
+lxml
