@@ -68,7 +68,7 @@ def get_snapshot_score(snapshot_id: int) -> Tuple[int, int]:
             if result != m_exploit.ExploitResult.no_flags:
                 hackers.add(attack.user_id)
 
-    return len(snaps) - len(hackers), len(snaps)
+    return len(snaps) - len(hackers) - 1, len(snaps) - 1
 
 
 @cachetools.func.ttl_cache(maxsize=500, ttl=TTL)
@@ -177,7 +177,7 @@ def get_standings(
     for user_id in users:
         attack_score = get_user_attack_score(user_id, task_id)
         if attack_score[1] == 0:
-            attack_score = (0, 1)
+            attack_score = (1, 1)
 
         defence_score = (0, len(users))
         active_snap = snapshot_repo.get_active_snapshot(task_id, user_id)

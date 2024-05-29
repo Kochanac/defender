@@ -21,8 +21,8 @@ export const HOST = "http://127.0.0.1:8000/"
 
 ReactDOM.render(
     <React.StrictMode>
-        <div className="App flex justify-center lg:p-20 md:p-16 sm:p-6  bg-light-surfaceContainer dark:bg-dark-surfaceContainer text-light-onSurface dark:text-dark-onSurface">
-            <div className="giga-container rounded px-8 pt-6 pb-8 w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full">
+        <div className="App flex justify-center p-1 lg:p-20 md:p-16 sm:p-6  bg-light-surfaceContainer dark:bg-dark-surfaceContainer text-light-onSurface dark:text-dark-onSurface">
+            <div className="giga-container rounded px-1 py-1 sm:px-8 sm:pt-6 sm:pb-8 w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full">
                 <Router>
                     <Routes>
                         <Route path="/task/:id" element=   <Task />   >
