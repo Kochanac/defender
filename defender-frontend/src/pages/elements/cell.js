@@ -36,6 +36,13 @@ export function Cell(props) {
             </div>
         </td>
     }
+    if (result != null && status === "checked") {
+        return <td>
+            <div className="aspect-square bg-purple-300 text-black dark:bg-purple-600 dark:text-white text-sm rounded-2xl text-center align-middle flex justify-center flex-col m-1">
+                Неизвестный результат
+            </div>
+        </td>
+    }
     if (result == null && status === "checked") {
         return <td>
             <div className="aspect-square bg-purple-300 text-black dark:bg-purple-600 dark:text-white text-sm rounded-2xl text-center align-middle flex justify-center flex-col m-1">
@@ -43,8 +50,15 @@ export function Cell(props) {
             </div>
         </td>
     }
+    if (result == null && status === null) {
+        return <td>
+            <div className="bg-white aspect-square stripes-still rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm dark:text-black">
+                В очереди
+            </div>
+        </td>
+    }
 
-    let wait_classes = "aspect-square stripes  rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm dark:text-black "
+    let wait_classes = "aspect-square stripes rounded-2xl text-center align-middle flex justify-center flex-col m-1 text-sm dark:text-black "
 
     if (prev_res == null) {
         wait_classes += "bg-white"

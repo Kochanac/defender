@@ -79,6 +79,19 @@ function Styles() {
                 background-size: 200% 200%;
                 animation: barberpole 5s linear infinite;
             }
+
+            .stripes-still {
+                background-image: 
+                    repeating-linear-gradient(
+                        -45deg, 
+                        transparent, 
+                        transparent 1rem,
+                        rgb(96 165 250) 1rem,
+                        rgb(96 165 250) 2rem
+                    );
+                background-size: 200% 200%;
+                
+            }
                 
             @keyframes barberpole {
                 100% {
