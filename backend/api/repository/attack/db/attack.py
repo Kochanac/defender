@@ -75,7 +75,7 @@ def get_active_attacks_of_this_user(
     cur.execute(
         f"""SELECT {cols}
            FROM attack
-           WHERE task_id=%s AND user_id = %s AND state = 'active' OR state is null
+           WHERE task_id=%s AND user_id = %s AND (state = 'active' OR state is null)
            ORDER BY id ASC""",
         [task_id, user_id],
     )
@@ -111,7 +111,7 @@ def get_active_attacks_of_task(
     cur.execute(
         f"""SELECT {cols}
            FROM attack
-           WHERE task_id=%s AND state = 'active' OR state is null
+           WHERE task_id=%s AND (state = 'active' OR state is null)
            ORDER BY id ASC""",
         [task_id],
     )

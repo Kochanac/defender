@@ -41,6 +41,9 @@ def get_active_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | Non
 def get_latest_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | None:
     return db.get_latest_snapshot(task_id, user_id)
 
+def get_latest_uploaded_snapshot(task_id: int, user_id: int) -> m_snapshot.Snapshot | None:
+    return db.get_latest_uploaded_snapshot(task_id, user_id)
+
 TTL = 10
 
 @cachetools.func.ttl_cache(maxsize=500, ttl=TTL)

@@ -99,7 +99,7 @@ def start_machine(user_id: int, task_id: int, target_user_id: int):
     if task_info is None:
         raise ValueError("no such task")
 
-    latest_snapshot = snapshot_repo.get_latest_snapshot(task_id, target_user_id)
+    latest_snapshot = snapshot_repo.get_latest_uploaded_snapshot(task_id, target_user_id)
     if latest_snapshot is None:
         raise ValueError("this user does not have snapshots")
 

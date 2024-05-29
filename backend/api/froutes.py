@@ -418,7 +418,7 @@ async def _get_scoreboard(
 
     for stand in standings:
         user_ids.add(stand[0])
-        snap = snapshot.get_latest_snapshot(t.task_id, stand[0])
+        snap = snapshot.get_latest_uploaded_snapshot(t.task_id, stand[0])
         if snap is None:
             continue
 
@@ -470,7 +470,7 @@ async def _rating_demo_status(
         target_id=target_id,
         state=machine.state,
         url=url,
-        time_left=time_left.seconds,
+        time_left=max(time_left.seconds, 0),
     )
 
 

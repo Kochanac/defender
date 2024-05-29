@@ -92,7 +92,7 @@ def get_latest_snapshot(conn, task_id, user_id) -> m_snapshot.Snapshot | None:
     cur.execute(
         f"""SELECT {cols}
            FROM snapshot
-           WHERE task_id=%s AND user_id=%s AND state != 'dead' OR state is null
+           WHERE task_id=%s AND user_id=%s AND (state != 'dead' OR state is null)
            ORDER BY id DESC LIMIT 1""",
         [task_id, user_id],
     )
@@ -100,6 +100,23 @@ def get_latest_snapshot(conn, task_id, user_id) -> m_snapshot.Snapshot | None:
     res = cur.fetchone()
 
     return convert_one(res)
+
+
+@with_connection
+def get_latest_uploaded_snapshot(conn, task_id, user_id) -> m_snapshot.Snapshot | None:
+    cur = conn.cursor()
+    cur.execute(
+        f"""SELECT {cols}
+           FROM snapshot
+           WHERE task_id=%s AND user_id=%s AND (state = 'checking' OR state = 'active')
+           ORDER BY id DESC LIMIT 1""",
+        [task_id, user_id],
+    )
+
+    res = cur.fetchone()
+
+    return convert_one(res)
+
 
 
 @with_connection
@@ -144,7 +161,7 @@ def get_rating_snapshots_in_task(conn, task_id: int) -> List[m_snapshot.Snapshot
     cur.execute(
         f"""SELECT {cols}
            FROM snapshot
-           WHERE task_id = %s AND state = 'checking' OR state = 'active'
+           WHERE task_id = %s AND (state = 'checking' OR state = 'active')
            ORDER BY id ASC""",
         [task_id],
     )

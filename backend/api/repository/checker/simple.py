@@ -48,7 +48,7 @@ def check_result(
 
     status = None
     print(f"{celery_status=} {celery_status.status}")
-    if celery_status.status == "STARTED":
+    if celery_status.status in ["STARTED", "PENDING"]:
         status = m_checker.CheckStatus.in_progress
     elif celery_status.status == "SUCCESS":
         status = m_checker.CheckStatus.checked
