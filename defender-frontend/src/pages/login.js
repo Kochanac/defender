@@ -12,10 +12,12 @@ async function RegUser() {
     )
 
     console.log(data);
-    if (data["status"] === "ok")
-        document.getElementById("title").innerText = "Registered."
-    else
-        document.getElementById("title").innerText = "Registration failed"
+    if (data["status"] === "ok") {
+        document.getElementById("modal-text").innerText = "Успешная регистрация"
+    } else {
+        document.getElementById("modal-text").innerText = "Ошибка при регистрации"
+    }
+    document.getElementById("modal").showModal()
 }
 
 async function LogUser() {
@@ -32,8 +34,10 @@ async function LogUser() {
         localStorage.setItem("username", username)
         localStorage.setItem("token", data["token"])
         window.location.href = "/tasks"
-    } else
-        document.getElementById("title").innerText = "Login failed"
+    } else {
+        document.getElementById("modal-text").innerText = "Некорректные данные входа"
+        document.getElementById("modal").showModal()
+    }
 }
 
 function Login() {
@@ -44,6 +48,21 @@ function Login() {
                     Defender 0.3
                 </h1>
             </div>
+            <dialog id="modal" className="rounded-xl shadow-md">
+                <div className="p-10
+                bg-light-primaryContainer text-light-primary
+                dark:bg-dark-primaryContainer dark:text-dark-primary
+                flex flex-col gap-8
+                ">
+                    <p id="modal-text">Ошибка</p>
+                    <button 
+                        className="w-full rounded-xl shadow-md
+                        bg-light-secondaryContainer text-light-onSecondaryContainer hover:bg-light-secondaryFixedDim
+                        dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer dark:hover:bg-dark-surfaceVariant
+                        py-6
+                    " >OK</button>
+                </div>
+            </dialog>
             <div class="mb-6">
                 <label class="block font-semibold mb-2" for="title">
                     Юзернейм

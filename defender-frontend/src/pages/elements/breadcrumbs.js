@@ -5,7 +5,7 @@ function addSeparator(array, separator) {
     if (!Array.isArray(array)) {
         return array
     }
-    
+
     let result = [];
     for (let i = 0; i < array.length - 1; i++) {
         result.push(array[i], separator)
@@ -27,9 +27,36 @@ export function Breadcrumbs(props) {
             {children}
 
             <div className="flex-grow" />
-            <div className="flex flex-col font-normal">
-                <div className="flex-grow" />
-                <h1 className="text-2xl text-gray-600 align-bottom pt-2">@{username}</h1>
+            <div className="flex flex-col font-normal justify-end">
+                <div className='flex flex-row gap-4'>
+                    <span className='p-4 flex flex-row justify-center rounded-xl text-2xl
+                bg-light-secondaryContainer text-light-onSecondaryContainer dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
+                '>
+
+                        {/* <div className="flex text-sm md:text-lg flex-col md:flex-row gap-2 justify-center"> */}
+                        {/* <span>
+                        {props.children}
+                        </span> */}
+                        {/* </div> */}
+
+                        <div className="text-center align-middle flex justify-center flex-col pb-1">
+                            @{username}
+                        </div>
+
+
+
+                        {/* <h1 className="text-2xl align-center pt-2"></h1> */}
+                    </span>
+
+                    <a href='/' className='p-4 flex flex-row justify-center rounded-xl text-2xl
+                    bg-light-secondaryContainer text-light-onSecondaryContainer dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer
+                    hover:bg-light-secondaryFixedDim dark:hover:bg-dark-surfaceVariant'>
+                        <div className="text-center align-middle flex justify-center flex-col scale-90 pl-2 pr-1">
+                            <span class="material-symbols-outlined">logout</span>
+                        </div>
+
+                    </a>
+                </div>
             </div>
         </div>
     )
