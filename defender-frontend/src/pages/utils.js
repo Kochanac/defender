@@ -1,5 +1,8 @@
 
 function convert_status(status) {
+    if (status === "pre starting") {
+        return "В очереди"
+    }
     if (status === "starting") {
         return "Создаю машину"
     }

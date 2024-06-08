@@ -143,9 +143,16 @@ class TaskState(BaseModel):
 async def _task_state(
     t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
 ) -> TaskState:
-    first_exploit_status, first_exploit_result = first_exploit.get_first_exploit_status(
+    fe = first_exploit.get_first_exploit_status(
         user_id, t.task_id
     )
+    if fe is not None:
+        first_exploit_status, first_exploit_result = fe[0], fe[1]
+        if first_exploit_status is None:
+            first_exploit_status = m_exploit.ExploitStatus.pre_starting
+    else:
+        first_exploit_status, first_exploit_result = None, None
+
     print(f"{first_exploit_status=} {first_exploit_result=}")
 
     task_status = db_tasks.get_task_progress(user_id, t.task_id)
