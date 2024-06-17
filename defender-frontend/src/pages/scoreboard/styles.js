@@ -67,52 +67,6 @@ function Styles() {
                 border-bottom: 1px solid gray;
                 padding: 5px 10px;
             }
-            .stripes {
-                background-image: 
-                    repeating-linear-gradient(
-                        -45deg, 
-                        transparent, 
-                        transparent 1rem,
-                        rgb(96 165 250) 1rem,
-                        rgb(96 165 250) 2rem
-                    );
-                background-size: 200% 200%;
-                animation: barberpole 5s linear infinite;
-            }
-
-            .stripes-still {
-                background-image: 
-                    repeating-linear-gradient(
-                        -45deg, 
-                        transparent, 
-                        transparent 1rem,
-                        rgb(96 165 250) 1rem,
-                        rgb(96 165 250) 2rem
-                    );
-                background-size: 200% 200%;
-                
-            }
-                
-            @keyframes barberpole {
-                100% {
-                    background-position: 100% 100%;
-                }
-            }
-            
-            .score {
-                min-width: 9rem;
-            }
-
-            .deactivated {
-                background: repeating-linear-gradient(
-                    45deg,
-                    rgba(0, 0, 0, 0.0),
-                    rgba(0, 0, 0, 0.0) 10px,
-                    rgba(0, 0, 0, 0.1) 10px,
-                    rgba(0, 0, 0, 0.1) 20px
-                  );
-                // background: black;
-            }
             `}
         </style>
     )

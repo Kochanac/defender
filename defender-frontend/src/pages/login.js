@@ -42,7 +42,7 @@ async function LogUser() {
 
 function Login() {
     return (
-        <form class="">
+        <div class="">
             <div class="mb-9">
                 <h1 id="title" class="text-5xl">
                     Defender 0.3
@@ -55,7 +55,7 @@ function Login() {
                 flex flex-col gap-8
                 ">
                     <p id="modal-text">Ошибка</p>
-                    <button 
+                    <button
                         className="w-full rounded-xl shadow-md
                         bg-light-secondaryContainer text-light-onSecondaryContainer hover:bg-light-secondaryFixedDim
                         dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer dark:hover:bg-dark-surfaceVariant
@@ -75,6 +75,11 @@ function Login() {
                     id="username"
                     type="text"
                     placeholder=""
+                    onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                            LogUser()
+                        }
+                    }}
                 />
             </div>
             <div class="mb-6">
@@ -92,6 +97,11 @@ function Login() {
                     id="password"
                     type="password"
                     placeholder=""
+                    onKeyUp={(e) => {
+                        if (e.key === 'Enter') {
+                            LogUser()
+                        }
+                    }}
                 />
             </div>
             <div class="flex mt-10">
@@ -112,7 +122,7 @@ function Login() {
                     Войти
                 </button>
             </div>
-        </form>
+        </div>
     );
 }
 

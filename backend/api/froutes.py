@@ -17,6 +17,7 @@ import api.repository.attack.attack as attack
 import api.repository.checker.adapters.first_defence as first_defence_checker
 import api.repository.exploit.adapters.first_exploit as first_exploit
 import api.repository.exploit.exploit as exploit
+import api.repository.machine.adapters.demo as m_demo_adapter
 import api.repository.machine.adapters.first_defence as first_defence
 import api.repository.machine.adapters.rating_demo as rating_demo_adapter
 import api.repository.rating.rating as rating_repo
@@ -24,6 +25,7 @@ import api.repository.snapshot.adapters.rating as rating_snapshot
 import api.repository.snapshot.adapters.user_snapshot as user_snapshot
 import api.repository.snapshot.snapshot as snapshot
 import api.repository.task.db.tasks as db_tasks
+import api.repository.task.demo_status as demo_status
 import api.repository.task.tasks as tasks
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -170,6 +172,15 @@ async def _task_state(
         defence_unlocked=task_status.is_exploited,
         flag=flag,
     )
+
+
+@app.post("/task/kill-demo")
+async def _task_state(
+    t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
+):
+    # todo check if we can kill it
+    m_demo_adapter.delete_machine(t.task_id)
+    demo_status.set_demo_status(t.task_id, m_task.TaskDemoState.fail)
 
 
 class UploadExploit(BaseModel):

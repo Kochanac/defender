@@ -44,10 +44,12 @@ def check_start(task_id: int):
         raise ValueError("No such task")
 
     check = simple_checker.create_check(task, mach, m_checker.CheckVariant.health)
-
     add_checker_run(task_id, check)
-
     simple_checker.run_check(check)
+    
+    # todo now we just assume it works. in reality we need to check it by GET, and check that they all complete successfully
+    put = simple_checker.create_check(task, mach, m_checker.CheckVariant.put)
+    simple_checker.run_check(put)
 
 
 def check_results(

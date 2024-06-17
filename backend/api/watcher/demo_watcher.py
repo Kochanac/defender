@@ -64,20 +64,26 @@ def handle_ok_machine(task_id: int, mach: m_machine.Machine):
         demo_checker.reset_checker_results(task_id)
         demo_machine.delete_machine(task_id)
 
-    # if last check is missing or is done, and if CHECK_EVERY_X_MINUTES time passed, run new check
+    
+    last_run_time = get_last_checker_run_time(task_id)
+    # if last check is missing or is done,  if CHECK_EVERY_X_MINUTES time passed, run new check
     if (
         len(last_checks) == 0
         or last_checks[0][0] is None
         or last_checks[0][0] == m_checker.CheckStatus.checked
+        or last_run_time is None
+        or datetime.datetime.now() - last_run_time
+            > datetime.timedelta(minutes=CHECK_EVERY_X_MINUTES)
     ):
-        last_run_time = get_last_checker_run_time(task_id)
+        demo_checker.check_start(task_id)
+        set_last_checker_run_time(task_id, datetime.datetime.now())
         if (
-            last_run_time is None
-            or datetime.datetime.now() - last_run_time
+            last_checks[0][0] != m_checker.CheckStatus.checked
+            and last_run_time is not None
+            and datetime.datetime.now() - last_run_time
             > datetime.timedelta(minutes=CHECK_EVERY_X_MINUTES)
         ):
-            demo_checker.check_start(task_id)
-            set_last_checker_run_time(task_id, datetime.datetime.now())
+            pass # todo kill the checker and set its status to timeout
 
 
 async def ensure_all_tasks_have_demo_machines():
@@ -91,7 +97,9 @@ async def ensure_all_tasks_have_demo_machines():
 
         if mach is None:
             logging.info("No machine, creating new")
+            demo_status.set_demo_status(task_id, m_task.TaskDemoState.fail)
             handle_no_machine(task_id)
+            demo_checker.reset_checker_results(task_id)
             continue
 
         if mach.state in [
@@ -100,10 +108,14 @@ async def ensure_all_tasks_have_demo_machines():
             m_machine.MachineState.turning_off,
         ]:
             logging.info(f"Machine is in progress, ignoring. state {mach.state}")
+            demo_status.set_demo_status(task_id, m_task.TaskDemoState.fail)
+            demo_checker.reset_checker_results(task_id)
             continue
 
         if mach.state == m_machine.MachineState.off:
             logging.info("Machine is off, deleting")
+            demo_status.set_demo_status(task_id, m_task.TaskDemoState.fail)
+            demo_checker.reset_checker_results(task_id)
             demo_machine.delete_machine(task_id)
             continue
 

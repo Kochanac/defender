@@ -14,7 +14,7 @@ fmt_started = "rating_demo_machine_{user}/started"
 demo_machines = "rating_demo_machines"
 time_fmt = "%Y-%m-%d %H:%M:%S"
 
-ALLOWED_TIME_SECONDS = 5 * 60
+ALLOWED_TIME_SECONDS = 15 * 60
 
 
 @with_redis
