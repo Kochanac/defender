@@ -12,7 +12,7 @@ import api.repository.task.demo_status as demo_status
 from api.misc import with_redis
 
 WATCHER_EVERY_X_SECONDS = 5
-CHECK_EVERY_X_MINUTES = 1
+CHECK_EVERY_X_MINUTES = 4
 
 
 fmt = "last_checker_run_time/task_id:{task_id}"
