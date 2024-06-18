@@ -1,3 +1,5 @@
+import random
+import string
 from typing import List
 
 import api.model.checker as m_checker
@@ -34,6 +36,13 @@ def reset_checker_results(r, task_id):
     r.ltrim(fmt.format(task_id=task_id), 0, 0)
 
 
+
+
+def generate_flag() -> str:
+    alph = string.ascii_uppercase
+    return "".join(random.choices(alph, k=31)) + "="
+
+
 def check_start(task_id: int):
     mach = demo_machine.get_machine(task_id)
     if mach is None:
@@ -48,7 +57,7 @@ def check_start(task_id: int):
     simple_checker.run_check(check)
     
     # todo now we just assume it works. in reality we need to check it by GET, and check that they all complete successfully
-    put = simple_checker.create_check(task, mach, m_checker.CheckVariant.put)
+    put = simple_checker.create_check(task, mach, m_checker.CheckVariant.put, generate_flag(), [generate_flag()])
     simple_checker.run_check(put)
 
 
