@@ -70,7 +70,6 @@ def handle_ok_machine(task_id: int, mach: m_machine.Machine):
     if (
         len(last_checks) == 0
         or last_checks[0][0] is None
-        or last_checks[0][0] == m_checker.CheckStatus.checked
         or last_run_time is None
         or datetime.datetime.now() - last_run_time
             > datetime.timedelta(minutes=CHECK_EVERY_X_MINUTES)
