@@ -16,8 +16,7 @@ import Table from "./pages/scoreboard/table";
 import Attacks from './pages/scoreboard/attacks';
 import Snapshots from './pages/scoreboard/snapshots';
 import ThemeSwitch from './pages/elements/theme-switcher.tsx';
-
-export const HOST = "http://127.0.0.1:8000/"
+import Competition from './pages/scoreboard/competition.js';
 
 ReactDOM.render(
     <React.StrictMode>
@@ -25,26 +24,27 @@ ReactDOM.render(
             <div className="giga-container rounded px-1 py-1 sm:px-8 sm:pt-6 sm:pb-8 w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full">
                 <Router>
                     <Routes>
-                        <Route path="/task/:id" element=   <Task />   >
-                        </Route>
-                        
-                        <Route path="/scoreboard/:id" element=   <Table />   >
+                        <Route path="/task/:id" element=<Task />   >
                         </Route>
 
-                        <Route path="/attacks/:id" element=   <Attacks />   >
+                        <Route path="/scoreboard/:id" element=<Table />   >
                         </Route>
 
-                        <Route path="/snapshots/:id" element=   <Snapshots />   >
+                        <Route path="/attacks/:id" element=<Attacks />   >
                         </Route>
 
-
-
-                        <Route exact path="/tasks" element=   <TaskList />   >
+                        <Route path="/snapshots/:id" element=<Snapshots />   >
                         </Route>
 
-                        <Route exact path="/" element=  <Login />  >
+                        <Route exact path="/tasks" element=<TaskList />   >
                         </Route>
-                        
+
+                        <Route path="/competition/:id" element=<Competition />   >
+                        </Route>
+
+                        <Route exact path="/" element=<Login />  >
+                        </Route>
+
                         <Route exact path="/users">
                             {/*<Users />*/}
                         </Route>
@@ -54,7 +54,7 @@ ReactDOM.render(
             </div>
             <div className='fixed top-0 right-0 p-4'>
 
-                <ThemeSwitch/>
+                <ThemeSwitch />
             </div>
         </div>
 

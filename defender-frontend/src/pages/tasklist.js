@@ -2,6 +2,7 @@ import React from "react";
 
 import { call, get } from "../api/api.js";
 import Breadcrumbs, { Breadcrumb } from "./elements/breadcrumbs.js";
+// import { LineProgressBar } from '@frogress/line'
 
 class TaskList extends React.Component {
     componentDidMount() {
@@ -20,7 +21,16 @@ class TaskList extends React.Component {
         super(props);
         this.state = {
             username: localStorage.getItem("username"),
-            tasks: []
+            tasks: [],
+            competitions: [
+                {
+                    "id": 1,
+                    "title": "Летняя школа 2024",
+                    "img": "/hydrangea_blue_bush.jpg",
+                    "time_start": "",
+                    "time_end": ""
+                }
+            ]
         }
     }
 
@@ -32,7 +42,10 @@ class TaskList extends React.Component {
                         Таски
                     </Breadcrumb>
                 </Breadcrumbs>
-                <div id="tasks" className="flex flex-col gap-4">
+                <div id="tasks" className="grid grid-cols-1 grid-flow-row gap-4">
+                    {this.state.competitions.map(comp => (
+                        <Competition title={comp.title} id={comp.id} key={comp.id} image={comp.img} start={comp.time_start} end={comp.time_end} />
+                    ))}
                     {this.state.tasks.map(task => (
                         <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id} />
                     ))}
@@ -50,7 +63,7 @@ function Task(props) {
                 text-lg md:text-2xl
                 bg-light-primaryContainer text-light-onPrimaryContainer dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer
                 ">
-                {/* bg-light-surfaceContainerHigh dark:bg-dark-surfaceContainerHigh */}
+                
                 <h3 className="flex-none font-semibold p-2 text-center align-middle flex justify-center flex-col">
                     {props.title}
                 </h3>
@@ -98,6 +111,63 @@ function Task(props) {
             }
         </div>
     )
+}
+
+
+function Competition(props) {
+    return (
+        <div className="flex gap-6 w-full min-h-48">
+            <div onClick={() => { window.location.href = "/competition/" + props.id }}
+                className="flex-grow gap-y-2 cursor-pointer transform ease-in-out duration-100 rounded-2xl shadow-md p-4 pl-6  flex flex-wrap
+                text-lg md:text-2xl
+                bg-dark-tertiaryContainer text-dark-onTertiaryContainer
+                "
+                // dark:bg-dark-tertiaryContainer dark:text-dark-onTertiaryContainer
+                // bg-light-tertiaryContainer text-light-onTertiaryContainer 
+                style={{
+                    background: "url(" + props.image + ")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center center"
+                }}
+                >
+
+                <div className="flex flex-col p-2">
+                    {/* <h3 className="font-semibold p-2 rounded-md bg-light-tertiaryContainer text-light-onTertiaryContainer dark:bg-dark-tertiaryContainer dark:text-dark-onTertiaryContainer">
+                        Соревнование
+                    </h3>
+                    <div className="flex-grow" />
+                    <h3 className="font-normal p-2 rounded-md bg-light-tertiaryContainer text-light-onTertiaryContainer dark:bg-dark-tertiaryContainer dark:text-dark-onTertiaryContainer">
+                        {props.title}
+                    </h3> */}
+
+                    <h3 className="font-semibold">
+                        Соревнование
+                    </h3>
+                    <div className="flex-grow" />
+                    <h3 className="font-normal">
+                        {props.title}
+                    </h3>
+                </div>
+                <div className="flex-grow" />
+                <div className="flex flex-col">
+                    <div className="flex-grow" />
+                    <h3 className="font-normal p-2 rounded-md bg-dark-tertiaryContainer text-dark-onTertiaryContainer">
+                        28 Июня 13:37 -&gt; 29 июня 19:30
+                    </h3>
+                </div>
+
+                
+                {/* <LineProgressBar
+                percent={35}
+                /> */}
+            </div>
+        </div>
+    )
+}
+
+function TertiaryCell(props) {
+
 }
 
 

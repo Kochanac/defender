@@ -40,6 +40,11 @@ async function LogUser() {
     }
 }
 
+async function HideModal() {
+    // todo hide modal
+    document.getElementById("modal").close();
+}
+
 function Login() {
     return (
         <div class="">
@@ -56,6 +61,7 @@ function Login() {
                 ">
                     <p id="modal-text">Ошибка</p>
                     <button
+                        onClick={HideModal}
                         className="w-full rounded-xl shadow-md
                         bg-light-secondaryContainer text-light-onSecondaryContainer hover:bg-light-secondaryFixedDim
                         dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer dark:hover:bg-dark-surfaceVariant
