@@ -17,7 +17,7 @@ func main() {
 		},
 	}
 
-	imageManager := image_manager.NewQCOW2Manager("/var/lib/libvirt/images/")
+	imageManager := image_manager.NewQCOW2Manager("/var/lib/libvirt/images/", nil)
 
 	mash, err := machines.ConnectLibvirt(cfg, imageManager)
 	if err != nil {
