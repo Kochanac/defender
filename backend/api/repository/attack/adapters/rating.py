@@ -35,3 +35,15 @@ def get_active_attacks_of_this_user(
 @cachetools.func.ttl_cache(maxsize=500, ttl=TTL)
 def get_attacks_of_this_user(user_id: int, task_id: int) -> List[m_attack.Attack]:
     return db_attack.get_attacks_of_this_user(user_id, task_id)
+
+
+def get_exploit_run_by_attack_snapshot(attack_id: int, snapshot_id: int) -> int | None:
+    res = db_attack.get_attack_exploits_for_snapshots(attack_id, [snapshot_id])
+
+    if len(res) != 1:
+        return None
+    
+    res = res[0]
+    return res[1]
+
+    
