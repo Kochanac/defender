@@ -66,6 +66,14 @@ def change_state(conn, attack_id: int, state: m_attack.AttackState):
         [state.value, attack_id],
     )
 
+@with_connection
+def remove_attack_exploit_run(conn, attack_id: int, snapshot_id: int):
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM attack_exploits WHERE attack_id=%s AND snapshot_id=%s",
+        [attack_id, snapshot_id],
+    )
+
 
 @with_connection
 def get_active_attacks_of_this_user(

@@ -29,3 +29,20 @@ insert into checker
     (task_id, checker_url)
 VALUES (4, '../checkers/wall/wall_checker.py');
 
+
+
+insert into tasks
+    (id, title, download_url, demo_url, flag, qemu_qcow2_path)
+VALUES (5, 'Lets see Paul Allens card', 'https://kochan.fun/f/paul_allen_card.tar.gz', 'http://{host}:8080/', 'Поздравляю с вашим первым эксплоитом)', '/var/lib/libvirt/images/cards.qcow2');
+
+insert into checker 
+    (task_id, checker_url)
+VALUES (5, '../checkers/card_checker/c.py');
+
+
+
+
+
+
+INSERT INTO public.work (type, worker_id, machine_id) 
+(select 'remove', 'kek-1', machine_id from machine_assignment);

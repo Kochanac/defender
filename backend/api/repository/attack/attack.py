@@ -35,3 +35,6 @@ def change_state(attack_id: int, new_state: m_attack.AttackState):
 
 def create_attack(user_id: int, task_id: int, exploit_id: int, name: str):
     db_attack.create_attack(user_id, task_id, exploit_id, name)
+
+def remove_attack_exploit_run(attack_id: int, snapshot_id: int):
+    db_attack.remove_attack_exploit_run(attack_id, snapshot_id)
