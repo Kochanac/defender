@@ -18,6 +18,8 @@ async def handle_task(task_id: int):
         [x.id for x in active_attacks], ATTEMPT_LIMIT
     )
 
+    logging.info(f"retry_status {retry_status}")
+
     for retry in retry_status:
         if retry.attempt > ATTEMPT_LIMIT:
             continue

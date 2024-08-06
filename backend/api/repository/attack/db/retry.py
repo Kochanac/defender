@@ -29,8 +29,8 @@ def inc_attack_attempts(conn, attack_id: int, snapshot_id: int):
 
     cur.execute(
         """
-        INSERT INTO retry_attacks (attack_id, snapshot_id, attampt) VALUES (%(a_id)s, %(s_id)s, 1)
-        ON CONFLICT DO UPDATE SET attempt = retry_attacks.attempt + 1
+        INSERT INTO retry_attacks (attack_id, snapshot_id, attempt) VALUES (%(a_id)s, %(s_id)s, 1)
+        ON CONFLICT (attack_id, snapshot_id) DO UPDATE SET attempt = retry_attacks.attempt + 1
         """,
         {"a_id": attack_id, "s_id": snapshot_id}
     )
@@ -48,7 +48,7 @@ def get_retry_status(conn, attack_ids: List[int], limit_attempts: int) -> List:
         LEFT JOIN retry_attacks ON retry_attacks.attack_id=attack_exploits.attack_id
         WHERE 
             attack_exploits.attack_id = ANY (%s) AND
-            attempt <= %s
+            coalesce(attempt, 0) <= %s
         """, [attack_ids, limit_attempts]
     )
 
