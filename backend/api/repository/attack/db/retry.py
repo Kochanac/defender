@@ -47,7 +47,7 @@ def get_retry_status(conn, attack_ids: List[int], limit_attempts: int) -> List:
         FROM attack_exploits
         LEFT JOIN retry_attacks ON retry_attacks.attack_id=attack_exploits.attack_id
         WHERE 
-            attack_id = ANY (%s)
+            attack_id = ANY (%s) AND
             attempt <= %s
         """, [attack_ids, limit_attempts]
     )
