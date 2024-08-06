@@ -49,7 +49,7 @@ def get_retry_status(conn, attack_ids: List[int], limit_attempts: int) -> List:
         WHERE 
             attack_id = ANY (%s)
             attempt <= %s
-        """, attack_ids, limit_attempts
+        """, [attack_ids, limit_attempts]
     )
 
     res = [
