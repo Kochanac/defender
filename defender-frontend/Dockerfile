@@ -3,5 +3,6 @@ FROM node:21
 COPY . /app
 WORKDIR /app
 
-RUN npm config delete proxy
-RUN npm install
+RUN npm cache clean --force && \
+    npm install -g npm@latest && \
+    npm install
