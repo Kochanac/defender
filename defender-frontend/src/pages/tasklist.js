@@ -43,9 +43,9 @@ class TaskList extends React.Component {
                     </Breadcrumb>
                 </Breadcrumbs>
                 <div id="tasks" className="grid grid-cols-1 grid-flow-row gap-4">
-                    {this.state.competitions.map(comp => (
+                    {/* {this.state.competitions.map(comp => (
                         <Competition title={comp.title} id={comp.id} key={comp.id} image={comp.img} start={comp.time_start} end={comp.time_end} />
-                    ))}
+                    ))} */}
                     {this.state.tasks.map(task => (
                         <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id} />
                     ))}
