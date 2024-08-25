@@ -205,7 +205,7 @@ class Table extends React.Component {
 
                 flex flex-col
 
-                mb-20
+                mb-4
                 ">
                     <h2 className="text-3xl mb-4 font-bold">Рейтинговая таблица</h2>
 
@@ -215,6 +215,15 @@ class Table extends React.Component {
                         <li className="text-xl pb-1">Взламывайте защиты других участников и создавайте атаки на новые уязвимости</li>
                     </ul>
 
+                </div>
+                <div className="
+                bg-light-errorContainer text-light-onErrorContainer dark:bg-dark-errorContainer dark:text-dark-onErrorContainer 
+                p-4 rounded-xl shadow-md z-20
+                text-xl
+                w-full 2xl:w-3/5 xl:w-3/4 lg:w-3/4 md:w-5/6 sm:w-full
+                mb-20
+                ">
+                    <p>Чтобы попасть на рейтнговую таблицу, перейдите во вкладку "Снапшоты" и сохраните свой первый снапшот</p>
                 </div>
 
                 <div className="w-full">

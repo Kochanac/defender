@@ -28,25 +28,7 @@ class Task extends React.Component {
             exploit_testing: false,
 
             defence_unlocked: false,
-            // defence: {
-            //     display: {
-            //         buttons: {
-            //             create_enabled: false,
-            //             start_enabled: false,
-            //             stop_enabled: false,
-            //             remove_enabled: false,
-            //         },
-            //         messagebox: false,
-            //         check_button: false,
-            //     },
-
-            //     messagebox_text: "test\ntest2\ntest3"
-            // },
-            // machine_progress: {
-            //     in_progress: false,
-            //     process_label: ""
-            // },
-            defence_testing: false,
+            defence_skip: false,
 
             checks: [
             ],
@@ -95,6 +77,7 @@ class Task extends React.Component {
             service_demo: data["service_demo"],
             download_url: data["download_url"],
             title: data["title"],
+            defence_skip: data["defence_skip"]
         })
 
         document.getElementById("exploit_code").value = data["exploit_code"]
@@ -135,7 +118,7 @@ class Task extends React.Component {
 
 
         this.setState({
-            defence_unlocked: data.defence_unlocked
+            defence_unlocked: data.defence_unlocked,
         })
 
     }
@@ -158,7 +141,6 @@ class Task extends React.Component {
                 <Breadcrumbs username={this.state.username}>
                     <Breadcrumb href="/tasks">
                         Таски
-                        {/* <div className=" aspect-square w-14 text-center flex justify-center flex-col">  {"←"} </div> */}
                     </Breadcrumb>
                     <Breadcrumb href="/tasks">
                         <span>{this.state.title}</span>
@@ -245,7 +227,21 @@ class Task extends React.Component {
 
                 <div className="p-6 my-4 rounded-xl shadow-md
                 bg-light-surface text-light-onSurface
-                dark:bg-dark-surface dark:text-dark-onSurface">
+                dark:bg-dark-surface dark:text-dark-onSurface
+                relative
+                ">
+                    {this.state.defence_skip &&
+                        <div className="
+                        absolute left-0 top-0 w-full h-full opacity-90 bg-white dark:bg-black overflow-hidden rounded-xl"
+                        >
+                            <div className="text-2xl font-bold h-full opacity-100 text-black dark:text-white text-center flex flex-col justify-center align-middle gap-2 p-8">
+                                <p>Для этого таска этап защиты не настроен</p>
+                                <p>Переходите в рейтинговую игру и сразитесь с другими игроками для проверки своей защиты</p>
+                            </div>
+                        </div>
+                    }
+
+
                     <p className="block text-3xl font-semibold mb-8">
                         Защититесь
                     </p>
@@ -277,8 +273,8 @@ class Task extends React.Component {
                 </div>
 
                 {this.state.passed_to_rating &&
-                    <a href={"/scoreboard/" + this.state.task_id} 
-                    className="duration-500 w-full p-4 h-32 shadow-md
+                    <a href={"/scoreboard/" + this.state.task_id}
+                        className="duration-500 w-full p-4 h-32 shadow-md
                     bg-light-primaryContainer text-light-onPrimaryContainer hover:bg-light-primaryFixedDim
                     dark:bg-dark-primaryContainer dark:text-dark-onPrimaryContainer dark:hover:bg-dark-onPrimary
                     text-center align-middle flex justify-center flex-col hover:shadow-md

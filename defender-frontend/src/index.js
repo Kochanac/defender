@@ -56,7 +56,8 @@ ReactDOM.render(
 
                 <ThemeSwitch />
             </div>
-        </div>
+
+    </div>
 
     </React.StrictMode>,
     document.getElementById('root')

@@ -50,7 +50,7 @@ function Login() {
         <div class="">
             <div class="mb-9">
                 <h1 id="title" class="text-5xl">
-                    Defender 0.3
+                    Defender 0.4
                 </h1>
             </div>
             <dialog id="modal" className="rounded-xl shadow-md">
@@ -128,6 +128,9 @@ function Login() {
                     Войти
                 </button>
             </div>
+
+            <a className="bottom-4 absolute" href="https://www.flaticon.com/free-icons/armor" title="armor icons">Armor favicon created by kliwir art - Flaticon</a>
+
         </div>
     );
 }

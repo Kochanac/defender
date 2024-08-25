@@ -47,7 +47,7 @@ class TaskList extends React.Component {
                         <Competition title={comp.title} id={comp.id} key={comp.id} image={comp.img} start={comp.time_start} end={comp.time_end} />
                     ))} */}
                     {this.state.tasks.map(task => (
-                        <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id} />
+                        <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id} defence_skip={task.defence_skip} />
                     ))}
                 </div>
             </div>
@@ -79,16 +79,22 @@ function Task(props) {
                     <div className="flex-grow"> </div>
 
                     <div className="flex">
-                        <div className={(props.attack ? "bg-green-300 border-green-200" : "bg-white") + " p-2 rounded-xl shadow-md border border-opacity-10 border-black mr-5 text-black w-12 aspect-square text-center align-middle flex justify-center flex-col"} >
+                        <div className={(props.attack ? "bg-green-300 border-green-200" : "bg-white") + " p-2 rounded-xl shadow-md border border-opacity-10 border-black text-black w-12 aspect-square text-center align-middle flex justify-center flex-col"} >
                             <span class="material-symbols-outlined">
                                 swords
                             </span>
                         </div>
+
+                        {!props.defence_skip &&
+                        <div className="mr-5"></div>
+                        }
+                        {!props.defence_skip &&
                         <div className={(props.defence ? "bg-green-300 border-green-200" : "bg-white") + " p-2 rounded-xl shadow-md border border-opacity-10 border-black text-black w-12 aspect-square text-center align-middle flex justify-center flex-col"} >
                             <span class="material-symbols-outlined">
                                 shield
                             </span>
                         </div>
+                        }
                     </div>
 
                     <div className="flex-grow"> </div>
