@@ -33,7 +33,8 @@ def get_task_info(task_id: int) -> m_task.TaskInfo | None:
         id=task_info.id,
         image_path=task_info.image_path,
         service_demo=task_demo,
-        title=task_info.title
+        title=task_info.title,
+        defence_skip=task_info.defence_skip
     )
 
 
