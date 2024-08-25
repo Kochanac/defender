@@ -271,8 +271,8 @@ class Table extends React.Component {
                                                             onClick={this.start_demo.bind(this)}
                                                             className="p-2 w-full h-full"
                                                         >
-                                                            {this.state.task_id !== this.state.demo.task_id && <span>Машина запущена в таске с id {this.state.demo.task_id}</span>}
-                                                            {this.state.task_id === this.state.demo.task_id && <span>Запустить его машину</span> }
+                                                            {this.state.task_id !== this.state.demo.task_id && this.state.demo.task_id != null && <span>Машина запущена в таске с id {this.state.demo.task_id}</span>}
+                                                            {(this.state.task_id === this.state.demo.task_id || this.state.demo.task_id == null) && <span>Запустить его машину</span> }
                                                         </div>
                                                     }
 
