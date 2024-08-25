@@ -1,11 +1,8 @@
 import json
-import logging
 from enum import Enum
-from hmac import new
 from typing import List
 
 import api.model.checker as m_checker
-import api.model.flag as m_flag
 from api.misc import with_connection
 
 # CHECK RUN
