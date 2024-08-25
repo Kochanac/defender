@@ -110,7 +110,7 @@ def start_machine(user_id: int, task_id: int, target_user_id: int):
 
     machine.create_machine(data, machine_name)
 
-    set_rating_demo_machine_target(user_id, m_rating_demo.RatingDemoTarget(user_id=user_id, task_id=task_id))
+    set_rating_demo_machine_target(user_id, m_rating_demo.RatingDemoTarget(user_id=target_user_id, task_id=task_id))
     set_rating_demo_machine_started(user_id)
 
 
