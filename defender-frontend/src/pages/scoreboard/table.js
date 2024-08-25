@@ -265,7 +265,7 @@ class Table extends React.Component {
 
                                                 <div className={"text-xs rounded-md mt-2 inline-block text-center bg-light-secondaryContainer text-light-onSecondaryContainer  dark:bg-dark-secondaryContainer dark:text-dark-onSecondaryContainer "
                                                     + (this.state.demo.target_id != null && this.state.demo.target_id !== user_id ? "deactivated" : "hover:bg-light-secondaryFixedDim dark:hover:bg-dark-surfaceVariant")}>
-                                                    {this.state.demo.target_id !== user_id &&
+                                                    {(this.state.demo.target_id !== user_id || this.state.task_id !== this.state.demo.task_id) &&
                                                         <div
                                                             id={user_id}
                                                             onClick={this.start_demo.bind(this)}
