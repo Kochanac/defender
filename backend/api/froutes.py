@@ -465,6 +465,7 @@ async def _rating_demo_create(
 
 class RatingDemoStatus(BaseModel):
     target_id: int
+    task_id: int
     state: m_machine.MachineState
     url: str | None
     time_left: int
@@ -474,9 +475,9 @@ class RatingDemoStatus(BaseModel):
 async def _rating_demo_status(
     m: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
 ) -> RatingDemoStatus | None:
-    target_id, machine = rating_demo_adapter.get_machine(user_id)
-    print(f"{target_id=} {machine=}")
-    if target_id is None or machine is None:
+    target, machine = rating_demo_adapter.get_machine(user_id)
+    print(f"{target=} {machine=}")
+    if target is None or machine is None:
         raise HTTPException(status_code=404, detail="No machine found")
 
     if machine.hostname is not None:
@@ -487,7 +488,8 @@ async def _rating_demo_status(
     time_left = rating_demo_adapter.get_rating_demo_machine_time_left(user_id)
 
     return RatingDemoStatus(
-        target_id=target_id,
+        target_id=target.user_id,
+        task_id=target.task_id,
         state=machine.state,
         url=url,
         time_left=max(time_left.seconds, 0),

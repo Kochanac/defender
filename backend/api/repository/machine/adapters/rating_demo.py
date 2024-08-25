@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import api.model.machine as m_machine
+import api.model.rating_demo as m_rating_demo
 import api.model.work as m_work
 import api.repository.snapshot.snapshot as snapshot_repo
 import api.repository.task.tasks as task
@@ -18,17 +19,17 @@ ALLOWED_TIME_SECONDS = 15 * 60
 
 
 @with_redis
-def get_rating_demo_machine_target(r, user_id: int) -> int | None:
+def get_rating_demo_machine_target(r, user_id: int) -> m_rating_demo.RatingDemoTarget | None:
     res = r.get(fmt.format(user=user_id))
     if res is None:
         return None
 
-    return int(res.decode())
+    return m_rating_demo.RatingDemoTarget.model_validate_json(res)
 
 
 @with_redis
-def set_rating_demo_machine_target(r, user_id: int, target_user_id: int):
-    res = r.set(fmt.format(user=user_id), str(target_user_id))
+def set_rating_demo_machine_target(r, user_id: int, target: m_rating_demo.RatingDemoTarget):
+    res = r.set(fmt.format(user=user_id), target.model_dump_json())
     if res is None:
         return None
 
@@ -80,12 +81,12 @@ def gen_demo_machine_name(user_id: int) -> str:
     return f"rating_demo_user_{user_id}"
 
 
-def get_machine(user_id: int) -> Tuple[int | None, m_machine.Machine | None]:
+def get_machine(user_id: int) -> Tuple[m_rating_demo.RatingDemoTarget | None, m_machine.Machine | None]:
     machine_name = gen_demo_machine_name(user_id)
 
-    target_id = get_rating_demo_machine_target(user_id)
+    target = get_rating_demo_machine_target(user_id)
 
-    return target_id, machine.get_machine(machine_name)
+    return target, machine.get_machine(machine_name)
 
 
 def start_machine(user_id: int, task_id: int, target_user_id: int):
@@ -109,7 +110,7 @@ def start_machine(user_id: int, task_id: int, target_user_id: int):
 
     machine.create_machine(data, machine_name)
 
-    set_rating_demo_machine_target(user_id, target_user_id)
+    set_rating_demo_machine_target(user_id, m_rating_demo.RatingDemoTarget(user_id=user_id, task_id=task_id))
     set_rating_demo_machine_started(user_id)
 
 
