@@ -1,0 +1,22 @@
+[Unit]
+Description=Watchers for defender
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 watchers.py >watchers 2>watchers_err
+WorkingDirectory=/home/kochan/defender/defender/backend
+Type=simple
+Restart=always
+User=root
+
+Environment="PSQL_HOST=127.0.0.1"
+Environment="PSQL_USER=postgres"
+Environment="PSQL_PASSWORD=ACTUAL_PASSWORD"
+Environment="REDIS_HOST=127.0.0.1"
+Environment="CELERY_BROKER=redis://127.0.0.1"
+Environment="CELERY_BACKEND=redis://127.0.0.1"
+
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target
