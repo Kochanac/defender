@@ -116,6 +116,7 @@ class GetTaskResponse(BaseModel):
     title: str
     download_url: str
     exploit_code: str
+    defence_skip: bool
 
 
 @app.post("/task")
@@ -130,6 +131,7 @@ async def _get_task(t: GetTaskModel) -> GetTaskResponse:
         title=ti.title,
         download_url=ti.download_url,
         exploit_code="import requests",
+        defence_skip=ti.defence_skip
     )
 
 
@@ -175,7 +177,7 @@ async def _task_state(
 
 
 @app.post("/task/kill-demo")
-async def _task_state(
+async def _kill_demo(
     t: GetTaskModel, user_id: Annotated[int, Depends(get_user_id)]
 ):
     # todo check if we can kill it

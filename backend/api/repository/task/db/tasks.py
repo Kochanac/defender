@@ -9,7 +9,7 @@ def get_tasks(conn, uid) -> list[m_task.UserTask]:
 	cur = conn.cursor()
 
 	cur.execute("""
-		SELECT tasks.id, tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0
+		SELECT tasks.id, tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0, defence_skip
 			FROM tasks
 
 			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
@@ -27,8 +27,9 @@ def get_tasks(conn, uid) -> list[m_task.UserTask]:
 		return m_task.UserTask(
 			id=t[0],
 			title=t[1],
-			is_exploited=t[2] == True,
-			is_defended=t[3] == True
+			is_exploited=t[2],
+			is_defended=t[3],
+			defence_skip=t[4]
 		)
 
 	return list(map(task_convert, tasks))
@@ -54,7 +55,7 @@ def get_task_ids(conn) -> List[int]:
 def get_task_info(conn, id) -> m_task.TaskInfoRaw | None:
 	cur = conn.cursor()
 
-	cur.execute("SELECT title, download_url, demo_url, qemu_qcow2_path, flag from tasks WHERE id = %s", [id])
+	cur.execute("SELECT title, download_url, demo_url, qemu_qcow2_path, flag, defence_skip from tasks WHERE id = %s", [id])
 
 	t = cur.fetchall()
 
@@ -69,7 +70,8 @@ def get_task_info(conn, id) -> m_task.TaskInfoRaw | None:
 			service_demo=t[2],
 			image_path=t[3],
 			exploit_example="https://kochan.fun/f/exploit_example.py",
-			flag=t[4]
+			flag=t[4],
+			defence_skip=t[5]
 		)
 		return ti
 
@@ -80,7 +82,7 @@ def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 	cur = conn.cursor()
 
 	cur.execute("""
-		SELECT tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0
+		SELECT tasks.title, count(er.exploit_id) > 0, count(cr.id) > 0, defence_skip
 			FROM tasks
 
 			LEFT JOIN first_exploits as fe ON fe.task_id = tasks.id AND fe.user_id=%(user_id)s
@@ -97,4 +99,4 @@ def get_task_progress(conn, uid, task_id) -> m_task.UserTask | None:
 	if task is None:
 		return None
 
-	return m_task.UserTask(id=task_id, title=str(task[0]), is_exploited=task[1], is_defended=task[2])
+	return m_task.UserTask(id=task_id, title=str(task[0]), is_exploited=task[1], is_defended=task[2], defence_skip=task[3])

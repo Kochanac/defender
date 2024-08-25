@@ -9,6 +9,7 @@ class UserTask(BaseModel):
     title: str
     is_exploited: bool
     is_defended: bool
+    defence_skip: bool
 
 class TaskDemoState(str, enum.Enum):
     ok = "ok"
@@ -28,6 +29,7 @@ class TaskInfo(BaseModel):
     service_demo: TaskDemo
     image_path: str
     flag: str
+    defence_skip: bool
 
 class TaskInfoRaw(BaseModel):
     id: int
@@ -37,3 +39,4 @@ class TaskInfoRaw(BaseModel):
     service_demo: str  # url
     image_path: str
     flag: str
+    defence_skip: bool
