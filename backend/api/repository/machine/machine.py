@@ -87,8 +87,35 @@ def get_machine(machine_name: str) -> m_machine.Machine | None:
     return m_machine.Machine(name=machine_name, state=state, hostname=ip)
 
 
+def is_last_action_the_same(
+    machine_name: str, work_type: m_work.WorkType, data: str | None
+) -> bool:
+    work_info = db_work.get_last_status_by_machine_name(
+        machine_name,
+        [
+            m_work.WorkType.create,
+            m_work.WorkType.remove,
+            m_work.WorkType.start,
+            m_work.WorkType.stop,
+            m_work.WorkType.upload_image
+        ],
+    )
+    if work_info is None:
+        return False
+
+    work: m_work.Work = work_info[0]
+
+    if work.work_type == work_type and work.data == data:
+        return True
+
+    return False
+
+
 def create_machine(machine_data: m_work.CreateWorkData, machine_name: str):
     data = machine_data.model_dump_json()
+
+    if is_last_action_the_same(machine_name, m_work.WorkType.create, data):
+        return
 
     db_work.start_work(
         db_work.StartWork(
@@ -98,6 +125,9 @@ def create_machine(machine_data: m_work.CreateWorkData, machine_name: str):
 
 
 def start_machine(machine_name: str):
+    if is_last_action_the_same(machine_name, m_work.WorkType.start, None):
+        return
+
     db_work.start_work(
         db_work.StartWork(
             data=None, work_type=m_work.WorkType.start, machine_name=machine_name
@@ -106,6 +136,9 @@ def start_machine(machine_name: str):
 
 
 def stop_machine(machine_name: str):
+    if is_last_action_the_same(machine_name, m_work.WorkType.stop, None):
+        return
+
     db_work.start_work(
         db_work.StartWork(
             data=None, work_type=m_work.WorkType.stop, machine_name=machine_name
@@ -114,6 +147,9 @@ def stop_machine(machine_name: str):
 
 
 def delete_machine(machine_name: str):
+    if is_last_action_the_same(machine_name, m_work.WorkType.remove, None):
+        return
+
     db_work.start_work(
         db_work.StartWork(
             data=None, work_type=m_work.WorkType.remove, machine_name=machine_name
@@ -123,6 +159,9 @@ def delete_machine(machine_name: str):
 
 def upload_image(data: m_work.UploadImageWorkData, machine_name: str):
     d = data.model_dump_json()
+
+    if is_last_action_the_same(machine_name, m_work.WorkType.upload_image, d):
+        return
 
     db_work.start_work(
         db_work.StartWork(
