@@ -14,6 +14,8 @@ class TaskList extends React.Component {
 
         console.log(data)
 
+        // Array.
+
         this.setState({ tasks: data })
     }
 
@@ -46,7 +48,9 @@ class TaskList extends React.Component {
                     {/* {this.state.competitions.map(comp => (
                         <Competition title={comp.title} id={comp.id} key={comp.id} image={comp.img} start={comp.time_start} end={comp.time_end} />
                     ))} */}
-                    {this.state.tasks.map(task => (
+                    {this.state.tasks
+                    .sort((a, b) => a.id < b.id)
+                    .map(task => (
                         <Task title={task.title} attack={task.is_exploited} defence={task.is_defended} id={task.id} key={task.id} defence_skip={task.defence_skip} />
                     ))}
                 </div>
@@ -57,7 +61,7 @@ class TaskList extends React.Component {
 
 function Task(props) {
     return (
-        <div className="flex gap-6 w-full">
+        <div id={props.id} className="flex gap-6 w-full">
             <div onClick={() => { window.location.href = "/task/" + props.id }}
                 className="flex-grow gap-y-2 hover:scale-105 cursor-pointer transform ease-in-out duration-100 rounded-2xl shadow-md p-4 pl-6  flex flex-wrap
                 text-lg md:text-2xl

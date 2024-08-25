@@ -21,7 +21,7 @@ class Table extends React.Component {
             username: localStorage.getItem("username"),
             updating: false,
 
-            task_id: this.props.params.id,
+            task_id: Number(this.props.params.id),
             task: {
                 title: "kek"
             },
@@ -271,10 +271,14 @@ class Table extends React.Component {
                                                             onClick={this.start_demo.bind(this)}
                                                             className="p-2 w-full h-full"
                                                         >
-                                                            Запустить его машину
+                                                            {this.state.task_id !== this.state.demo.task_id && <span>Машина запущена в таске с id {this.state.demo.task_id}</span>}
+                                                            {this.state.task_id === this.state.demo.task_id && <span>Запустить его машину</span> }
                                                         </div>
                                                     }
-                                                    {this.state.demo.target_id === user_id &&
+
+                                                    
+
+                                                    {this.state.demo.target_id === user_id && this.state.task_id === this.state.demo.task_id &&
                                                         <div className="h-full w-full rounded-md align-middle flex justify-center ">
                                                             <div className="flex flex-col justify-center align-middle">
                                                                 <a
