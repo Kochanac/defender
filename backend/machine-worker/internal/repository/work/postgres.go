@@ -81,8 +81,8 @@ func (p *Postgres) GetUnclaimedWork(ctx context.Context, limit int32) ([]Work, e
 
 		WHERE 
 			worker_id IS NULL
-		ORDER BY id ASC 
-		LIMIT $2
+		ORDER BY work.id ASC 
+		LIMIT $2 
 	`
 
 	rows, err := p.pg.Query(ctx, request, p.cfg.WorkerID, limit)

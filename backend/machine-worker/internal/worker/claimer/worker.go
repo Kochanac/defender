@@ -53,7 +53,7 @@ func (w Worker) Work(ctx context.Context) error {
 
 	workers, err := w.work.GetWorkers(ctx)
 	if err != nil {
-		return fmt.Errorf("get work: %w", err)
+		return fmt.Errorf("get workers: %w", err)
 	}
 
 	log.Printf("claiming work %+v", work)
