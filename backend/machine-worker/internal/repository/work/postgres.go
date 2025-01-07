@@ -102,7 +102,7 @@ func (p *Postgres) GetUnclaimedWork(ctx context.Context, limit int32) ([]Work, e
 func (p *Postgres) GetWorkers(ctx context.Context) ([]Worker, error) {
 	request := `
 		SELECT id, worker_id, weight
-		FROM worker
+		FROM workers
 	`
 
 	rows, err := p.pg.Query(ctx, request)
