@@ -1,4 +1,4 @@
-package worker
+package handler
 
 import (
 	"context"
@@ -41,23 +41,25 @@ func NewWorker(cfg *Config, mach machines.Repository, work work.Repository, mach
 }
 
 func (w Worker) Work(ctx context.Context) error {
-	workBatch, err := w.work.GetWork(ctx, w.cfg.WorkBatchLimit)
+	claimed, err := w.work.GetClaimedWork(ctx, w.cfg.WorkBatchLimit)
 	if err != nil {
 		return fmt.Errorf("get work: %w", err)
 	}
 
-	claimed := make([]work.Work, 0, len(workBatch))
-	for _, wrk := range workBatch {
-		err = w.work.ClaimWork(ctx, wrk.WorkID)
-		if err != nil {
-			slog.DebugContext(ctx, "did not claim work %d: %s", wrk.WorkID, err)
-			log.Printf("did not claim work %d: %s", wrk.WorkID, err)
-			continue
-		}
-		claimed = append(claimed, wrk)
-	}
+	// claimed := make([]work.Work, 0, len(workBatch))
+	// for _, wrk := range workBatch {
+	// 	if !wrk.IsAssigned {
+	// 		err = w.work.ClaimWork(ctx, wrk.WorkID)
+	// 		if err != nil {
+	// 			slog.DebugContext(ctx, "did not claim work %d: %s", wrk.WorkID, err)
+	// 			log.Printf("did not claim work %d: %s", wrk.WorkID, err)
+	// 			continue
+	// 		}
+	// 	}
+	// 	claimed = append(claimed, wrk)
+	// }
 
-	log.Printf("claimed work %+v", claimed)
+	log.Printf("handling work %+v", claimed)
 
 	for _, wrk := range claimed {
 		res, err := w.handleWork(ctx, wrk)

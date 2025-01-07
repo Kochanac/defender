@@ -17,7 +17,8 @@ import (
 	"machine-worker/internal/repository/work"
 	objectstorage "machine-worker/internal/storage/object-storage"
 	"machine-worker/internal/util/periodic"
-	"machine-worker/internal/worker"
+	"machine-worker/internal/worker/claimer"
+	"machine-worker/internal/worker/handler"
 
 	"go.uber.org/atomic"
 )
@@ -52,16 +53,25 @@ func main() {
 	}
 	defer mash.Close()
 
-	wrkr := worker.NewWorker(cfg.GetWorkerConfig(), mash, workRepo, machineAssignment, imageManager)
+	handler := handler.NewWorker(cfg.GetHandlerConfig(), mash, workRepo, machineAssignment, imageManager)
+	claimer := claimer.NewWorker(cfg.GetClaimerConfig(), workRepo)
 
 	timeout, delay := cfg.GetPeriodic()
 	aTimeout := &atomic.Duration{}
 	aTimeout.Store(timeout) // todo live config
-	periodicWorker := periodic.NewWorker(wrkr.Work, time.NewTicker(delay), aTimeout)
-	defer periodicWorker.Close()
+	// todo different timeout but probably not
+
+	periodicHandler := periodic.NewWorker(handler.Work, time.NewTicker(delay), aTimeout)
+	defer periodicHandler.Close()
+
+	periodicClaimer := periodic.NewWorker(claimer.Work, time.NewTicker(delay), aTimeout)
+	defer periodicClaimer.Close()
 
 	go func() {
-		periodicWorker.Run()
+		periodicHandler.Run()
+	}()
+	go func() {
+		periodicClaimer.Run()
 	}()
 
 	quit := make(chan os.Signal, 1)

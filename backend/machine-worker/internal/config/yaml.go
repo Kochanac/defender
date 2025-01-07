@@ -12,7 +12,8 @@ import (
 	"machine-worker/internal/repository/machines"
 	"machine-worker/internal/repository/work"
 	objectstorage "machine-worker/internal/storage/object-storage"
-	"machine-worker/internal/worker"
+	"machine-worker/internal/worker/claimer"
+	"machine-worker/internal/worker/handler"
 
 	"github.com/c-robinson/iplib"
 	"github.com/knadh/koanf"
@@ -148,11 +149,18 @@ func (c *Controller) GetWorkConfig() *work.Config {
 	}
 }
 
-func (c *Controller) GetWorkerConfig() *worker.Config {
-	return &worker.Config{
+func (c *Controller) GetHandlerConfig() *handler.Config {
+	return &handler.Config{
 		WorkBatchLimit:       int32(c.k.Int64(WorkerBatchLimit)),
 		DefaultMachineMemory: uint64(c.k.Int64(MachinesDefaultMemory)),
 		DefaultMachineVCPU:   uint64(c.k.Int64(MachinesDefaultCPU)),
+	}
+}
+
+func (c *Controller) GetClaimerConfig() *claimer.Config {
+	return &claimer.Config{
+		WorkBatchLimit: int32(c.k.Int64(WorkerBatchLimit)),
+		WorkerID:       string(c.k.String(WorkerID)),
 	}
 }
 

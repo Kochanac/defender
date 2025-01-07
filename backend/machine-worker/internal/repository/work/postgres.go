@@ -52,8 +52,38 @@ func convertWorkEventType(t string) EventType {
 	}
 }
 
-func (p *Postgres) GetWork(ctx context.Context, limit int32) ([]Work, error) {
-	request := `SELECT id, type, worker_id, machine_id, data FROM work WHERE worker_id IS NULL OR worker_id = $1 AND result is NULL ORDER BY id ASC LIMIT $2`
+func scanWork(rows pgx.Rows, limit int32) ([]Work, error) {
+	wrk := make([]Work, 0, limit)
+	for rows.Next() {
+		var w Work
+		var t string
+		var workerID, machineName, data pgtype.Text
+		err := rows.Scan(&w.WorkID, &t, &workerID, &machineName, &data)
+		if err != nil {
+			return nil, fmt.Errorf("rows scan: %w", err)
+		}
+
+		w.Type = convertWorkType(t)
+		w.MachineName = machineName.String
+		w.Data = data.String
+
+		wrk = append(wrk, w)
+	}
+
+	return wrk, nil
+}
+
+func (p *Postgres) GetUnclaimedWork(ctx context.Context, limit int32) ([]Work, error) {
+	request := `
+		SELECT id, type, worker_id, machine_id, data 
+		FROM work
+		INNER JOIN workers ON workers.worker_id = $1
+
+		WHERE 
+			worker_id IS NULL
+		ORDER BY id ASC 
+		LIMIT $2
+	`
 
 	rows, err := p.pg.Query(ctx, request, p.cfg.WorkerID, limit)
 	if err != nil {
@@ -61,20 +91,33 @@ func (p *Postgres) GetWork(ctx context.Context, limit int32) ([]Work, error) {
 	}
 	defer rows.Close()
 
-	wrk := make([]Work, 0, limit)
+	wrk, err := scanWork(rows, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return wrk, nil
+}
+
+func (p *Postgres) GetWorkers(ctx context.Context) ([]Worker, error) {
+	request := `
+		SELECT id, worker_id, weight
+		FROM worker
+	`
+
+	rows, err := p.pg.Query(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	wrk := make([]Worker, 0)
 	for rows.Next() {
-		var w Work
-		var t string
-		var workerID, machineName, data pgtype.Text
-		err = rows.Scan(&w.WorkID, &t, &workerID, &machineName, &data)
+		var w Worker
+		err := rows.Scan(&w.ID, &w.WorkerID, &w.Weight)
 		if err != nil {
 			return nil, fmt.Errorf("rows scan: %w", err)
 		}
-
-		w.IsAssigned = workerID.Valid && workerID.String == p.cfg.WorkerID
-		w.Type = convertWorkType(t)
-		w.MachineName = machineName.String
-		w.Data = data.String
 
 		wrk = append(wrk, w)
 	}
@@ -126,6 +169,30 @@ func (p *Postgres) ClaimWork(ctx context.Context, workID int32) error {
 	}
 
 	return nil
+}
+
+func (p *Postgres) GetClaimedWork(ctx context.Context, limit int32) ([]Work, error) {
+	request := `
+		SELECT id, type, worker_id, machine_id, data 
+		FROM work
+		WHERE
+			worker_id = $1 AND result is NULL
+		ORDER BY id ASC
+		LIMIT $2
+	`
+
+	rows, err := p.pg.Query(ctx, request, p.cfg.WorkerID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	wrk, err := scanWork(rows, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return wrk, nil
 }
 
 func (p *Postgres) SetResultOfDoneWork(ctx context.Context, workID int32, result string) error {
