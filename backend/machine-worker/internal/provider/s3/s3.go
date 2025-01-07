@@ -8,7 +8,7 @@ import (
 func NewS3(tokenID, tokenValue, endpoint string) (*minio.Client, error) {
 	conn, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(tokenID, tokenValue, ""),
-		Secure: true,
+		Secure: false,
 	})
 	if err != nil {
 		return nil, err
