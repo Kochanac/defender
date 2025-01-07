@@ -75,7 +75,7 @@ func scanWork(rows pgx.Rows, limit int32) ([]Work, error) {
 
 func (p *Postgres) GetUnclaimedWork(ctx context.Context, limit int32) ([]Work, error) {
 	request := `
-		SELECT id, type, worker_id, machine_id, data 
+		SELECT work.id, type, worker_id, machine_id, data 
 		FROM work
 		INNER JOIN workers ON workers.worker_id = $1
 
