@@ -10,3 +10,6 @@ requests
 cachetools
 
 lxml
+
+bs4
+checklib
