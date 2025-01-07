@@ -13,3 +13,4 @@ lxml
 
 bs4
 checklib
+websocket
