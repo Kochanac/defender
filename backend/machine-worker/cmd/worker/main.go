@@ -53,7 +53,15 @@ func main() {
 	}
 	defer mash.Close()
 
-	handler := handler.NewWorker(cfg.GetHandlerConfig(), mash, workRepo, machineAssignment, imageManager)
+	uploader := handler.NewWorker(cfg.GetHandlerConfig(), mash, workRepo, machineAssignment, imageManager, []work.Type{
+		work.TypeUploadImage,
+	})
+	machineHandler := handler.NewWorker(cfg.GetHandlerConfig(), mash, workRepo, machineAssignment, imageManager, []work.Type{
+		work.TypeCreateMachine,
+		work.TypeStopMachine,
+		work.TypeStartMachine,
+		work.TypeRemoveMachine,
+	})
 	claimer := claimer.NewWorker(cfg.GetClaimerConfig(), workRepo)
 
 	timeout, delay := cfg.GetPeriodic()
@@ -61,12 +69,17 @@ func main() {
 	aTimeout.Store(timeout) // todo live config
 	// todo different timeout but probably not
 
-	periodicHandler := periodic.NewWorker(handler.Work, time.NewTicker(delay), aTimeout)
+	periodicUploader := periodic.NewWorker(uploader.Work, time.NewTicker(delay), aTimeout)
+	defer periodicUploader.Close()
+	periodicHandler := periodic.NewWorker(machineHandler.Work, time.NewTicker(delay), aTimeout)
 	defer periodicHandler.Close()
 
 	periodicClaimer := periodic.NewWorker(claimer.Work, time.NewTicker(delay), aTimeout)
 	defer periodicClaimer.Close()
 
+	go func() {
+		periodicUploader.Run()
+	}()
 	go func() {
 		periodicHandler.Run()
 	}()

@@ -42,6 +42,6 @@ type Repository interface {
 	GetWorkers(ctx context.Context) ([]Worker, error)
 	ClaimWork(ctx context.Context, workID int32) error
 
-	GetClaimedWork(ctx context.Context, limit int32) ([]Work, error)
+	GetClaimedWork(ctx context.Context, workTypes []Type, limit int32) ([]Work, error)
 	SetResultOfDoneWork(ctx context.Context, workID int32, result string) error
 }

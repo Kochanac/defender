@@ -20,3 +20,12 @@ func RandomHash(n int) string {
 	}
 	return string(b)
 }
+
+func Map[T any, V any](arr []T, x func(T) V) []V {
+	res := make([]V, len(arr))
+	for i, el := range arr {
+		res[i] = x(el)
+	}
+
+	return res
+}

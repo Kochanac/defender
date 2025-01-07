@@ -28,36 +28,25 @@ type Worker struct {
 	work              work.Repository
 	machineAssignment machine_assignment.Repository
 	imageManager      image_manager.Repository
+	workTypes         []work.Type
 }
 
-func NewWorker(cfg *Config, mach machines.Repository, work work.Repository, machineAssignment machine_assignment.Repository, imageManager image_manager.Repository) *Worker {
+func NewWorker(cfg *Config, mach machines.Repository, work work.Repository, machineAssignment machine_assignment.Repository, imageManager image_manager.Repository, workTypes []work.Type) *Worker {
 	return &Worker{
 		cfg:               cfg,
 		mach:              mach,
 		work:              work,
 		machineAssignment: machineAssignment,
 		imageManager:      imageManager,
+		workTypes:         workTypes,
 	}
 }
 
 func (w Worker) Work(ctx context.Context) error {
-	claimed, err := w.work.GetClaimedWork(ctx, w.cfg.WorkBatchLimit)
+	claimed, err := w.work.GetClaimedWork(ctx, w.workTypes, w.cfg.WorkBatchLimit)
 	if err != nil {
 		return fmt.Errorf("get work: %w", err)
 	}
-
-	// claimed := make([]work.Work, 0, len(workBatch))
-	// for _, wrk := range workBatch {
-	// 	if !wrk.IsAssigned {
-	// 		err = w.work.ClaimWork(ctx, wrk.WorkID)
-	// 		if err != nil {
-	// 			slog.DebugContext(ctx, "did not claim work %d: %s", wrk.WorkID, err)
-	// 			log.Printf("did not claim work %d: %s", wrk.WorkID, err)
-	// 			continue
-	// 		}
-	// 	}
-	// 	claimed = append(claimed, wrk)
-	// }
 
 	log.Printf("handling work %+v", claimed)
 

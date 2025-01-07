@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"machine-worker/internal/util"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -24,20 +25,46 @@ func NewPostgres(pg *pgxpool.Pool, cfg *Config) *Postgres {
 	return &Postgres{pg: pg, cfg: cfg}
 }
 
+// Work type names
+const (
+	create      = "create"
+	stop        = "stop"
+	start       = "start"
+	remove      = "remove"
+	uploadImage = "upload-image"
+)
+
 func convertWorkType(t string) Type {
 	switch t {
-	case "create":
+	case create:
 		return TypeCreateMachine
-	case "stop":
+	case stop:
 		return TypeStopMachine
-	case "start":
+	case start:
 		return TypeStartMachine
-	case "remove":
+	case remove:
 		return TypeRemoveMachine
-	case "upload-image":
+	case uploadImage:
 		return TypeUploadImage
 	default:
 		return TypeUnknown
+	}
+}
+
+func workTypeToString(t Type) string {
+	switch t {
+	case TypeCreateMachine:
+		return create
+	case TypeStopMachine:
+		return stop
+	case TypeStartMachine:
+		return start
+	case TypeRemoveMachine:
+		return remove
+	case TypeUploadImage:
+		return uploadImage
+	default:
+		return ""
 	}
 }
 
@@ -171,17 +198,19 @@ func (p *Postgres) ClaimWork(ctx context.Context, workID int32) error {
 	return nil
 }
 
-func (p *Postgres) GetClaimedWork(ctx context.Context, limit int32) ([]Work, error) {
+func (p *Postgres) GetClaimedWork(ctx context.Context, workTypes []Type, limit int32) ([]Work, error) {
 	request := `
 		SELECT id, type, worker_id, machine_id, data 
 		FROM work
 		WHERE
-			worker_id = $1 AND result is NULL
+			worker_id = $1 AND result is NULL AND type = ANY ($3)
 		ORDER BY id ASC
 		LIMIT $2
 	`
 
-	rows, err := p.pg.Query(ctx, request, p.cfg.WorkerID, limit)
+	workTypesStr := util.Map(workTypes, workTypeToString)
+
+	rows, err := p.pg.Query(ctx, request, p.cfg.WorkerID, limit, workTypesStr)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
